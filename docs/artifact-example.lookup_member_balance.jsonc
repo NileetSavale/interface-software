@@ -1,0 +1,200 @@
+// Example artifact, annotated: what discovery should emit for
+//   goal: "look up member 12345 and read their current savings balance"
+// The comments explain each choice. tests/test_artifact_schema.py validates this exact file against the Pydantic
+// schema (src/interfaze/artifact/schema.py), so the documentation can't drift from the code.
+{
+  "schemaVersion": "1",
+
+  // ── Agent-facing contract ────────────────────────────────────────────────
+  "capability": {
+    "id": "core_banking.lookup_member_balance",
+    "version": "1.0.0",                         // semver: a breaking change to inputs/outputs/outcomes is a major bump
+    "title": "Look up a member's savings balance",
+    "description": "Searches for a member by member number and returns the current balance of their primary savings account."
+  },
+
+  "app": {
+    "product": "mock-core-banking",            // the VENDOR product, not a tenant
+    "versionRange": ">=1.0 <2.0",
+    "surface": "web"                           // "web" | "desktop": selects the Surface adapter
+  },
+
+  "status": "draft",                           // draft → approved; only approved artifacts replay unattended
+
+  "provenance": {
+    "discoveryRunId": "disc_2026-11-14T00-00-00Z_ab12",
+    "recordedAt": "2026-11-14T00:00:00Z",
+    "model": "claude-sonnet-5-5",
+    "recordedOnVariant": "a"
+  },
+
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",                 // pre-flight check: a bad value is invalid_input, no browser started
+      "sensitive": true,                       // masked in logs and evidence
+      "identifies": "member"                   // the schema then REQUIRES an identity checkpoint (D16)
+    }
+  },
+
+  // Each output is filled by the extractor with the same name (one extractor per output, enforced)
+  "outputs": {
+    "memberName":     { "type": "string", "redact": "partial" },   // logs show "J*** D**"; the caller gets it in full
+    "savingsBalance": { "type": "money",  "redact": "none" }
+  },
+
+  "outcomes": [
+    // business: legitimate answers the caller needs
+    { "code": "MEMBER_NOT_FOUND", "kind": "business", "at": "after:submit_search",
+      "detect": { "text": { "matches": "(?i)no (member|record)s? found" } } },
+    { "code": "INVALID_INPUT", "kind": "business", "at": "after:submit_search",
+      "detect": { "role": "alert", "text": { "matches": "(?i)invalid" } } },
+    { "code": "PERMISSION_DENIED", "kind": "business",
+      "detect": { "text": { "matches": "(?i)not authori[sz]ed|access denied" } } },
+
+    // recoverable: handled inside the run, reported as RecoveryEvents beside the result
+    { "code": "SESSION_EXPIRED", "kind": "recoverable",
+      "detect": { "role": "heading", "name": { "matches": "(?i)session (expired|timed out)" } },
+      "recovery": { "do": { "kind": "subflow", "subflow": "login" }, "maxAttempts": 1 } },
+    { "code": "NOTICE_INTERSTITIAL", "kind": "recoverable",
+      "detect": { "role": "button", "name": "Acknowledge" },
+      "recovery": { "do": { "kind": "click",
+                            "target": { "frame": ["main"], "strategies": [ { "kind": "role", "role": "button", "name": "Acknowledge" } ] } },
+                    "maxAttempts": 2 } },
+
+    // escalate: pause for an operator (attended), or fail (unattended)
+    { "code": "UNEXPECTED_DIALOG", "kind": "escalate",
+      "detect": { "role": "dialog" } },
+
+    // fatal: stop and keep the evidence. (WRONG_RECORD isn't declared here: a failed identity checkpoint always
+    // produces it, so it can't be forgotten.)
+    { "code": "APP_ERROR", "kind": "fatal",
+      "detect": { "text": { "matches": "(?i)internal server error|an unexpected error" } } }
+  ],
+
+  "policy": {
+    "allowedOrigins": ["http://localhost:4100"],
+    "allowedPaths": ["/*"],
+    "maxRisk": "read"                          // this capability never changes anything. Irreversible is never allowed (D1).
+  },
+
+  // ── Implementation ──────────────────────────────────────────────────────
+  "subflows": {
+    "login": [
+      { "id": "login_user", "intent": "enter operator username", "action": "type",
+        "target": { "frame": ["main"], "strategies": [ { "kind": "label", "label": "User ID" } ] },
+        "value": "{{secrets.APP_USER}}", "risk": "read" },     // secrets are read from env at act time, never stored
+      { "id": "login_pass", "intent": "enter operator password", "action": "type",
+        "target": { "frame": ["main"], "strategies": [ { "kind": "label", "label": "Password" } ] },
+        "value": "{{secrets.APP_PASSWORD}}", "risk": "read" },
+      { "id": "login_submit", "intent": "sign in", "action": "click",
+        "target": { "frame": ["main"], "strategies": [ { "kind": "role", "role": "button", "name": "Sign On" } ] },
+        "risk": "read",
+        "expect": { "frame": ["nav"], "role": "link", "name": "Member Inquiry" } }
+    ]
+  },
+
+  "preconditions": [
+    { "use": "login", "unless": { "frame": ["nav"], "role": "link", "name": "Member Inquiry" } }
+  ],
+
+  "steps": [
+    {
+      "id": "open_inquiry",
+      "intent": "open the member inquiry screen",
+      "action": "click",
+      "target": {
+        "frame": ["nav"],                      // frame path, needed for the frameset app
+        "strategies": [                        // ranked: replay tries them in order and reports which one hit
+          { "kind": "role", "role": "link", "name": "Member Inquiry" },
+          { "kind": "text", "text": "Member Inquiry" },
+          { "kind": "structural", "path": "table[1]/tr[3]/td[1]/a[1]" }
+        ]
+      },
+      "risk": "read",
+      "waitFor": { "frame": ["main"], "loadState": "domcontentloaded", "timeoutMs": 10000 },
+      "expect":  { "frame": ["main"], "role": "textbox", "label": "Member #" }
+    },
+    {
+      "id": "enter_member_id",
+      "intent": "enter the member number",
+      "action": "type",
+      "target": {
+        "frame": ["main"],
+        "strategies": [
+          { "kind": "label", "label": "Member #" },
+          { "kind": "anchor", "anchorText": "Member #", "relation": "right-of", "role": "textbox" }
+        ]
+      },
+      "value": "{{inputs.memberId}}",           // a template: the recorder replaced the literal "12345"
+      "risk": "read"
+    },
+    {
+      "id": "submit_search",
+      "intent": "submit member search",
+      "action": "click",
+      "target": {
+        "frame": ["main"],
+        // two "Search" buttons exist (nav quick-search + this form), so the role strategy is scoped to the form
+        "within": { "role": "form", "name": "Member Inquiry" },
+        "strategies": [ { "kind": "role", "role": "button", "name": "Search" } ]
+      },
+      "risk": "read",
+      "waitFor": {
+        "frame": ["main"],
+        "anyOf": [                             // whichever comes first decides what happens next
+          { "kind": "visible", "text": "Account Summary" },
+          { "kind": "outcome", "code": "MEMBER_NOT_FOUND" },
+          { "kind": "outcome", "code": "INVALID_INPUT" }
+        ],
+        "timeoutMs": 15000
+      }
+    },
+    {
+      "id": "read_balance",
+      "intent": "read savings balance and member name",
+      "action": "extract",
+      "extract": {
+        "memberName": {
+          "frame": ["main"],
+          "strategies": [ { "kind": "anchor", "anchorText": "Name:", "relation": "right-of" } ]
+        },
+        "savingsBalance": {
+          "frame": ["main"],
+          // legacy table with no semantics: "the cell in the Balance column of the row whose Type is Savings"
+          "strategies": [ { "kind": "tableCell", "tableAnchor": "Account Summary",
+                            "rowWhere": { "column": "Type", "equals": "Savings" }, "column": "Balance" } ],
+          "parse": "money"
+        }
+      },
+      "risk": "read"
+    }
+  ],
+
+  "success": {
+    "checkpoint": [
+      { "kind": "visible", "frame": ["main"], "text": "Account Summary" },
+      { "kind": "output", "output": "savingsBalance" },
+      // mandatory identity check: we're on THIS member's record, not a prefix match. A mismatch is WRONG_RECORD.
+      { "kind": "identity", "input": "memberId",
+        "target": { "frame": ["main"], "strategies": [ { "kind": "anchor", "anchorText": "Member #:", "relation": "right-of" } ] },
+        "equals": "{{inputs.memberId}}" }
+    ]
+  },
+
+  // Tenant overrides, addressed by STEP ID, never by array index (an index silently shifts when steps are added).
+  // An unknown id fails validation. appliesTo is a semver range over capability.version.
+  "overrides": {
+    "variant:b": {
+      "appliesTo": "^1.0.0",
+      "ops": [
+        { "op": "set", "step": "submit_search", "path": "target.strategies[kind=role].name", "value": "Find Member" },
+        { "op": "insertAfter", "step": "open_inquiry",
+          "value": { "id": "ack_notice", "intent": "acknowledge daily notice", "action": "click",
+                     "target": { "frame": ["main"], "strategies": [ { "kind": "role", "role": "button", "name": "Acknowledge" } ] },
+                     "risk": "read" } }
+      ]
+    }
+  }
+}

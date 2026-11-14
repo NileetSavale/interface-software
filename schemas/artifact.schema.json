@@ -1,0 +1,1542 @@
+{
+  "$defs": {
+    "AnchorStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 3: a control positioned relative to visible text. The legacy case: no labels, only a neighbouring cell.",
+      "properties": {
+        "kind": {
+          "const": "anchor",
+          "default": "anchor",
+          "title": "Kind",
+          "type": "string"
+        },
+        "anchorText": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            }
+          ],
+          "title": "Anchortext"
+        },
+        "relation": {
+          "enum": [
+            "right-of",
+            "left-of",
+            "above",
+            "below"
+          ],
+          "title": "Relation",
+          "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        }
+      },
+      "required": [
+        "anchorText",
+        "relation"
+      ],
+      "title": "AnchorStrategy",
+      "type": "object"
+    },
+    "App": {
+      "additionalProperties": false,
+      "properties": {
+        "product": {
+          "description": "The vendor product, not a tenant. Tenants specialise through overrides.",
+          "title": "Product",
+          "type": "string"
+        },
+        "versionRange": {
+          "title": "Versionrange",
+          "type": "string"
+        },
+        "surface": {
+          "enum": [
+            "web",
+            "desktop"
+          ],
+          "title": "Surface",
+          "type": "string"
+        }
+      },
+      "required": [
+        "product",
+        "versionRange",
+        "surface"
+      ],
+      "title": "App",
+      "type": "object"
+    },
+    "BBoxStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 5: a position in the frame. Used to break ties, and on desktop surfaces with thin trees.",
+      "properties": {
+        "kind": {
+          "const": "bbox",
+          "default": "bbox",
+          "title": "Kind",
+          "type": "string"
+        },
+        "x": {
+          "title": "X",
+          "type": "number"
+        },
+        "y": {
+          "title": "Y",
+          "type": "number"
+        },
+        "width": {
+          "title": "Width",
+          "type": "number"
+        },
+        "height": {
+          "title": "Height",
+          "type": "number"
+        }
+      },
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
+      "title": "BBoxStrategy",
+      "type": "object"
+    },
+    "Capability": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "namespace.name",
+          "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "version": {
+          "description": "A breaking change to inputs, outputs or outcomes is a major bump.",
+          "pattern": "^\\d+\\.\\d+\\.\\d+(-[0-9A-Za-z.-]+)?$",
+          "title": "Version",
+          "type": "string"
+        },
+        "title": {
+          "title": "Title",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "version",
+        "title",
+        "description"
+      ],
+      "title": "Capability",
+      "type": "object"
+    },
+    "ClickThrough": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "click",
+          "default": "click",
+          "title": "Kind",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/Target"
+        }
+      },
+      "required": [
+        "target"
+      ],
+      "title": "ClickThrough",
+      "type": "object"
+    },
+    "Extractor": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "description": "Frame path from the top document; [] is the top.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Frame",
+          "type": "array"
+        },
+        "within": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RegionScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "strategies": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "anchor": "#/$defs/AnchorStrategy",
+                "bbox": "#/$defs/BBoxStrategy",
+                "label": "#/$defs/LabelStrategy",
+                "role": "#/$defs/RoleStrategy",
+                "structural": "#/$defs/StructuralStrategy",
+                "tableCell": "#/$defs/TableCellStrategy",
+                "text": "#/$defs/TextStrategy"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/RoleStrategy"
+              },
+              {
+                "$ref": "#/$defs/LabelStrategy"
+              },
+              {
+                "$ref": "#/$defs/AnchorStrategy"
+              },
+              {
+                "$ref": "#/$defs/TableCellStrategy"
+              },
+              {
+                "$ref": "#/$defs/TextStrategy"
+              },
+              {
+                "$ref": "#/$defs/StructuralStrategy"
+              },
+              {
+                "$ref": "#/$defs/BBoxStrategy"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Strategies",
+          "type": "array"
+        },
+        "nth": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Last resort when no scope tells duplicates apart. Requires the step to be flagged needsReview.",
+          "title": "Nth"
+        },
+        "parse": {
+          "default": "text",
+          "enum": [
+            "text",
+            "money",
+            "integer",
+            "date"
+          ],
+          "title": "Parse",
+          "type": "string"
+        }
+      },
+      "required": [
+        "strategies"
+      ],
+      "title": "Extractor",
+      "type": "object"
+    },
+    "IdentityMatches": {
+      "additionalProperties": false,
+      "description": "The record on screen is the one asked for. A mismatch is always the fatal WRONG_RECORD (D16): a prefix-matched\nneighbour's balance must never come back as success.",
+      "properties": {
+        "kind": {
+          "const": "identity",
+          "default": "identity",
+          "title": "Kind",
+          "type": "string"
+        },
+        "input": {
+          "title": "Input",
+          "type": "string"
+        },
+        "target": {
+          "$ref": "#/$defs/Target"
+        },
+        "equals": {
+          "description": "Usually {{inputs.<input>}}.",
+          "title": "Equals",
+          "type": "string"
+        }
+      },
+      "required": [
+        "input",
+        "target",
+        "equals"
+      ],
+      "title": "IdentityMatches",
+      "type": "object"
+    },
+    "InputSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "money",
+            "date",
+            "enum"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "title": "Description",
+          "type": "string"
+        },
+        "pattern": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pattern"
+        },
+        "values": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Allowed values when type is enum.",
+          "title": "Values"
+        },
+        "sensitive": {
+          "default": false,
+          "title": "Sensitive",
+          "type": "boolean"
+        },
+        "identifies": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Set when the input names a record (member, account). Requires an identity checkpoint.",
+          "title": "Identifies"
+        }
+      },
+      "required": [
+        "type",
+        "description"
+      ],
+      "title": "InputSpec",
+      "type": "object"
+    },
+    "InsertOp": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "enum": [
+            "insertBefore",
+            "insertAfter"
+          ],
+          "title": "Op",
+          "type": "string"
+        },
+        "step": {
+          "title": "Step",
+          "type": "string"
+        },
+        "value": {
+          "$ref": "#/$defs/Step"
+        }
+      },
+      "required": [
+        "op",
+        "step",
+        "value"
+      ],
+      "title": "InsertOp",
+      "type": "object"
+    },
+    "LabelStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 2: the form control a label is associated with.",
+      "properties": {
+        "kind": {
+          "const": "label",
+          "default": "label",
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            }
+          ],
+          "title": "Label"
+        }
+      },
+      "required": [
+        "label"
+      ],
+      "title": "LabelStrategy",
+      "type": "object"
+    },
+    "Outcome": {
+      "additionalProperties": false,
+      "description": "A named state replay can recognise. business: a legitimate answer for the caller (no such member).\nrecoverable: handled inside the run. fatal: stop with evidence. escalate: pause for a human (unknown dialog).",
+      "properties": {
+        "code": {
+          "pattern": "^[A-Z][A-Z0-9_]*$",
+          "title": "Code",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "business",
+            "recoverable",
+            "fatal",
+            "escalate"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "at": {
+          "default": "any",
+          "pattern": "^(any|(before|after):[a-z][a-z0-9_]*)$",
+          "title": "At",
+          "type": "string"
+        },
+        "detect": {
+          "$ref": "#/$defs/Visible"
+        },
+        "recovery": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Recovery"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        }
+      },
+      "required": [
+        "code",
+        "kind",
+        "detect"
+      ],
+      "title": "Outcome",
+      "type": "object"
+    },
+    "OutcomeSeen": {
+      "additionalProperties": false,
+      "description": "A declared outcome's detector matched. Used to branch a wait (e.g. results page OR 'no member found').",
+      "properties": {
+        "kind": {
+          "const": "outcome",
+          "default": "outcome",
+          "title": "Kind",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code"
+      ],
+      "title": "OutcomeSeen",
+      "type": "object"
+    },
+    "OutputPresent": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "output",
+          "default": "output",
+          "title": "Kind",
+          "type": "string"
+        },
+        "output": {
+          "title": "Output",
+          "type": "string"
+        },
+        "notEmpty": {
+          "default": true,
+          "title": "Notempty",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "output"
+      ],
+      "title": "OutputPresent",
+      "type": "object"
+    },
+    "OutputSpec": {
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "enum": [
+            "string",
+            "integer",
+            "money",
+            "date"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Description"
+        },
+        "redact": {
+          "default": "none",
+          "description": "How the value appears in logs and evidence. The caller always gets it in full.",
+          "enum": [
+            "none",
+            "partial",
+            "full"
+          ],
+          "title": "Redact",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "OutputSpec",
+      "type": "object"
+    },
+    "Override": {
+      "additionalProperties": false,
+      "properties": {
+        "appliesTo": {
+          "description": "Semver range over capability.version. A breaking base change flags the override.",
+          "title": "Appliesto",
+          "type": "string"
+        },
+        "ops": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "insertAfter": "#/$defs/InsertOp",
+                "insertBefore": "#/$defs/InsertOp",
+                "remove": "#/$defs/RemoveOp",
+                "set": "#/$defs/SetOp"
+              },
+              "propertyName": "op"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/SetOp"
+              },
+              {
+                "$ref": "#/$defs/InsertOp"
+              },
+              {
+                "$ref": "#/$defs/RemoveOp"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Ops",
+          "type": "array"
+        }
+      },
+      "required": [
+        "appliesTo",
+        "ops"
+      ],
+      "title": "Override",
+      "type": "object"
+    },
+    "Policy": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedOrigins": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowedorigins",
+          "type": "array"
+        },
+        "allowedPaths": {
+          "description": "Glob patterns on the URL path.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowedpaths",
+          "type": "array"
+        },
+        "maxRisk": {
+          "default": "read",
+          "enum": [
+            "read",
+            "reversible"
+          ],
+          "title": "Maxrisk",
+          "type": "string"
+        }
+      },
+      "required": [
+        "allowedOrigins"
+      ],
+      "title": "Policy",
+      "type": "object"
+    },
+    "Precondition": {
+      "additionalProperties": false,
+      "properties": {
+        "use": {
+          "description": "A subflow to run first,",
+          "title": "Use",
+          "type": "string"
+        },
+        "unless": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Visible"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "\u2026skipped when this already holds (e.g. already logged in)."
+        }
+      },
+      "required": [
+        "use"
+      ],
+      "title": "Precondition",
+      "type": "object"
+    },
+    "Provenance": {
+      "additionalProperties": false,
+      "properties": {
+        "discoveryRunId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Discoveryrunid"
+        },
+        "recordedAt": {
+          "title": "Recordedat",
+          "type": "string"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "recordedOnVariant": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Recordedonvariant"
+        }
+      },
+      "required": [
+        "recordedAt"
+      ],
+      "title": "Provenance",
+      "type": "object"
+    },
+    "Recovery": {
+      "additionalProperties": false,
+      "description": "What to do before retrying the step. A run allows at most 3 recoveries in total, whatever these say.",
+      "properties": {
+        "do": {
+          "discriminator": {
+            "mapping": {
+              "click": "#/$defs/ClickThrough",
+              "subflow": "#/$defs/RunSubflow",
+              "wait": "#/$defs/WaitLonger"
+            },
+            "propertyName": "kind"
+          },
+          "oneOf": [
+            {
+              "$ref": "#/$defs/RunSubflow"
+            },
+            {
+              "$ref": "#/$defs/ClickThrough"
+            },
+            {
+              "$ref": "#/$defs/WaitLonger"
+            }
+          ],
+          "title": "Do"
+        },
+        "maxAttempts": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Maxattempts",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "do"
+      ],
+      "title": "Recovery",
+      "type": "object"
+    },
+    "Regex": {
+      "additionalProperties": false,
+      "properties": {
+        "matches": {
+          "title": "Matches",
+          "type": "string"
+        }
+      },
+      "required": [
+        "matches"
+      ],
+      "title": "Regex",
+      "type": "object"
+    },
+    "RegionScope": {
+      "additionalProperties": false,
+      "description": "Narrows a target to a labelled region, so a duplicate name elsewhere on the page can't match (\u00a72 ambiguity).",
+      "properties": {
+        "role": {
+          "description": "form, region, group, table, dialog\u2026",
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "role",
+        "name"
+      ],
+      "title": "RegionScope",
+      "type": "object"
+    },
+    "RemoveOp": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "remove",
+          "default": "remove",
+          "title": "Op",
+          "type": "string"
+        },
+        "step": {
+          "title": "Step",
+          "type": "string"
+        }
+      },
+      "required": [
+        "step"
+      ],
+      "title": "RemoveOp",
+      "type": "object"
+    },
+    "RoleStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 1: accessible role + name. Survives restyling and DOM changes.",
+      "properties": {
+        "kind": {
+          "const": "role",
+          "default": "role",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            }
+          ],
+          "title": "Name"
+        }
+      },
+      "required": [
+        "role",
+        "name"
+      ],
+      "title": "RoleStrategy",
+      "type": "object"
+    },
+    "RowWhere": {
+      "additionalProperties": false,
+      "properties": {
+        "column": {
+          "title": "Column",
+          "type": "string"
+        },
+        "equals": {
+          "description": "Literal, or a template such as {{inputs.accountType}}.",
+          "title": "Equals",
+          "type": "string"
+        }
+      },
+      "required": [
+        "column",
+        "equals"
+      ],
+      "title": "RowWhere",
+      "type": "object"
+    },
+    "RunSubflow": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "subflow",
+          "default": "subflow",
+          "title": "Kind",
+          "type": "string"
+        },
+        "subflow": {
+          "title": "Subflow",
+          "type": "string"
+        }
+      },
+      "required": [
+        "subflow"
+      ],
+      "title": "RunSubflow",
+      "type": "object"
+    },
+    "SetOp": {
+      "additionalProperties": false,
+      "properties": {
+        "op": {
+          "const": "set",
+          "default": "set",
+          "title": "Op",
+          "type": "string"
+        },
+        "step": {
+          "title": "Step",
+          "type": "string"
+        },
+        "path": {
+          "description": "Dotted path inside the step; a list item is picked by value: strategies[kind=role].name",
+          "title": "Path",
+          "type": "string"
+        },
+        "value": {
+          "title": "Value"
+        }
+      },
+      "required": [
+        "step",
+        "path",
+        "value"
+      ],
+      "title": "SetOp",
+      "type": "object"
+    },
+    "Step": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "pattern": "^[a-z][a-z0-9_]*$",
+          "title": "Id",
+          "type": "string"
+        },
+        "intent": {
+          "description": "What the step is for, in words. Review, drift reports and repair key off it.",
+          "minLength": 3,
+          "title": "Intent",
+          "type": "string"
+        },
+        "action": {
+          "enum": [
+            "click",
+            "type",
+            "select",
+            "check",
+            "uncheck",
+            "press",
+            "navigate",
+            "extract"
+          ],
+          "title": "Action",
+          "type": "string"
+        },
+        "target": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "value": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Text to type/select, key to press, or URL. Templates allowed.",
+          "title": "Value"
+        },
+        "extract": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "$ref": "#/$defs/Extractor"
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Extract"
+        },
+        "risk": {
+          "description": "Irreversible steps can't exist in an artifact: they're blocked by policy (D1). An artifact can reach a commit point but never press it.",
+          "enum": [
+            "read",
+            "reversible"
+          ],
+          "title": "Risk",
+          "type": "string"
+        },
+        "waitFor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/WaitFor"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "expect": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Visible"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Postcondition. We never assume a click worked."
+        },
+        "recordedBy": {
+          "default": "model",
+          "enum": [
+            "model",
+            "human",
+            "author"
+          ],
+          "title": "Recordedby",
+          "type": "string"
+        },
+        "needsReview": {
+          "default": false,
+          "title": "Needsreview",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "intent",
+        "action",
+        "risk"
+      ],
+      "title": "Step",
+      "type": "object"
+    },
+    "StructuralStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 4: a path through the frame's markup. Last DOM resort; breaks on any layout change.",
+      "properties": {
+        "kind": {
+          "const": "structural",
+          "default": "structural",
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path"
+      ],
+      "title": "StructuralStrategy",
+      "type": "object"
+    },
+    "Success": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpoint": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "identity": "#/$defs/IdentityMatches",
+                "output": "#/$defs/OutputPresent",
+                "visible": "#/$defs/Visible"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Visible"
+              },
+              {
+                "$ref": "#/$defs/OutputPresent"
+              },
+              {
+                "$ref": "#/$defs/IdentityMatches"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Checkpoint",
+          "type": "array"
+        }
+      },
+      "required": [
+        "checkpoint"
+      ],
+      "title": "Success",
+      "type": "object"
+    },
+    "TableCellStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 3: a cell picked by values, not position: the Balance column of the row where Type = Savings.",
+      "properties": {
+        "kind": {
+          "const": "tableCell",
+          "default": "tableCell",
+          "title": "Kind",
+          "type": "string"
+        },
+        "tableAnchor": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            }
+          ],
+          "description": "Caption or heading text that identifies the table.",
+          "title": "Tableanchor"
+        },
+        "rowWhere": {
+          "$ref": "#/$defs/RowWhere"
+        },
+        "column": {
+          "title": "Column",
+          "type": "string"
+        }
+      },
+      "required": [
+        "tableAnchor",
+        "rowWhere",
+        "column"
+      ],
+      "title": "TableCellStrategy",
+      "type": "object"
+    },
+    "Target": {
+      "additionalProperties": false,
+      "properties": {
+        "frame": {
+          "description": "Frame path from the top document; [] is the top.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Frame",
+          "type": "array"
+        },
+        "within": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RegionScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "strategies": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "anchor": "#/$defs/AnchorStrategy",
+                "bbox": "#/$defs/BBoxStrategy",
+                "label": "#/$defs/LabelStrategy",
+                "role": "#/$defs/RoleStrategy",
+                "structural": "#/$defs/StructuralStrategy",
+                "tableCell": "#/$defs/TableCellStrategy",
+                "text": "#/$defs/TextStrategy"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/RoleStrategy"
+              },
+              {
+                "$ref": "#/$defs/LabelStrategy"
+              },
+              {
+                "$ref": "#/$defs/AnchorStrategy"
+              },
+              {
+                "$ref": "#/$defs/TableCellStrategy"
+              },
+              {
+                "$ref": "#/$defs/TextStrategy"
+              },
+              {
+                "$ref": "#/$defs/StructuralStrategy"
+              },
+              {
+                "$ref": "#/$defs/BBoxStrategy"
+              }
+            ]
+          },
+          "minItems": 1,
+          "title": "Strategies",
+          "type": "array"
+        },
+        "nth": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Last resort when no scope tells duplicates apart. Requires the step to be flagged needsReview.",
+          "title": "Nth"
+        }
+      },
+      "required": [
+        "strategies"
+      ],
+      "title": "Target",
+      "type": "object"
+    },
+    "TextStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 3: an element by its visible text alone.",
+      "properties": {
+        "kind": {
+          "const": "text",
+          "default": "text",
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            }
+          ],
+          "title": "Text"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "TextStrategy",
+      "type": "object"
+    },
+    "Visible": {
+      "additionalProperties": false,
+      "description": "Something is on screen. All given fields must match the same element (or, for text alone, any text).",
+      "properties": {
+        "kind": {
+          "const": "visible",
+          "default": "visible",
+          "title": "Kind",
+          "type": "string"
+        },
+        "frame": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "None searches every frame.",
+          "title": "Frame"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Role"
+        },
+        "name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Name"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "$ref": "#/$defs/Regex"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Text"
+        }
+      },
+      "title": "Visible",
+      "type": "object"
+    },
+    "WaitFor": {
+      "additionalProperties": false,
+      "description": "No fixed sleeps: a step waits until one of these holds, or times out (\u00a74 determinism rules).",
+      "properties": {
+        "frame": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Frame"
+        },
+        "loadState": {
+          "anyOf": [
+            {
+              "enum": [
+                "load",
+                "domcontentloaded",
+                "networkidle"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Loadstate"
+        },
+        "anyOf": {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "outcome": "#/$defs/OutcomeSeen",
+                "visible": "#/$defs/Visible"
+              },
+              "propertyName": "kind"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/Visible"
+              },
+              {
+                "$ref": "#/$defs/OutcomeSeen"
+              }
+            ]
+          },
+          "title": "Anyof",
+          "type": "array"
+        },
+        "timeoutMs": {
+          "default": 10000,
+          "maximum": 120000,
+          "minimum": 100,
+          "title": "Timeoutms",
+          "type": "integer"
+        }
+      },
+      "title": "WaitFor",
+      "type": "object"
+    },
+    "WaitLonger": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "wait",
+          "default": "wait",
+          "title": "Kind",
+          "type": "string"
+        },
+        "timeoutMs": {
+          "maximum": 120000,
+          "minimum": 100,
+          "title": "Timeoutms",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "timeoutMs"
+      ],
+      "title": "WaitLonger",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "1",
+      "default": "1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "capability": {
+      "$ref": "#/$defs/Capability"
+    },
+    "app": {
+      "$ref": "#/$defs/App"
+    },
+    "status": {
+      "default": "draft",
+      "description": "Only approved artifacts replay unattended.",
+      "enum": [
+        "draft",
+        "approved",
+        "deprecated"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "inputs": {
+      "additionalProperties": {
+        "$ref": "#/$defs/InputSpec"
+      },
+      "title": "Inputs",
+      "type": "object"
+    },
+    "outputs": {
+      "additionalProperties": {
+        "$ref": "#/$defs/OutputSpec"
+      },
+      "title": "Outputs",
+      "type": "object"
+    },
+    "outcomes": {
+      "items": {
+        "$ref": "#/$defs/Outcome"
+      },
+      "title": "Outcomes",
+      "type": "array"
+    },
+    "policy": {
+      "$ref": "#/$defs/Policy"
+    },
+    "subflows": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/Step"
+        },
+        "type": "array"
+      },
+      "title": "Subflows",
+      "type": "object"
+    },
+    "preconditions": {
+      "items": {
+        "$ref": "#/$defs/Precondition"
+      },
+      "title": "Preconditions",
+      "type": "array"
+    },
+    "steps": {
+      "items": {
+        "$ref": "#/$defs/Step"
+      },
+      "minItems": 1,
+      "title": "Steps",
+      "type": "array"
+    },
+    "success": {
+      "$ref": "#/$defs/Success"
+    },
+    "overrides": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Override"
+      },
+      "title": "Overrides",
+      "type": "object"
+    }
+  },
+  "required": [
+    "capability",
+    "app",
+    "provenance",
+    "policy",
+    "steps",
+    "success"
+  ],
+  "title": "Artifact",
+  "type": "object"
+}

@@ -1,0 +1,434 @@
+{
+  "$defs": {
+    "BusinessOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "runId": {
+          "title": "Runid",
+          "type": "string"
+        },
+        "completedAt": {
+          "description": "So a caller collecting a late result can judge whether it's stale.",
+          "title": "Completedat",
+          "type": "string"
+        },
+        "recovered": {
+          "items": {
+            "$ref": "#/$defs/RecoveryEvent"
+          },
+          "title": "Recovered",
+          "type": "array"
+        },
+        "drift": {
+          "items": {
+            "$ref": "#/$defs/DriftEvent"
+          },
+          "title": "Drift",
+          "type": "array"
+        },
+        "status": {
+          "const": "business_outcome",
+          "default": "business_outcome",
+          "title": "Status",
+          "type": "string"
+        },
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "atStep": {
+          "title": "Atstep",
+          "type": "string"
+        },
+        "details": {
+          "additionalProperties": true,
+          "title": "Details",
+          "type": "object"
+        }
+      },
+      "required": [
+        "runId",
+        "completedAt",
+        "code",
+        "atStep"
+      ],
+      "title": "BusinessOutcome",
+      "type": "object"
+    },
+    "DriftEvent": {
+      "additionalProperties": false,
+      "description": "The control was found, but not by the strategy recorded first. The run still succeeds (\u00a74 drift).",
+      "properties": {
+        "stepId": {
+          "title": "Stepid",
+          "type": "string"
+        },
+        "hitRank": {
+          "description": "Index of the strategy that matched; 0 would be no drift.",
+          "minimum": 1,
+          "title": "Hitrank",
+          "type": "integer"
+        },
+        "strategy": {
+          "title": "Strategy",
+          "type": "string"
+        },
+        "proposedOverride": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Path of the draft override written for review.",
+          "title": "Proposedoverride"
+        }
+      },
+      "required": [
+        "stepId",
+        "hitRank",
+        "strategy"
+      ],
+      "title": "DriftEvent",
+      "type": "object"
+    },
+    "EvidenceRef": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "screenshot",
+            "a11y_snapshot",
+            "trace",
+            "log"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "path": {
+          "title": "Path",
+          "type": "string"
+        }
+      },
+      "required": [
+        "kind",
+        "path"
+      ],
+      "title": "EvidenceRef",
+      "type": "object"
+    },
+    "Failed": {
+      "additionalProperties": false,
+      "properties": {
+        "runId": {
+          "title": "Runid",
+          "type": "string"
+        },
+        "completedAt": {
+          "description": "So a caller collecting a late result can judge whether it's stale.",
+          "title": "Completedat",
+          "type": "string"
+        },
+        "recovered": {
+          "items": {
+            "$ref": "#/$defs/RecoveryEvent"
+          },
+          "title": "Recovered",
+          "type": "array"
+        },
+        "drift": {
+          "items": {
+            "$ref": "#/$defs/DriftEvent"
+          },
+          "title": "Drift",
+          "type": "array"
+        },
+        "status": {
+          "const": "failed",
+          "default": "failed",
+          "title": "Status",
+          "type": "string"
+        },
+        "atStep": {
+          "title": "Atstep",
+          "type": "string"
+        },
+        "errorClass": {
+          "enum": [
+            "TARGET_UNRESOLVED",
+            "AMBIGUOUS_TARGET",
+            "EXPECT_FAILED",
+            "CHECKPOINT_FAILED",
+            "WRONG_RECORD",
+            "FATAL_OUTCOME",
+            "POLICY_VIOLATION",
+            "RECOVERY_EXHAUSTED",
+            "TIMEOUT",
+            "NOT_APPROVED",
+            "SURFACE_ERROR"
+          ],
+          "title": "Errorclass",
+          "type": "string"
+        },
+        "expected": {
+          "title": "Expected",
+          "type": "string"
+        },
+        "observed": {
+          "title": "Observed",
+          "type": "string"
+        },
+        "outcomeCode": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outcomecode"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRef"
+          },
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "runId",
+        "completedAt",
+        "atStep",
+        "errorClass",
+        "expected",
+        "observed"
+      ],
+      "title": "Failed",
+      "type": "object"
+    },
+    "InputError": {
+      "additionalProperties": false,
+      "properties": {
+        "input": {
+          "title": "Input",
+          "type": "string"
+        },
+        "rule": {
+          "title": "Rule",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "input",
+        "rule",
+        "message"
+      ],
+      "title": "InputError",
+      "type": "object"
+    },
+    "InvalidInput": {
+      "additionalProperties": false,
+      "description": "Rejected before any UI was touched, so it isn't a business outcome: the app was never asked.",
+      "properties": {
+        "runId": {
+          "title": "Runid",
+          "type": "string"
+        },
+        "completedAt": {
+          "description": "So a caller collecting a late result can judge whether it's stale.",
+          "title": "Completedat",
+          "type": "string"
+        },
+        "status": {
+          "const": "invalid_input",
+          "default": "invalid_input",
+          "title": "Status",
+          "type": "string"
+        },
+        "errors": {
+          "items": {
+            "$ref": "#/$defs/InputError"
+          },
+          "minItems": 1,
+          "title": "Errors",
+          "type": "array"
+        }
+      },
+      "required": [
+        "runId",
+        "completedAt",
+        "errors"
+      ],
+      "title": "InvalidInput",
+      "type": "object"
+    },
+    "NeedsHuman": {
+      "additionalProperties": false,
+      "description": "The run is paused for an operator and continues in the background; collect it later by run_id.",
+      "properties": {
+        "runId": {
+          "title": "Runid",
+          "type": "string"
+        },
+        "completedAt": {
+          "description": "So a caller collecting a late result can judge whether it's stale.",
+          "title": "Completedat",
+          "type": "string"
+        },
+        "status": {
+          "const": "needs_human",
+          "default": "needs_human",
+          "title": "Status",
+          "type": "string"
+        },
+        "interventionId": {
+          "title": "Interventionid",
+          "type": "string"
+        },
+        "atStep": {
+          "title": "Atstep",
+          "type": "string"
+        },
+        "reason": {
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "runId",
+        "completedAt",
+        "interventionId",
+        "atStep",
+        "reason"
+      ],
+      "title": "NeedsHuman",
+      "type": "object"
+    },
+    "RecoveryEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "description": "The recoverable outcome, or MAP_FALLBACK for a map-assisted step (\u00a77a).",
+          "title": "Code",
+          "type": "string"
+        },
+        "stepId": {
+          "title": "Stepid",
+          "type": "string"
+        },
+        "attempt": {
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "action": {
+          "description": "What was done, e.g. 'ran subflow login'.",
+          "title": "Action",
+          "type": "string"
+        },
+        "mapVersion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mapversion"
+        }
+      },
+      "required": [
+        "code",
+        "stepId",
+        "attempt",
+        "action"
+      ],
+      "title": "RecoveryEvent",
+      "type": "object"
+    },
+    "Success": {
+      "additionalProperties": false,
+      "properties": {
+        "runId": {
+          "title": "Runid",
+          "type": "string"
+        },
+        "completedAt": {
+          "description": "So a caller collecting a late result can judge whether it's stale.",
+          "title": "Completedat",
+          "type": "string"
+        },
+        "recovered": {
+          "items": {
+            "$ref": "#/$defs/RecoveryEvent"
+          },
+          "title": "Recovered",
+          "type": "array"
+        },
+        "drift": {
+          "items": {
+            "$ref": "#/$defs/DriftEvent"
+          },
+          "title": "Drift",
+          "type": "array"
+        },
+        "status": {
+          "const": "success",
+          "default": "success",
+          "title": "Status",
+          "type": "string"
+        },
+        "outputs": {
+          "additionalProperties": true,
+          "title": "Outputs",
+          "type": "object"
+        }
+      },
+      "required": [
+        "runId",
+        "completedAt",
+        "outputs"
+      ],
+      "title": "Success",
+      "type": "object"
+    }
+  },
+  "discriminator": {
+    "mapping": {
+      "business_outcome": "#/$defs/BusinessOutcome",
+      "failed": "#/$defs/Failed",
+      "invalid_input": "#/$defs/InvalidInput",
+      "needs_human": "#/$defs/NeedsHuman",
+      "success": "#/$defs/Success"
+    },
+    "propertyName": "status"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/Success"
+    },
+    {
+      "$ref": "#/$defs/BusinessOutcome"
+    },
+    {
+      "$ref": "#/$defs/InvalidInput"
+    },
+    {
+      "$ref": "#/$defs/NeedsHuman"
+    },
+    {
+      "$ref": "#/$defs/Failed"
+    }
+  ]
+}
