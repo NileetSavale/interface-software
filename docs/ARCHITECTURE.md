@@ -119,10 +119,13 @@ headed browser. agent-desktop is the reference for a future `DesktopSurface`.
 1. **One continued conversation.** The model's reasoning and past actions are kept in full. loop_runner's `continue`
    mode was cheapest in 6/6 head-to-head runs.
 2. **Prompt caching** on every call (`loop_runner/backend/providers/anthropic.py`).
-3. **Only the latest snapshot is kept in full.** Older snapshots collapse to one line:
-   `[snapshot s4: "Member Inquiry" in frame main, 14 controls (replaced)]`. Old UI observations are stale and their
-   refs are invalid. This is the UI version of loop_runner's biggest saving, short test output. Only the last
-   message or two change, so the cache prefix still holds.
+3. **Old snapshots are cleared server-side, not edited client-side** (corrected in Pass 1, D17). Old UI
+   observations are stale and their refs are invalid, so only the latest ones matter. But the current models
+   (Sonnet 5.5, Opus 5.5) bind their thinking to the exact conversation: editing an earlier message invalidates
+   it, and for accounts created after 2026-08-31 that's an HTTP 400. So the history stays **append-only**, and the
+   API's context editing (`clear_tool_uses`, keep the last 2 tool results) clears old snapshots on its side, which
+   doesn't count as an edit. This is the same mechanism as loop_runner's `CONTEXT_EDITING`. Nudges are appended as
+   text after the tool results, never inserted into earlier turns.
 4. **Only the latest screenshot** is kept.
 5. **After a human handoff, the same conversation continues** with a message saying what the operator did, plus the
    current screen.

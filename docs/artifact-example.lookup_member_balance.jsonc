@@ -16,7 +16,8 @@
   "app": {
     "product": "mock-core-banking",            // the VENDOR product, not a tenant
     "versionRange": ">=1.0 <2.0",
-    "surface": "web"                           // "web" | "desktop": selects the Surface adapter
+    "surface": "web",                          // "web" | "desktop": selects the Surface adapter
+    "entryPath": "/"                           // relative to each tenant's own base URL, supplied at invoke time
   },
 
   "status": "draft",                           // draft → approved; only approved artifacts replay unattended
@@ -82,6 +83,8 @@
   // ── Implementation ──────────────────────────────────────────────────────
   "subflows": {
     "login": [
+      // starts from the entry page, so the same subflow also recovers from "session expired"
+      { "id": "login_open", "intent": "go to the sign-on page", "action": "navigate", "value": "/", "risk": "read" },
       { "id": "login_user", "intent": "enter operator username", "action": "type",
         "target": { "frame": ["main"], "strategies": [ { "kind": "label", "label": "User ID" } ] },
         "value": "{{secrets.APP_USER}}", "risk": "read" },     // secrets are read from env at act time, never stored
@@ -136,8 +139,9 @@
       "action": "click",
       "target": {
         "frame": ["main"],
-        // two "Search" buttons exist (nav quick-search + this form), so the role strategy is scoped to the form
-        "within": { "role": "form", "name": "Member Inquiry" },
+        // two "Search" buttons exist (nav quick-search + this form), so the role strategy is scoped to the form's
+        // fieldset, which the accessibility tree exposes as a group named by its legend
+        "within": { "role": "group", "name": "Member Inquiry" },
         "strategies": [ { "kind": "role", "role": "button", "name": "Search" } ]
       },
       "risk": "read",

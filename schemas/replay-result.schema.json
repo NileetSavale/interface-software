@@ -168,6 +168,7 @@
             "RECOVERY_EXHAUSTED",
             "TIMEOUT",
             "NOT_APPROVED",
+            "ESCALATION_UNATTENDED",
             "SURFACE_ERROR"
           ],
           "title": "Errorclass",

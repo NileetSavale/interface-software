@@ -1,0 +1,90 @@
+// In-page helpers for the strategies the browser has no built-in locator for: a value next to a label cell
+// ("Name:" | "Jane Doe"), and a cell picked by row and column values in a legacy table. Installed in every frame
+// as window.__ifz. The recorder uses describeValue to propose strategies; replay uses anchor/tableCell to resolve
+// them; both sides run the same code, so what was recorded is what gets found.
+(() => {
+  if (window.__ifz) return;
+  const norm = (s) => (s || "").replace(/\s+/g, " ").trim();
+  const textOf = (el) => norm(el.innerText ?? el.textContent);
+  // m is {exact: "..."} or {regex: [source, flags]}
+  const matches = (text, m) => (m.exact !== undefined ? text === norm(m.exact) : new RegExp(m.regex[0], m.regex[1]).test(text));
+
+  function tableLabel(table) {
+    if (table.caption) return textOf(table.caption);
+    let p = table.previousElementSibling;
+    while (p && p.tagName === "BR") p = p.previousElementSibling;
+    return p && p.tagName !== "TABLE" ? textOf(p) : null;
+  }
+
+  function headerRow(table) {
+    return Array.from(table.rows).find((r) => Array.from(r.cells).some((c) => c.tagName === "TH")) || null;
+  }
+
+  function control(cell, role) {
+    if (!role) return cell;
+    return cell.querySelector("input:not([type=hidden]),select,textarea,button,a") || null;
+  }
+
+  function anchor(anchorM, relation, role) {
+    const hits = Array.from(document.querySelectorAll("td,th,label,b,span,font")).filter((el) => matches(textOf(el), anchorM));
+    const innermost = hits.filter((el) => !hits.some((o) => o !== el && el.contains(o)));
+    const out = [];
+    for (const a of innermost) {
+      const cell = a.closest("td,th");
+      if (!cell) continue;
+      let target = null;
+      if (relation === "right-of") target = cell.nextElementSibling;
+      else if (relation === "left-of") target = cell.previousElementSibling;
+      else {
+        const row = relation === "below" ? cell.parentElement.nextElementSibling : cell.parentElement.previousElementSibling;
+        target = row ? row.cells[cell.cellIndex] : null;
+      }
+      const el = target && control(target, role);
+      if (el) out.push(el);
+    }
+    return out;
+  }
+
+  function tableCell(tableM, column, rowColumn, rowEquals) {
+    const out = [];
+    for (const table of document.querySelectorAll("table")) {
+      const label = tableLabel(table);
+      const header = headerRow(table);
+      if (!label || !header || !matches(label, tableM)) continue;
+      const heads = Array.from(header.cells).map(textOf);
+      const ci = heads.indexOf(column), ri = heads.indexOf(rowColumn);
+      if (ci < 0 || ri < 0) continue;
+      for (const row of table.rows) {
+        if (row !== header && row.cells[ri] && textOf(row.cells[ri]) === norm(rowEquals) && row.cells[ci]) out.push(row.cells[ci]);
+      }
+    }
+    return out;
+  }
+
+  // A label is static text. Anything with a digit is treated as data (member and account numbers, amounts, dates):
+  // anchoring on it would break for the next record and would write that data into the artifact.
+  const isLabel = (text) => !!text && !/\d/.test(text);
+
+  // Strategies that describe where a value sits, never what it says: the value changes per record, its place doesn't
+  function describeValue(el) {
+    const cell = el.closest("td,th");
+    if (!cell) return [];
+    const out = [];
+    const table = cell.closest("table");
+    const header = table && headerRow(table);
+    const label = table && tableLabel(table);
+    if (header && label && cell.parentElement !== header) {
+      const heads = Array.from(header.cells).map(textOf);
+      const row = cell.parentElement;
+      if (heads[cell.cellIndex] && heads[0] && cell.cellIndex !== 0 && isLabel(textOf(row.cells[0]))) {
+        out.push({ kind: "tableCell", tableAnchor: label, column: heads[cell.cellIndex],
+                   rowWhere: { column: heads[0], equals: textOf(row.cells[0]) } });
+      }
+    }
+    const prev = cell.previousElementSibling;
+    if (prev && isLabel(textOf(prev))) out.push({ kind: "anchor", anchorText: textOf(prev), relation: "right-of" });
+    return out;
+  }
+
+  window.__ifz = { anchor, tableCell, describeValue, textOf };
+})();

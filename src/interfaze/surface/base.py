@@ -39,8 +39,8 @@ class AXNode(Model):
 class Observation(Model):
     snapshot_id: str
     url: str
-    title: str = ""
-    tree: AXNode
+    text: str = Field(description="The tree as the model reads it: one line per node, refs inline.")
+    tree: AXNode | None = Field(default=None, description="Parsed form, for surfaces that build one.")
     fingerprint: str = Field(description="Hash of the screen's structure and static text, ignoring data (§7a).")
     screenshot_path: str | None = None
 
@@ -71,8 +71,10 @@ class Surface(ABC):
         """The current screen as a tree with fresh refs (and a screenshot when asked)."""
 
     @abstractmethod
-    async def describe(self, ref: str) -> Target:
-        """The recorder's half: turn a live ref into ranked, surface-neutral strategies, scoped so they're unique."""
+    async def describe(self, ref: str, purpose: Literal["act", "read"] = "act") -> Target:
+        """The recorder's half: turn a live ref into ranked, surface-neutral strategies, each checked to find exactly
+        this element. "act" describes a control by what it is; "read" describes a value by where it sits, since the
+        value itself changes per record."""
 
     @abstractmethod
     async def resolve(self, target: Target) -> Resolved | Unresolved:

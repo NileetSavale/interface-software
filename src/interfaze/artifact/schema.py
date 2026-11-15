@@ -231,6 +231,9 @@ class App(Model):
     product: str = Field(description="The vendor product, not a tenant. Tenants specialise through overrides.")
     version_range: str
     surface: Literal["web", "desktop"]
+    entry_path: str = Field(
+        default="/", description="Where replay starts, relative to the tenant's base URL (each bank hosts its own).",
+    )
 
 
 class Provenance(Model):

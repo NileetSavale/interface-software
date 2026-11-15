@@ -1,0 +1,20 @@
+{
+  "capability": "core_banking.lookup_member_balance",
+  "title": "Look up a member's savings balance",
+  "description": "Searches for a member by member number and returns the member's name and the current balance of their savings account.",
+  "product": "mock-core-banking",
+  "versionRange": ">=1.0 <2.0",
+  "entryPath": "/",
+  "goal": "Sign on, look up member {{inputs.memberId}}, and read the member's name and current savings balance.",
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "member"
+    }
+  },
+  "secrets": ["APP_USER", "APP_PASSWORD"],
+  "maxRisk": "read"
+}

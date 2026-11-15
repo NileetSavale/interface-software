@@ -1,0 +1,308 @@
+{
+  "schemaVersion": "1",
+  "capability": {
+    "id": "core_banking.lookup_member_balance",
+    "version": "1.0.0",
+    "title": "Look up a member's savings balance",
+    "description": "Searches for a member by member number and returns the member's name and the current balance of their savings account."
+  },
+  "app": {
+    "product": "mock-core-banking",
+    "versionRange": ">=1.0 <2.0",
+    "surface": "web",
+    "entryPath": "/"
+  },
+  "status": "approved",
+  "provenance": {
+    "discoveryRunId": "disc_20261115T005032Z_98ac60",
+    "recordedAt": "2026-11-15T00:50:45+00:00",
+    "model": "claude-sonnet-5-5"
+  },
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "member"
+    }
+  },
+  "outputs": {
+    "memberName": {
+      "type": "string",
+      "redact": "none"
+    },
+    "savingsBalance": {
+      "type": "money",
+      "redact": "none"
+    }
+  },
+  "outcomes": [],
+  "policy": {
+    "allowedOrigins": [
+      "http://127.0.0.1:4100"
+    ],
+    "allowedPaths": [
+      "/*"
+    ],
+    "maxRisk": "read"
+  },
+  "subflows": {},
+  "preconditions": [],
+  "steps": [
+    {
+      "id": "enter_user_id",
+      "intent": "enter user id",
+      "action": "type",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "User ID"
+          },
+          {
+            "kind": "label",
+            "label": "User ID"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "User ID",
+            "relation": "right-of",
+            "role": "textbox"
+          }
+        ]
+      },
+      "value": "{{secrets.APP_USER}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "enter_password",
+      "intent": "enter password",
+      "action": "type",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Password"
+          },
+          {
+            "kind": "label",
+            "label": "Password"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Password",
+            "relation": "right-of",
+            "role": "textbox"
+          }
+        ]
+      },
+      "value": "{{secrets.APP_PASSWORD}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "sign",
+      "intent": "sign on",
+      "action": "click",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Sign On"
+          },
+          {
+            "kind": "text",
+            "text": "Sign On"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "open_member_inquiry",
+      "intent": "open member inquiry",
+      "action": "click",
+      "target": {
+        "frame": [
+          "nav"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Member Inquiry"
+          },
+          {
+            "kind": "text",
+            "text": "Member Inquiry"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "enter_member_number",
+      "intent": "enter member number",
+      "action": "type",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Member #"
+          },
+          {
+            "kind": "label",
+            "label": "Member #"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Member #",
+            "relation": "right-of",
+            "role": "textbox"
+          }
+        ]
+      },
+      "value": "{{inputs.memberId}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "search_member",
+      "intent": "search member",
+      "action": "click",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Search"
+          },
+          {
+            "kind": "text",
+            "text": "Search"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "read_name",
+      "intent": "read name",
+      "action": "extract",
+      "extract": {
+        "memberName": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Name:",
+              "relation": "right-of"
+            }
+          ],
+          "parse": "text"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "read_savings_balance",
+      "intent": "read savings balance",
+      "action": "extract",
+      "extract": {
+        "savingsBalance": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "tableCell",
+              "tableAnchor": "Account Summary",
+              "rowWhere": {
+                "column": "Type",
+                "equals": "Savings"
+              },
+              "column": "Balance"
+            }
+          ],
+          "parse": "money"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    }
+  ],
+  "success": {
+    "checkpoint": [
+      {
+        "kind": "visible",
+        "frame": [
+          "main"
+        ],
+        "text": "Member Detail"
+      },
+      {
+        "kind": "output",
+        "output": "memberName",
+        "notEmpty": true
+      },
+      {
+        "kind": "output",
+        "output": "savingsBalance",
+        "notEmpty": true
+      },
+      {
+        "kind": "identity",
+        "input": "memberId",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Member #:",
+              "relation": "right-of"
+            }
+          ]
+        },
+        "equals": "{{inputs.memberId}}"
+      }
+    ]
+  },
+  "overrides": {}
+}
