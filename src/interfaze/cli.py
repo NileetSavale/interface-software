@@ -17,7 +17,7 @@ from pathlib import Path
 
 from interfaze.artifact.io import dump_artifact, load_artifact
 
-DEFAULT_BASE_URL = "http://localhost:4100"
+DEFAULT_BASE_URL = "http://127.0.0.1:4100"  # the origin the artifacts were recorded on; the allowlist is exact
 # Exit codes a caller can branch on without parsing: a business outcome is an answer, not an error
 EXIT = {"success": 0, "business_outcome": 0, "needs_human": 3, "invalid_input": 2, "failed": 1}
 

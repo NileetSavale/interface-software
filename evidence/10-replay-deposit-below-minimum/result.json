@@ -1,0 +1,10 @@
+{
+  "runId": "replay_20261115T075226Z_b912de",
+  "completedAt": "2026-11-15T07:52:30+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "business_outcome",
+  "code": "DEPOSIT_BELOW_MINIMUM",
+  "atStep": "continue_review",
+  "details": {}
+}

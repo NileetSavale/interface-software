@@ -1,0 +1,11 @@
+{"t": 0.0, "at": "2026-11-15T07:25:25+00:00", "event": "replay_started", "capability": "core_banking.open_sub_account", "version": "1.0.0", "inputs": ["accountType", "initialDeposit", "memberId", "nickname"]}
+{"t": 0.285, "at": "2026-11-15T07:25:26+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.352, "at": "2026-11-15T07:25:28+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.417, "at": "2026-11-15T07:25:28+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.457, "at": "2026-11-15T07:25:28+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.874, "at": "2026-11-15T07:25:28+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.311, "at": "2026-11-15T07:25:29+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.366, "at": "2026-11-15T07:25:29+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.762, "at": "2026-11-15T07:25:29+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.788, "at": "2026-11-15T07:25:29+00:00", "event": "outcome", "code": "MEMBER_NOT_FOUND", "kind": "business", "step": "search_member"}
+{"t": 3.812, "at": "2026-11-15T07:25:29+00:00", "event": "replay_finished", "status": "business_outcome", "result": {"runId": "disc_20261115T072446Z_c5d86f-probe2", "completedAt": "2026-11-15T07:25:29+00:00", "recovered": [], "drift": [], "status": "business_outcome", "code": "MEMBER_NOT_FOUND", "atStep": "search_member", "details": {}}}

@@ -1,0 +1,18 @@
+{
+  "runId": "replay_20261115T075207Z_f66d41",
+  "completedAt": "2026-11-15T07:52:12+00:00",
+  "recovered": [
+    {
+      "code": "SESSION_EXPIRED",
+      "stepId": "search_member",
+      "attempt": 1,
+      "action": "ran subflow sign_on"
+    }
+  ],
+  "drift": [],
+  "status": "success",
+  "outputs": {
+    "memberName": "{{outputs.memberName}}",
+    "savingsBalance": "{{outputs.savingsBalance}}"
+  }
+}

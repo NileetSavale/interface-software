@@ -1,0 +1,22 @@
+{
+  "runId": "replay_20261115T075212Z_06595a",
+  "completedAt": "2026-11-15T07:52:16+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "search_member",
+  "errorClass": "FATAL_OUTCOME",
+  "expected": "no error state",
+  "observed": "APP_ERROR",
+  "outcomeCode": "APP_ERROR",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261115T075212Z_06595a/search_member.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261115T075212Z_06595a/search_member.png"
+    }
+  ]
+}

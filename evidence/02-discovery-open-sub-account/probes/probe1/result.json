@@ -1,0 +1,21 @@
+{
+  "runId": "disc_20261115T072446Z_c5d86f-probe1",
+  "completedAt": "2026-11-15T07:25:23+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "open_sub_account_form",
+  "errorClass": "TARGET_UNRESOLVED",
+  "expected": "exactly one match for: role, text",
+  "observed": "role: TARGET_UNRESOLVED; text: TARGET_UNRESOLVED",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/disc_20261115T072446Z_c5d86f-probe1/open_sub_account_form.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/disc_20261115T072446Z_c5d86f-probe1/open_sub_account_form.png"
+    }
+  ]
+}

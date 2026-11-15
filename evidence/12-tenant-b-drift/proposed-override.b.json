@@ -1,0 +1,39 @@
+{
+  "appliesTo": ">=1.0.0 <2.0.0",
+  "ops": [
+    {
+      "op": "set",
+      "step": "enter_member_number",
+      "path": "target.strategies",
+      "value": [
+        {
+          "kind": "anchor",
+          "anchorText": "Member #",
+          "relation": "right-of",
+          "role": "textbox"
+        },
+        {
+          "kind": "role",
+          "role": "textbox",
+          "name": "Member #"
+        },
+        {
+          "kind": "label",
+          "label": "Member #"
+        }
+      ]
+    },
+    {
+      "op": "set",
+      "step": "search_member",
+      "path": "target.strategies[kind=role].name",
+      "value": "Find Member"
+    },
+    {
+      "op": "set",
+      "step": "search_member",
+      "path": "target.strategies[kind=text].text",
+      "value": "Find Member"
+    }
+  ]
+}

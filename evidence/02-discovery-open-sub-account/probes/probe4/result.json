@@ -1,0 +1,21 @@
+{
+  "runId": "disc_20261115T072446Z_c5d86f-probe4",
+  "completedAt": "2026-11-15T07:25:44+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "checkpoint",
+  "errorClass": "CHECKPOINT_FAILED",
+  "expected": "visible(frame=['main'], text='Account type:')",
+  "observed": "not on screen",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/disc_20261115T072446Z_c5d86f-probe4/checkpoint.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/disc_20261115T072446Z_c5d86f-probe4/checkpoint.png"
+    }
+  ]
+}

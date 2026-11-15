@@ -1,6 +1,7 @@
-# interfaze — Architecture (draft for review)
+# interfaze — Architecture
 
-Status: **all 8 decisions locked (2026-11-14); nothing built yet.** Items marked ✅ were agreed in review.
+Status: **built.** Decisions were locked in review on 2026-11-14 and built in passes; each "As built" section says what changed
+in the building. The page map (§7a) is designed, not built. The short version is `REPORT.md`.
 Items marked ✅ are locked.
 
 > The model discovers. The artifact becomes a reusable capability. Deterministic replay is how the AI agent invokes

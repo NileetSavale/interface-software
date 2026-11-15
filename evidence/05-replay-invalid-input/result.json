@@ -1,0 +1,12 @@
+{
+  "runId": "replay_20261115T075207Z_5f75e2",
+  "completedAt": "2026-11-15T07:52:07+00:00",
+  "status": "invalid_input",
+  "errors": [
+    {
+      "input": "memberId",
+      "rule": "pattern",
+      "message": "doesn't match ^[0-9]{5}$"
+    }
+  ]
+}

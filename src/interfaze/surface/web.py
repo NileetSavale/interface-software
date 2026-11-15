@@ -6,6 +6,7 @@ for legacy tables, the in-page helpers in locate.js.
 """
 import asyncio
 import hashlib
+import json
 import re
 import time
 from pathlib import Path
@@ -23,6 +24,10 @@ from interfaze.policy import refused
 from interfaze.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
 
 HUMAN_JS = (Path(__file__).parent / "human.js").read_text()
+KEEP_MASKED_JS = """(() => { const [p, l] = %s;
+  const mask = () => window.__ifz && window.__ifz.maskPII(p, l, true);
+  document.addEventListener("DOMContentLoaded", mask); document.addEventListener("input", mask, true);
+  setInterval(mask, 100); })();"""
 LOCATE_JS = (Path(__file__).parent / "locate.js").read_text()
 POLL_SECONDS = 0.15
 _SNAPSHOT_LINE = re.compile(r"""^\s*-\s+'?(?P<role>[a-z]+)(?:\s+"(?P<name>(?:[^"\\]|\\.)*)")?.*\[ref=(?P<ref>\w+)\]""")
@@ -66,7 +71,7 @@ class WebSurface(Surface):
 
     @classmethod
     async def open(cls, context: BrowserContext, on_human: Callable[[dict], Awaitable[None]] | None = None,
-                   policy: Policy | None = None) -> "WebSurface":
+                   policy: Policy | None = None, masked_view: bool = False) -> "WebSurface":
         """on_human receives what a person does in this browser, already described as a recorded target. The page
         reports every click and change; the callback decides whether a person was holding control at the time.
 
@@ -93,6 +98,11 @@ class WebSurface(Surface):
             context.on("request", lambda request: documents.__setitem__(0, documents[0] + is_document(request)))
             await context.route("**/*", gate)
         await context.add_init_script(script=LOCATE_JS)
+        if masked_view:
+            # For a screen recording: PII stays blacked out in every frame for the whole run, re-applied as pages
+            # load and as fields are filled, so the video never shows a record's data
+            await context.add_init_script(script=KEEP_MASKED_JS % json.dumps(
+                [[p for _, p in PATTERNS], [l for _, l in LABELS]]))
         if on_human:
             async def relay(payload: dict):
                 await on_human(human_action(payload))

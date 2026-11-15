@@ -1,2 +1,0 @@
-{"t": 0.0, "at": "2026-11-15T00:52:11+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "inputs": ["memberId"]}
-{"t": 0.0, "at": "2026-11-15T00:52:11+00:00", "event": "replay_finished", "status": "invalid_input", "result": {"runId": "replay_20261115T005211Z_0acb41", "completedAt": "2026-11-15T00:52:11+00:00", "status": "invalid_input", "errors": [{"input": "memberId", "rule": "pattern", "message": "doesn't match ^[0-9]{5}$"}]}}

@@ -307,6 +307,12 @@ window.SITE = {
    "date": "2026-11-15",
    "subject": "Pass 2.7: probes name the outcome code they expect",
    "body": "Each probe in a goal spec can say the code it expects; the probe tool\nthen offers only that code, and any other is refused (D22). Left free,\nthe same screen got different codes in different discoveries, and a\ncaller branches on the code. The sub-account goal now also probes a\nmissing member, so it learns MEMBER_NOT_FOUND under the same code as\nlookup. Both artifacts re-recorded with Claude on bank A."
+  },
+  {
+   "sha": "81707e7",
+   "date": "2026-11-15",
+   "subject": "Eval results at 40be003 and site data",
+   "body": "All five suites rerun on 40be003: fault matrix 48/48 across both banks,\ndiscovery 10/10 with the expected outcome codes, stability 80/80,\nsafety 15/16 (one known gap) and 12/12 with Claude, robustness 60/60."
   }
  ],
  "tests": 82

@@ -1,0 +1,21 @@
+{
+  "runId": "disc_20261115T072331Z_7fc64b-probe1",
+  "completedAt": "2026-11-15T07:24:00+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "read_name",
+  "errorClass": "TARGET_UNRESOLVED",
+  "expected": "exactly one match for: anchor",
+  "observed": "anchor: TARGET_UNRESOLVED",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/disc_20261115T072331Z_7fc64b-probe1/read_name.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/disc_20261115T072331Z_7fc64b-probe1/read_name.png"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "runId": "disc_20261115T072446Z_c5d86f-probe5",
+  "completedAt": "2026-11-15T07:25:54+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "business_outcome",
+  "code": "DEPOSIT_BELOW_MINIMUM",
+  "atStep": "continue_review",
+  "details": {}
+}

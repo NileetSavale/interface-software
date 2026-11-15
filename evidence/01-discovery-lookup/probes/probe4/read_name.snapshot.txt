@@ -1,0 +1,28 @@
+- generic [ref=f6e1]:
+  - iframe "nav" [ref=f6e2]:
+    - generic [ref=f7e2]:
+      - table [ref=f7e3]:
+        - rowgroup [ref=f7e4]:
+          - row [ref=f7e5]:
+            - cell "CU*Core" [ref=f7e6]
+      - table [ref=f7e8]:
+        - rowgroup [ref=f7e9]:
+          - row [ref=f7e10]:
+            - cell "Teller Functions" [ref=f7e11]
+          - row [ref=f7e12]:
+            - cell [ref=f7e13]:
+              - link "Member Inquiry" [ref=f7e14] [cursor=pointer]:
+                - /url: /inquiry
+          - row [ref=f7e15]:
+            - cell [ref=f7e16]:
+              - link "Sign Off" [ref=f7e17] [cursor=pointer]:
+                - /url: /signoff
+  - iframe "main" [active] [ref=f6e3]:
+    - table [ref=f8e3]:
+      - rowgroup [ref=f8e4]:
+        - row [ref=f8e5]:
+          - cell "Invalid member number \"{{inputs.memberId}}\"." [ref=f8e6]
+        - row [ref=f8e7]:
+          - cell [ref=f8e8]:
+            - link "New search" [ref=f8e9] [cursor=pointer]:
+              - /url: /inquiry

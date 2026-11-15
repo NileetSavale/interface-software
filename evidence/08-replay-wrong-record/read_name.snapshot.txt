@@ -1,0 +1,50 @@
+- generic [ref=f#e#]:
+  - iframe "nav" [ref=f#e#]:
+    - generic [ref=f#e#]:
+      - table [ref=f#e#]:
+        - rowgroup [ref=f#e#]:
+          - row [ref=f#e#]:
+            - cell "⟨ACCT_1⟩" [ref=f#e#]
+      - table [ref=f#e#]:
+        - rowgroup [ref=f#e#]:
+          - row [ref=f#e##]:
+            - cell "⟨ACCT_1⟩" [ref=f#e##]
+          - row [ref=f#e##]:
+            - cell [ref=f#e##]:
+              - link "Member Inquiry" [ref=f#e##] [cursor=pointer]:
+                - /url: /inquiry
+          - row [ref=f#e##]:
+            - cell [ref=f#e##]:
+              - link "Sign Off" [ref=f#e##] [cursor=pointer]:
+                - /url: /signoff
+  - iframe "main" [active] [ref=f#e#]:
+    - generic [ref=f#e#]:
+      - table [ref=f#e#]:
+        - rowgroup [ref=f#e#]:
+          - row [ref=f#e#]:
+            - cell "⟨ACCT_1⟩" [ref=f#e#]
+          - row [ref=f#e#]:
+            - 'cell "Member #:" [ref=f#e#]'
+            - cell "⟨ACCT_1⟩" [ref=f#e#]
+          - row [ref=f#e##]:
+            - cell "Name:" [ref=f#e##]
+            - cell "⟨ACCT_1⟩" [ref=f#e##]
+      - text: ⟨ACCT_1⟩
+      - table [ref=f#e##]:
+        - rowgroup [ref=f#e##]:
+          - row [ref=f#e##]:
+            - columnheader "Type" [ref=f#e##]
+            - columnheader "Account" [ref=f#e##]
+            - columnheader "Balance" [ref=f#e##]
+            - columnheader "Action" [ref=f#e##]
+          - row [ref=f#e##]:
+            - cell "⟨ACCT_1⟩" [ref=f#e##]
+            - cell "⟨ACCT_1⟩" [ref=f#e##]
+            - cell "⟨ACCT_1⟩" [ref=f#e##]
+            - cell [ref=f#e##]:
+              - link "View" [ref=f#e##] [cursor=pointer]:
+                - /url: /account?no=####-#####-##
+      - link "Open Sub-Account" [ref=f#e##] [cursor=pointer]:
+        - /url: /subaccount/new?id=#####
+      - link "New search" [ref=f#e##] [cursor=pointer]:
+        - /url: /inquiry

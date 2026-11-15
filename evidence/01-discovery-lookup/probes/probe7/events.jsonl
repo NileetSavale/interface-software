@@ -1,0 +1,11 @@
+{"t": 0.0, "at": "2026-11-15T07:24:41+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "inputs": ["memberId"]}
+{"t": 0.233, "at": "2026-11-15T07:24:42+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.306, "at": "2026-11-15T07:24:44+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.372, "at": "2026-11-15T07:24:44+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.418, "at": "2026-11-15T07:24:44+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.877, "at": "2026-11-15T07:24:44+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.301, "at": "2026-11-15T07:24:45+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.351, "at": "2026-11-15T07:24:45+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.749, "at": "2026-11-15T07:24:45+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.76, "at": "2026-11-15T07:24:45+00:00", "event": "outcome", "code": "PERMISSION_DENIED", "kind": "business", "step": "search_member"}
+{"t": 3.781, "at": "2026-11-15T07:24:45+00:00", "event": "replay_finished", "status": "business_outcome", "result": {"runId": "disc_20261115T072331Z_7fc64b-probe7", "completedAt": "2026-11-15T07:24:45+00:00", "recovered": [], "drift": [], "status": "business_outcome", "code": "PERMISSION_DENIED", "atStep": "search_member", "details": {}}}

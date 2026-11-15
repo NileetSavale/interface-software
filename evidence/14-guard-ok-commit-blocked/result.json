@@ -1,0 +1,21 @@
+{
+  "runId": "replay_20261115T075259Z_9f156f",
+  "completedAt": "2026-11-15T07:53:05+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "press_ok",
+  "errorClass": "POLICY_VIOLATION",
+  "expected": "a read action",
+  "observed": "blocked by policy: /subaccount/confirm commits a change (irreversible). Automation can reach a commit point but never press it; stop here.",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261115T075259Z_9f156f/press_ok.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261115T075259Z_9f156f/press_ok.png"
+    }
+  ]
+}

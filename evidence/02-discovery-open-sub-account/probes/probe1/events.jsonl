@@ -1,0 +1,10 @@
+{"t": 0.0, "at": "2026-11-15T07:25:07+00:00", "event": "replay_started", "capability": "core_banking.open_sub_account", "version": "1.0.0", "inputs": ["accountType", "initialDeposit", "memberId", "nickname"]}
+{"t": 0.247, "at": "2026-11-15T07:25:08+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.315, "at": "2026-11-15T07:25:10+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.379, "at": "2026-11-15T07:25:10+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.421, "at": "2026-11-15T07:25:10+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.836, "at": "2026-11-15T07:25:10+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.259, "at": "2026-11-15T07:25:11+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.309, "at": "2026-11-15T07:25:11+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.708, "at": "2026-11-15T07:25:11+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 15.367, "at": "2026-11-15T07:25:23+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "disc_20261115T072446Z_c5d86f-probe1", "completedAt": "2026-11-15T07:25:23+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "open_sub_account_form", "errorClass": "TARGET_UNRESOLVED", "expected": "exactly one match for: role, text", "observed": "role: TARGET_UNRESOLVED; text: TARGET_UNRESOLVED", "evidence": [{"kind": "a11y_snapshot", "path": "runs/disc_20261115T072446Z_c5d86f-probe1/open_sub_account_form.snapshot.txt"}, {"kind": "screenshot", "path": "runs/disc_20261115T072446Z_c5d86f-probe1/open_sub_account_form.png"}]}}

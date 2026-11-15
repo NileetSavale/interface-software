@@ -95,10 +95,11 @@ class Replayer:
     def __init__(self, artifact: Artifact, base_url: str, inputs: dict[str, str], *, headed: bool = False,
                  allow_draft: bool = False, env: dict[str, str] | None = None, run_id: str | None = None,
                  audit: Audit | None = None, operator_hub=None, pause_timeout_s: float = 600,
-                 tenant: str | None = None, pending_dir: Path | None = None):
+                 tenant: str | None = None, pending_dir: Path | None = None, video_dir: Path | None = None):
         # The tenant's own version: the base with that tenant's approved override applied (§7). An override that
         # doesn't apply to this base version is refused at load (OverrideError), never skipped silently
         self.tenant = tenant
+        self.video_dir = video_dir  # a screen recording of the run, with PII masked throughout
         self.base = artifact
         artifact = overrides.apply(artifact, tenant) if tenant else artifact
         self.pending_dir = pending_dir or Path("artifacts") / artifact.capability.id / "overrides.pending"
@@ -149,9 +150,11 @@ class Replayer:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=not self.headed)
             try:
-                self.surface = await WebSurface.open(await browser.new_context(),
-                                                     on_human=self._on_human if self.hub else None,
-                                                     policy=self.artifact.policy)
+                video = {"record_video_dir": str(self.video_dir), "viewport": {"width": 1280, "height": 720},
+                         "record_video_size": {"width": 1280, "height": 720}} if self.video_dir else {}
+                context = await browser.new_context(**video)
+                self.surface = await WebSurface.open(context, on_human=self._on_human if self.hub else None,
+                                                     policy=self.artifact.policy, masked_view=bool(self.video_dir))
                 result = await self._run_steps()
             except _Stop as stop:
                 result = stop.result
@@ -161,6 +164,8 @@ class Replayer:
                                 expected="automation to hold control", observed=str(e), recovered=self.recovered,
                                 drift=self.drift)
             finally:
+                if self.video_dir and self.surface:
+                    await self.surface.page.context.close()  # writes the video file
                 await browser.close()
         return self._finish(result)
 

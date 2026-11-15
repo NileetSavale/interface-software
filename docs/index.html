@@ -252,7 +252,8 @@ footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; }
   <div class="cta">
     <a class="btn primary" id="repo-link" href="#">View the code</a>
     <a class="btn" href="#architecture">Explore the architecture</a>
-    <a class="btn" href="#decisions">The decision log</a>
+    <a class="btn" id="report-link" href="#">Read the report</a>
+    <a class="btn" id="evidence-link" href="#">See the evidence</a>
   </div>
   <div class="stats" id="hero-stats"></div>
 </div></header>
@@ -374,7 +375,7 @@ footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; }
           model: tree snapshot → act on a ref → observe again, with a retry disposition on every error. We built it
           in-process on Playwright for the browser, and our surface interface is the seam where an agent-desktop-style
           native surface plugs in. Its stated limit, that an app with no accessibility tree is invisible, is why
-          screenshots stay for a first visit and for people.</p></div></div>
+          bounding-box strategies stay in the schema for desktop surfaces.</p></div></div>
       <ul class="list">
         <li><b>Claude 5.5's thinking binding.</b> Current models bind their thinking to the exact conversation, so
           trimming old snapshots client-side would break it. Switched to server-side context editing; history stays
@@ -432,6 +433,8 @@ $("#theme").onclick = () => {
   try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {}
 };
 $("#repo-link").href = S.repo;
+$("#report-link").href = blob("REPORT.md");
+$("#evidence-link").href = `${S.repo}/tree/main/evidence`;
 
 // hero stats
 const E = S.evals;
@@ -655,7 +658,7 @@ $("#suites").innerHTML = cards.map((c) => `<div class="card suite">${c.llm ? '<s
 const NOS = [
   ["Letting automation press Confirm, even with approval", "This layer is the agent's hands, not its judgment. No artifact can hold a commit, which is simple to audit (D1)."],
   ["RAG or a vector database", "Everything looked up is an exact key (a capability id, a page fingerprint) or a short list. Similarity search only adds ways to be wrong in a system whose point is to be exact."],
-  ["Screenshots and coordinates as the way to click", "The accessibility tree with refs, as agent-desktop does it: cheaper, exact, and it survives layout changes. Screenshots stay for a first visit and for people."],
+  ["Screenshots and coordinates as the way to click", "The accessibility tree with refs, as agent-desktop does it: cheaper, exact, and it survives layout changes. Screenshots are evidence, for people."],
   ["Overrides addressed by array index", "An index shifts when a step is added and silently renames the wrong control. Step ids fail loudly (D8)."],
   ["A vendor-wide shared page map", "Maps learn without review, so they stay inside the bank that produced them; only human-approved artifacts are shared (D5)."],
   ["Distributed-systems vocabulary for a small mechanism", "A \"lease\" became a control token, explained plainly. The brief rewards correct abstractions, not infrastructure (D9)."],
