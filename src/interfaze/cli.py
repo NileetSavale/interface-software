@@ -4,6 +4,9 @@
     interfaze discover goals/lookup_member_balance.json --input memberId=12345
     interfaze approve artifacts/core_banking.lookup_member_balance.json
     interfaze replay artifacts/core_banking.lookup_member_balance.json --input memberId=12345
+    interfaze replay artifacts/core_banking.lookup_member_balance.json --tenant b --base-url http://localhost:4101 ...
+    interfaze override artifacts/core_banking.lookup_member_balance.json --tenant b            (show the pending one)
+    interfaze override artifacts/core_banking.lookup_member_balance.json --tenant b --approve
 """
 import argparse
 import asyncio
@@ -43,13 +46,20 @@ async def start_operator_page(port: int):
     return hub
 
 
+def pending_path(artifact_path: str, capability: str, tenant: str) -> Path:
+    """Where drift on a tenant leaves its proposed override: beside the artifact, never inside it."""
+    return Path(artifact_path).parent / capability / "overrides.pending" / f"{tenant}.json"
+
+
 def cmd_replay(args) -> int:
     from interfaze.replay.executor import Replayer
     artifact = load_artifact(args.artifact)
     inputs = parse_inputs(args.input)
+    tenant = {"tenant": args.tenant, "pending_dir": pending_path(args.artifact, artifact.capability.id, args.tenant).parent} \
+        if args.tenant else {}
     if not args.attended:
         result = asyncio.run(Replayer(artifact, args.base_url, inputs, headed=args.headed,
-                                      allow_draft=args.allow_draft).run())
+                                      allow_draft=args.allow_draft, **tenant).run())
         show(result)
         return EXIT[result.status]
 
@@ -59,7 +69,7 @@ def cmd_replay(args) -> int:
         hub = await start_operator_page(args.operator_port)
         runs = Runs(operator_hub=hub)
         result = await runs.invoke(artifact, args.base_url, inputs, deadline_s=args.deadline, headed=True,
-                                   allow_draft=args.allow_draft)
+                                   allow_draft=args.allow_draft, **tenant)
         if result.status in ("needs_human", "running"):
             show(result)
             print("... the run continues; waiting for its result", file=sys.stderr, flush=True)
@@ -88,6 +98,38 @@ def cmd_approve(args) -> int:
     return 0
 
 
+def cmd_override(args) -> int:
+    """Show a tenant's pending override (proposed by drift), or approve it into the artifact. Approving checks it
+    applies cleanly first; it's the reviewer's sign-off that the corrected names are the right controls."""
+    from interfaze.artifact.overrides import OverrideError, apply
+    from interfaze.artifact.schema import Override
+    artifact = load_artifact(args.artifact)
+    path = pending_path(args.artifact, artifact.capability.id, args.tenant)
+    if not path.exists():
+        print(f"no pending override for {args.tenant} ({path})", file=sys.stderr)
+        return 1
+    pending = Override.model_validate_json(path.read_text())
+    for op in pending.ops:
+        print(f"  {op.op} {op.step}" + (f" {op.path} = {json.dumps(op.value)}" if op.op == "set" else ""))
+    if not args.approve:
+        print(f"pending for {args.tenant}; approve with --approve")
+        return 0
+    current = artifact.overrides.get(args.tenant)
+    merged = pending if current is None else current.model_copy(update={"ops": [
+        *(op for op in current.ops if (op.step, getattr(op, "path", None)) not in
+          {(p.step, getattr(p, "path", None)) for p in pending.ops}), *pending.ops]})
+    updated = artifact.model_copy(update={"overrides": {**artifact.overrides, args.tenant: merged}})
+    try:
+        apply(updated, args.tenant)
+    except (OverrideError, ValueError) as e:
+        print(f"not approved: {e}", file=sys.stderr)
+        return 1
+    Path(args.artifact).write_text(dump_artifact(updated))
+    path.unlink()
+    print(f"override for {args.tenant} approved into {args.artifact}")
+    return 0
+
+
 def cmd_discover(args) -> int:
     from interfaze.discovery.loop import discover
     goal = json.loads(Path(args.goal).read_text())
@@ -109,7 +151,9 @@ def cmd_discover(args) -> int:
 
 def cmd_mock_app(args) -> int:
     import uvicorn
-    uvicorn.run("apps.mock_core_banking.app:app", port=args.port)
+    os.environ["VARIANT"] = args.variant
+    # apps/ sits at the project root, which an installed entry point doesn't have on its import path
+    uvicorn.run("apps.mock_core_banking.app:app", port=args.port, app_dir=str(Path(__file__).resolve().parents[2]))
     return 0
 
 
@@ -138,7 +182,14 @@ def main(argv: list[str] | None = None) -> int:
                                                           "(headed browser, operator page on --operator-port)")
     p.add_argument("--deadline", type=float, default=30, help="attended: seconds before returning needs_human")
     p.add_argument("--operator-port", type=int, default=4200)
+    p.add_argument("--tenant", help="run this tenant's version (its approved override); drift proposes one")
     p.set_defaults(fn=cmd_replay)
+
+    p = sub.add_parser("override", help="review or approve a tenant's pending override")
+    p.add_argument("artifact")
+    p.add_argument("--tenant", required=True)
+    p.add_argument("--approve", action="store_true")
+    p.set_defaults(fn=cmd_override)
 
     p = sub.add_parser("approve", help="mark a reviewed artifact as approved for unattended replay")
     p.add_argument("artifact")
@@ -161,6 +212,7 @@ def main(argv: list[str] | None = None) -> int:
 
     p = sub.add_parser("mock-app", help="serve the mock core-banking app")
     p.add_argument("--port", type=int, default=4100)
+    p.add_argument("--variant", default="a", choices=["a", "b"], help="b: a second bank's templates")
     p.set_defaults(fn=cmd_mock_app)
 
     args = parser.parse_args(argv)

@@ -203,6 +203,7 @@
                 "anchor": "#/$defs/AnchorStrategy",
                 "bbox": "#/$defs/BBoxStrategy",
                 "label": "#/$defs/LabelStrategy",
+                "onlyInRegion": "#/$defs/OnlyInRegionStrategy",
                 "role": "#/$defs/RoleStrategy",
                 "structural": "#/$defs/StructuralStrategy",
                 "tableCell": "#/$defs/TableCellStrategy",
@@ -225,6 +226,9 @@
               },
               {
                 "$ref": "#/$defs/TextStrategy"
+              },
+              {
+                "$ref": "#/$defs/OnlyInRegionStrategy"
               },
               {
                 "$ref": "#/$defs/StructuralStrategy"
@@ -426,6 +430,27 @@
         "label"
       ],
       "title": "LabelStrategy",
+      "type": "object"
+    },
+    "OnlyInRegionStrategy": {
+      "additionalProperties": false,
+      "description": "Rank 4: the only control of this role inside the target's labelled region (\"the one button in the Member\nInquiry fieldset\"). Survives a relabel, which every name-based strategy above it doesn't; it's recorded only\nwhen it was unique, and it fails rather than guesses once the region holds two.",
+      "properties": {
+        "kind": {
+          "const": "onlyInRegion",
+          "default": "onlyInRegion",
+          "title": "Kind",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "OnlyInRegionStrategy",
       "type": "object"
     },
     "Outcome": {
@@ -1216,6 +1241,7 @@
                 "anchor": "#/$defs/AnchorStrategy",
                 "bbox": "#/$defs/BBoxStrategy",
                 "label": "#/$defs/LabelStrategy",
+                "onlyInRegion": "#/$defs/OnlyInRegionStrategy",
                 "role": "#/$defs/RoleStrategy",
                 "structural": "#/$defs/StructuralStrategy",
                 "tableCell": "#/$defs/TableCellStrategy",
@@ -1238,6 +1264,9 @@
               },
               {
                 "$ref": "#/$defs/TextStrategy"
+              },
+              {
+                "$ref": "#/$defs/OnlyInRegionStrategy"
               },
               {
                 "$ref": "#/$defs/StructuralStrategy"

@@ -8,9 +8,11 @@ import asyncio
 import json
 import re
 from collections import Counter
+from pathlib import Path
 
 from playwright.async_api import async_playwright
 
+from interfaze.artifact import overrides
 from interfaze.artifact.schema import (
     Artifact, ClickThrough, IdentityMatches, InputSpec, OutcomeSeen, Outcome, OutputPresent, RunSubflow, Step,
     TEMPLATE, Visible, WaitLonger,
@@ -27,6 +29,13 @@ from interfaze.surface.base import Resolved, SurfaceError
 from interfaze.surface.web import WebSurface
 
 DEFAULT_TIMEOUT_MS = 10_000
+# A control's accessible name, for proposing an override. Never an input's value: that's what the user typed.
+LIVE_NAME_JS = """el => {
+  if (el.matches('input[type=submit],input[type=button],input[type=reset]')) return el.value || '';
+  if (el.matches('input,select,textarea')) return el.getAttribute('aria-label') || (el.labels && el.labels[0]
+    ? el.labels[0].innerText : '');
+  return el.getAttribute('aria-label') || el.innerText || '';
+}"""
 MAX_RECOVERIES_PER_RUN = 3
 
 
@@ -85,7 +94,14 @@ def last4(value: str) -> str:
 class Replayer:
     def __init__(self, artifact: Artifact, base_url: str, inputs: dict[str, str], *, headed: bool = False,
                  allow_draft: bool = False, env: dict[str, str] | None = None, run_id: str | None = None,
-                 audit: Audit | None = None, operator_hub=None, pause_timeout_s: float = 600):
+                 audit: Audit | None = None, operator_hub=None, pause_timeout_s: float = 600,
+                 tenant: str | None = None, pending_dir: Path | None = None):
+        # The tenant's own version: the base with that tenant's approved override applied (§7). An override that
+        # doesn't apply to this base version is refused at load (OverrideError), never skipped silently
+        self.tenant = tenant
+        self.base = artifact
+        artifact = overrides.apply(artifact, tenant) if tenant else artifact
+        self.pending_dir = pending_dir or Path("artifacts") / artifact.capability.id / "overrides.pending"
         self.artifact = artifact
         self.base_url = base_url.rstrip("/")
         self.inputs = {k: str(v) for k, v in inputs.items()}
@@ -273,8 +289,10 @@ class Replayer:
             # the last one: check again on the screen it was found on, so a non-modal dialog can't be clicked past
             await self._outcomes(step, "during", recovering)
             if hit.rank > 0:
-                self.drift.append(DriftEvent(step_id=step.id, hit_rank=hit.rank, strategy=hit.strategy))
-                self.log.event("drift", step=step.id, rank=hit.rank, strategy=hit.strategy)
+                proposed = await self._propose_override(step, target, hit)
+                self.drift.append(DriftEvent(step_id=step.id, hit_rank=hit.rank, strategy=hit.strategy,
+                                             proposed_override=proposed))
+                self.log.event("drift", step=step.id, rank=hit.rank, strategy=hit.strategy, proposed=proposed)
             return hit
         # Nothing found. A declared outcome (an error page, "no member found") explains that better than a miss.
         await self._outcomes(step, "after", recovering)
@@ -285,6 +303,20 @@ class Replayer:
         raise self._fail(step.id, "AMBIGUOUS_TARGET" if ambiguous else "TARGET_UNRESOLVED",
                          f"exactly one match for: {', '.join(k for k, _ in hit.attempts)}",
                          "; ".join(f"{k}: {c}" for k, c in hit.attempts), evidence=await self._evidence(step.id))
+
+    async def _propose_override(self, step: Step, target, hit: Resolved) -> str | None:
+        """Drift on a tenant becomes a pending override for that tenant, for a person to approve (§4 drift). Without
+        a tenant there's nobody to propose it for: the drift is reported and that's all."""
+        if not self.tenant:
+            return None
+        where = "target" if target is step.target else next(
+            f"extract.{name}" for name, extractor in step.extract.items() if extractor is target)
+        live = await hit.handle.evaluate(LIVE_NAME_JS)
+        ops = overrides.propose(where, [s.model_dump(by_alias=True, exclude_none=True) for s in target.strategies],
+                                hit.rank, live)
+        path = overrides.write_pending(self.pending_dir / f"{self.tenant}.json", self.base,
+                                       [op.model_copy(update={"step": step.id}) for op in ops])
+        return str(path)
 
     async def _check_policy(self, step: Step, hit: Resolved):
         """The recorded risk class is checked again against the live control, so a relabelled button that now

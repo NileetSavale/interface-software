@@ -21,6 +21,7 @@ KIND = {
     "D7": "agreed", "D8": "ai self-correction", "D9": "overrode", "D10": "overrode", "D11": "my challenge",
     "D12": "my challenge", "D13": "overrode", "D14": "overrode", "D15": "agreed", "D16": "ai self-correction",
     "D17": "ai self-correction", "D18": "agreed", "D19": "ai self-correction", "D20": "my choice",
+    "D21": "ai proposal",
 }
 
 
@@ -62,7 +63,8 @@ def summary(results: dict) -> dict:
     if fm := results.get("fault_matrix"):
         s["fault_matrix"] = {"passed": fm["passed"], "runs": fm["runs"], "opened": fm["sub_accounts_opened"],
                              "date": fm["date"], "commit": fm["commit"],
-                             "misses": [f"{r['flow']}: {r['case']} → {r['actual']}" for r in fm["rows"] if not r["pass"]]}
+                             "misses": [f"bank {r.get('variant', 'a').upper()} {r['flow']}: {r['case']} → {r['actual']}"
+                                        for r in fm["rows"] if not r["pass"]]}
     if st := results.get("stability"):
         s["stability"] = {"ok": sum(round(a["success_rate"] * a["n"]) for a in st["arms"]),
                           "runs": sum(a["n"] for a in st["arms"]),

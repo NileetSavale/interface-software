@@ -78,12 +78,17 @@ class MockApp:
         else:
             httpx.post(self.base_url + "/__layout", params={"seed": seed}).raise_for_status()
 
+    def variant(self, name: str):
+        """Which bank this app plays: a (where the artifacts were recorded) or b (§7, variant B)."""
+        httpx.post(self.base_url + "/__variant", params={"name": name}).raise_for_status()
+
     def confirmed(self) -> int:
         return httpx.get(self.base_url + "/__confirmed").json()["count"]
 
     def reset(self):
         self.fault(None)
         self.layout(None)
+        self.variant("a")
 
 
 def replay(app: MockApp, artifact, inputs: dict, replayer=Replayer, **kw):
@@ -104,7 +109,7 @@ def label(result) -> str:
     """status/code: the result type plus what made it that, e.g. failed/WRONG_RECORD or business_outcome/X."""
     match result.status:
         case "success":
-            return "success" + ("+recovered" if result.recovered else "")
+            return "success" + ("+recovered" if result.recovered else "") + ("+drift" if result.drift else "")
         case "business_outcome":
             return f"business_outcome/{result.code}"
         case "failed":

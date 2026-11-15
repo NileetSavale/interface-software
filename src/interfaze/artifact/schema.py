@@ -88,6 +88,14 @@ class TextStrategy(Model):
     text: TextMatch
 
 
+class OnlyInRegionStrategy(Model):
+    """Rank 4: the only control of this role inside the target's labelled region ("the one button in the Member
+    Inquiry fieldset"). Survives a relabel, which every name-based strategy above it doesn't; it's recorded only
+    when it was unique, and it fails rather than guesses once the region holds two."""
+    kind: Literal["onlyInRegion"] = "onlyInRegion"
+    role: str
+
+
 class StructuralStrategy(Model):
     """Rank 4: a path through the frame's markup. Last DOM resort; breaks on any layout change."""
     kind: Literal["structural"] = "structural"
@@ -104,7 +112,8 @@ class BBoxStrategy(Model):
 
 
 Strategy = Annotated[
-    RoleStrategy | LabelStrategy | AnchorStrategy | TableCellStrategy | TextStrategy | StructuralStrategy | BBoxStrategy,
+    RoleStrategy | LabelStrategy | AnchorStrategy | TableCellStrategy | TextStrategy | OnlyInRegionStrategy
+    | StructuralStrategy | BBoxStrategy,
     Field(discriminator="kind"),
 ]
 
@@ -123,6 +132,12 @@ class Target(Model):
         default=None, ge=0,
         description="Last resort when no scope tells duplicates apart. Requires the step to be flagged needsReview.",
     )
+
+    @model_validator(mode="after")
+    def _region_strategy_needs_a_region(self):
+        if self.within is None and any(isinstance(s, OnlyInRegionStrategy) for s in self.strategies):
+            raise ValueError("an onlyInRegion strategy needs the target's `within` region; page-wide it would guess")
+        return self
 
 
 # ── Conditions ─────────────────────────────────────────────────────────────────────────────────────────────────────

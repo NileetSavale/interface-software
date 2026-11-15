@@ -4,11 +4,19 @@ Expected labels are written down here before running, as the contract (docs/ARCH
 is an answer (business_outcome), never a failure; an app error is fatal; an expired session is recovered on a
 read-only flow and escalated on one that changes data; an unknown screen unattended stops rather than guessing.
 "*" matches any code. No LLM.
+
+Both banks: the artifacts were recorded on bank A. On bank B (relabelled search button, unlabelled Member # field)
+each flow first runs once with no override: it must succeed through fallbacks, report drift and propose an override
+for B. That proposal is then treated as approved, and every case runs again on B: the same contract must hold, and
+the happy path must run without drift.
 """
 import fnmatch
+import tempfile
 from collections import Counter
+from pathlib import Path
 
 from evals.common import HAPPY, artifact, label, mock_app, replay, save
+from interfaze.artifact.schema import Override
 
 TYPES = ["success", "business_outcome", "invalid_input", "needs_human", "failed"]
 
@@ -52,23 +60,47 @@ def kind(result_label: str) -> str:
 
 
 def run(n: int = 1, **_) -> dict:
-    rows = []
+    rows, proposals = [], {}
+
+    def record(variant: str, case: dict, result, seconds: float, i: int = 0):
+        actual = label(result)
+        rows.append({"variant": variant, **{k: case[k] for k in ("flow", "case", "fault", "expect")}, "run": i + 1,
+                     "actual": actual, "pass": fnmatch.fnmatchcase(actual, case["expect"]),
+                     "at_step": getattr(result, "at_step", None), "seconds": round(seconds, 2),
+                     "run_id": result.run_id})
+        print(f"{'PASS' if rows[-1]['pass'] else 'FAIL'}  {variant} {case['flow']:<17} {case['case']:<32} {actual}",
+              flush=True)
+
     with mock_app() as app:
-        for case in cases():
-            for i in range(n):
-                app.fault(case["fault"])
-                result, seconds, _ = replay(app, artifact(case["flow"], app), case["inputs"])
-                actual = label(result)
-                rows.append({**{k: case[k] for k in ("flow", "case", "fault", "expect")}, "run": i + 1,
-                             "actual": actual, "pass": fnmatch.fnmatchcase(actual, case["expect"]),
-                             "at_step": getattr(result, "at_step", None), "seconds": round(seconds, 2),
-                             "run_id": result.run_id})
-                print(f"{'PASS' if rows[-1]['pass'] else 'FAIL'}  {case['flow']:<17} {case['case']:<32} {actual}",
-                      flush=True)
+        for variant in ("a", "b"):
+            app.variant(variant)
+            tenants = {}
+            if variant == "b":
+                # First contact with bank B: drift, and an override proposed from what the fallbacks found
+                for flow in ("lookup", "open_sub_account"):
+                    pending = Path(tempfile.mkdtemp())
+                    case = dict(flow=flow, case="first run, no override yet", fault=None, expect="success+drift")
+                    app.fault(None)
+                    result, seconds, _ = replay(app, artifact(flow, app), HAPPY[flow], tenant="b", pending_dir=pending)
+                    record(variant, case, result, seconds)
+                    if (pending / "b.json").exists():
+                        proposal = Override.model_validate_json((pending / "b.json").read_text())
+                        proposals[flow] = proposal.model_dump(by_alias=True, exclude_none=True)
+                        tenants[flow] = proposal
+            for case in cases():
+                subject = artifact(case["flow"], app)
+                if case["flow"] in tenants:  # the proposal, approved
+                    subject = subject.model_copy(update={"overrides": {"b": tenants[case["flow"]]}})
+                for i in range(n):
+                    app.fault(case["fault"])
+                    result, seconds, _ = replay(app, subject, case["inputs"], tenant=variant,
+                                                pending_dir=Path(tempfile.mkdtemp()))
+                    record(variant, case, result, seconds, i)
         committed = app.confirmed()
     confusion = Counter((kind(r["expect"]), kind(r["actual"])) for r in rows)
     return {
-        "n_per_case": n, "cases": len(cases()), "runs": len(rows), "passed": sum(r["pass"] for r in rows),
+        "n_per_case": n, "cases": len(cases()), "variants": ["a", "b"], "runs": len(rows),
+        "passed": sum(r["pass"] for r in rows), "proposed_overrides": proposals,
         # The commit point: nothing in this suite may ever open an account
         "sub_accounts_opened": committed,
         "confusion": {e: {a: confusion[(e, a)] for a in TYPES} for e in TYPES},

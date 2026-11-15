@@ -221,3 +221,42 @@ def test_replay_survives_a_reshuffled_layout(replay, base_url):
         httpx.delete(base_url + "/__layout")
     assert isinstance(result, Success), result
     assert result.outputs == {"memberName": "Jane Doe", "savingsBalance": "4210.55"}
+
+
+def test_a_second_bank_drifts_proposes_an_override_and_runs_clean_once_approved(base_url, discovered, audit, tmp_path):
+    """Recorded on bank A; bank B says "Find Member" and has no <label> on Member #. Replay still succeeds on B
+    through fallbacks, reports drift, and proposes an override for B. Once a person approves it, B runs on its
+    first strategies again, and A is unaffected (§7, locked demo in §9)."""
+    from interfaze.artifact.overrides import apply
+    from interfaze.artifact.schema import Override
+    approved = discovered[2].model_copy(update={"status": "approved"})
+    search = next(s for s in approved.steps if s.id == "submit_member_search")
+    assert [s.kind for s in search.target.strategies][-1] == "onlyInRegion"
+    pending = tmp_path / "pending"
+
+    def on_b(artifact):
+        return asyncio.run(Replayer(artifact, base_url, {"memberId": "34567"}, env=ENV, audit=audit, tenant="b",
+                                    pending_dir=pending).run())
+    httpx.post(base_url + "/__variant", params={"name": "b"})
+    try:
+        drifted = on_b(approved)
+        assert isinstance(drifted, Success) and drifted.outputs["memberName"] == "Mei Chen", drifted
+        assert {d.step_id: d.strategy for d in drifted.drift} == {"enter_member_number": "anchor",
+                                                                  "submit_member_search": "onlyInRegion"}
+        proposal = Override.model_validate_json((pending / "b.json").read_text())
+        assert {op.step for op in proposal.ops} == {"enter_member_number", "submit_member_search"}
+        # The relabelled button keeps role+name first, with B's name; the unlabelled field leads with its anchor
+        tenant_b = apply(approved.model_copy(update={"overrides": {"b": proposal}}), "b")
+        b_search = next(s for s in tenant_b.steps if s.id == "submit_member_search").target.strategies
+        assert (b_search[0].kind, b_search[0].name) == ("role", "Find Member")
+        assert next(s for s in tenant_b.steps if s.id == "enter_member_number").target.strategies[0].kind == "anchor"
+
+        with_override = approved.model_copy(update={"overrides": {"b": proposal}})
+        clean = on_b(with_override)
+        assert isinstance(clean, Success) and not clean.drift, clean
+    finally:
+        httpx.post(base_url + "/__variant", params={"name": "a"})
+    # Bank A runs the base, untouched by B's override
+    on_a = asyncio.run(Replayer(with_override, base_url, {"memberId": "34567"}, env=ENV, audit=audit, tenant="a",
+                                pending_dir=pending).run())
+    assert isinstance(on_a, Success) and not on_a.drift

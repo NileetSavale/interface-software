@@ -14,8 +14,8 @@
   },
   "status": "draft",
   "provenance": {
-    "discoveryRunId": "disc_20261115T025211Z_159668",
-    "recordedAt": "2026-11-15T02:52:31+00:00",
+    "discoveryRunId": "disc_20261115T070336Z_cfba68",
+    "recordedAt": "2026-11-15T07:04:42+00:00",
     "model": "claude-sonnet-5-5"
   },
   "inputs": {
@@ -119,7 +119,7 @@
       "description": "The session ended part-way through a change. A person checks what was saved."
     },
     {
-      "code": "DEPOSIT_BELOW_MINIMUM",
+      "code": "MINIMUM_DEPOSIT_NOT_MET",
       "kind": "business",
       "at": "any",
       "detect": {
@@ -128,7 +128,7 @@
           "matches": "(?i)Minimum opening deposit is"
         }
       },
-      "description": "The application rejected the opening deposit as below the minimum and returned the Open Sub-Account form instead of the review screen. (learned from probe: an opening deposit below the minimum)"
+      "description": "The application rejected the opening deposit as below the minimum and returned the Open Sub-Account form with the minimum shown. (learned from probe: an opening deposit below the minimum)"
     }
   ],
   "policy": {
@@ -156,7 +156,7 @@
       },
       {
         "id": "enter_user_id",
-        "intent": "enter user id",
+        "intent": "enter user ID",
         "action": "type",
         "target": {
           "frame": [
@@ -340,6 +340,10 @@
           {
             "kind": "text",
             "text": "Search"
+          },
+          {
+            "kind": "onlyInRegion",
+            "role": "button"
           }
         ]
       },
@@ -348,8 +352,8 @@
       "needsReview": false
     },
     {
-      "id": "start_sub_account_opening",
-      "intent": "start sub-account opening",
+      "id": "open_sub_account_form",
+      "intent": "open sub-account form",
       "action": "click",
       "target": {
         "frame": [

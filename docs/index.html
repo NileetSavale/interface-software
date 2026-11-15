@@ -170,6 +170,7 @@ h3 { font-size: 18px; margin: 0 0 6px; letter-spacing: -.01em; }
 .who.my-idea, .who.my-challenge { background: var(--accent-soft); color: var(--accent-ink); }
 .who.ai-self-correction, .who.ai-changed-its-mind { background: var(--violet-soft); color: var(--violet); }
 .who.agreed { background: var(--blue-soft); color: var(--blue); }
+.who.ai-proposal { background: var(--line); color: var(--ink-2); }
 .dec h3 { font-size: 17px; margin: 0; }
 .dec .row { font-size: 14px; color: var(--ink-2); }
 .dec .row b { display: block; font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin-bottom: 2px; }
@@ -282,6 +283,7 @@ footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; }
     <button data-tour="discovery">▶ Follow a discovery</button>
     <button data-tour="replay">▶ Follow a replay</button>
     <button data-tour="handoff">▶ Follow a handoff</button>
+    <button data-tour="tenant">▶ Follow a second bank</button>
     <button data-tour="safety">▶ Follow a hostile click</button>
     <div class="cap" id="tour-cap"></div>
   </div>
@@ -452,6 +454,7 @@ const N = {
   ladder:    { x: 35,  y: 270, t: "Escalation ladder", s: "Opus → a person", lane: "learn" },
   recorder:  { x: 200, y: 170, t: "Recorder", s: "click → descriptor", lane: "learn" },
   probes:    { x: 200, y: 270, t: "Probes", s: "learn outcomes", lane: "learn" },
+  overrides: { x: 430, y: 70,  t: "Tenant overrides", s: "by step id · semver", lane: "contract" },
   artifact:  { x: 430, y: 170, t: "Capability artifact", s: "typed · versioned", lane: "contract" },
   review:    { x: 430, y: 270, t: "Review & approve", s: "a person signs off", lane: "contract" },
   invoke:    { x: 670, y: 70,  t: "Invocation API", s: "deadline → handle", lane: "run" },
@@ -475,7 +478,8 @@ const EDGES = [
   ["discovery", "surface", "act on refs"], ["replay", "surface", "resolve strategies"], ["surface", "policy", "every action & request"],
   ["discovery", "masker", "model sees placeholders"], ["replay", "evidence", "log + snapshots"], ["discovery", "evidence", "log"],
   ["ladder", "session", "pause for a person"], ["replay", "session", "epoch check"], ["session", "operator", "claim / hand back"],
-  ["surface", "mock", "browser"], ["evals", "mock", "faults · layouts"], ["evals", "replay", "N replays"],
+  ["replay", "overrides", "drift → proposal"], ["overrides", "replay", "a bank's version"],
+  ["overrides", "artifact", "approved into"], ["surface", "mock", "browser"], ["evals", "mock", "faults · layouts"], ["evals", "replay", "N replays"],
 ];
 const LANES = [
   { id: "learn", x: 20, y: 30, w: 335, h: 320, label: "Learn · with Claude", fill: "--lane-learn" },
@@ -491,6 +495,7 @@ const INFO = {
   recorder: { kind: "Recording", what: "Turns each live action into a surface-neutral target with ranked strategies (role+name › label › nearby text or table cell › text), described from the live page, never from the transcript. Duplicates are told apart by their region (a fieldset), never by index. Sign-on becomes its own subflow.", files: ["src/interfaze/discovery/recorder.py", "src/interfaze/surface/locate.js"], d: ["D8"] },
   probes: { kind: "Outcome learning", what: "After recording, the artifact is replayed with each probe input. Where it stops, the model names the screen; the outcome is kept only if the probe now ends in it and the happy path still succeeds. Detectors must be fixed wording, never data.", files: ["src/interfaze/discovery/probes.py"], d: ["D18"] },
   artifact: { kind: "The contract", what: "A typed, versioned capability: inputs and outputs, steps with risk classes and waits, outcomes (business, recoverable, escalate, fatal), a success checkpoint with an identity check, policy, subflows. Pydantic with exported JSON Schema; no step can be irreversible.", files: ["src/interfaze/artifact/schema.py", "schemas/artifact.schema.json", "artifacts/"], d: ["D1", "D8", "D16"] },
+  overrides: { kind: "Multi-tenant", what: "How one bank's copy differs from the base, as ops on step ids (set, insert, remove) with a semver range over the artifact version. When a fallback strategy is what found a control on a bank, replay still succeeds, reports drift and writes a pending override for that bank: the relabelled name, or the strategy that worked moved first. A person approves it; nothing applies itself. A missing step or an out-of-range version is refused loudly.", bullets: ["Bank B: \"Find Member\" for \"Search\", no <label> on Member #", "First contact: success + drift + the right proposal", "Approved: same contract as bank A, no drift"], files: ["src/interfaze/artifact/overrides.py", "src/interfaze/cli.py"], d: ["D8", "D21"] },
   review: { kind: "Human gate", what: "Draft until a person approves. Approval is refused while any step is flagged for review (taught by a person, or recorded after a hostile form), and approving resets the wrong-record circuit breaker.", files: ["src/interfaze/cli.py"], d: ["D1", "D19", "D20"] },
   invoke: { kind: "Caller contract", what: "A calling agent is usually mid-conversation. invoke() blocks only until a deadline, then returns needs_human with a run handle; the run carries on and its late result is kept for 15 minutes.", files: ["src/interfaze/runs.py"], d: ["D11"] },
   replay: { kind: "Deterministic run", what: "Resolves each step's ranked strategies on the live page, acts, waits on postconditions (never sleeps), and races every wait against declared outcomes so an error page is named the moment it shows. A fallback strategy is logged as drift, not failure.", bullets: ["Recoveries: re-sign-on and restart, read-only flows only", "Unknown screen + operator attached → pause for a person", "Policy re-checked against the live control"], files: ["src/interfaze/replay/executor.py"], d: ["D6", "D10"] },
@@ -509,6 +514,7 @@ const TOURS = {
   discovery: [["goal", "A goal with typed inputs and probe values."], ["discovery", "Claude reads the screen as an accessibility tree with refs."], ["masker", "Names, numbers and balances reach it only as placeholders."], ["surface", "It clicks by ref; the surface acts in the real browser."], ["policy", "Every action is policy-checked first; a commit is refused and explained."], ["recorder", "Each action is described as ranked, surface-neutral locators."], ["artifact", "The run becomes a typed draft artifact."], ["probes", "Replaying probe inputs teaches it business outcomes, verified by construction."], ["review", "A person approves it."]],
   replay: [["invoke", "A calling agent invokes the capability with inputs and a deadline."], ["review", "Only approved artifacts run unattended."], ["replay", "No LLM: ranked strategies resolve each control on the live page."], ["identity", "Before reading the record, its identity is checked."], ["surface", "Waits race postconditions against named outcomes."], ["evidence", "Everything is logged, redacted at the write boundary."], ["result", "A typed result: success, an answer, or a failure that says where and why."]],
   handoff: [["replay", "An unknown screen appears mid-run."], ["session", "Automation pauses; the control token's epoch rises."], ["operator", "A person claims control on the operator page and works in the same browser."], ["session", "They hand back; automation verifies the screen before it continues."], ["result", "The caller got needs_human by its deadline, and collects the late result."]],
+  tenant: [["mock", "Bank B runs the same product with its own templates: \"Find Member\", and an unlabelled field."], ["replay", "The artifact recorded on bank A replays on B. Name-based strategies miss."], ["surface", "Fallbacks find the controls: the anchor beside the field, the only button in its fieldset."], ["overrides", "Drift becomes a pending override for B, written from what the fallbacks found."], ["review", "A person approves it."], ["replay", "B now runs its own version: first strategies hit, no drift. Bank A is untouched."]],
   safety: [["mock", "A hostile page: a commit button labelled \"OK\", a link to another site."], ["surface", "The click happens; the browser starts a request."], ["policy", "The network gate drops it: off-origin, or a declared commit path."], ["result", "POLICY_VIOLATION at that step. Nothing was opened, nothing left the browser."]],
 };
 const svg = $("#svg"), NS = "http://www.w3.org/2000/svg";
@@ -598,10 +604,10 @@ $("#timeline").innerHTML = S.commits.map((c) => `<div class="tl"><div class="met
   <div class="t">${esc(c.subject)}</div>${c.body ? `<p>${esc(c.body)}</p>` : ""}</div>`).join("");
 
 // ── decisions ───────────────────────────────────────────────────────────────────────────────────────────
-const LABEL = { "overrode": "I overrode", "my idea": "My idea", "my challenge": "My challenge", "my choice": "My call",
+const LABEL = { "ai proposal": "AI proposal · open", "overrode": "I overrode", "my idea": "My idea", "my challenge": "My challenge", "my choice": "My call",
   "ai self-correction": "AI self-correction", "ai changed its mind": "AI changed its mind", "agreed": "Agreed" };
 const GROUPS = { all: () => true, mine: (d) => ["overrode", "my idea", "my challenge", "my choice"].includes(d.kind),
-  ai: (d) => d.kind.startsWith("ai"), agreed: (d) => d.kind === "agreed" };
+  ai: (d) => d.kind.startsWith("ai") && d.kind !== "ai proposal", agreed: (d) => d.kind === "agreed" };
 const GNAME = { all: "All", mine: "Where I moved it", ai: "AI corrected itself", agreed: "Agreed after challenge" };
 const mine = S.decisions.filter(GROUPS.mine).length;
 $("#override-count").textContent = `${S.decisions.length} decisions are logged; in ${mine} of them I overrode the AI, raised the idea, or forced the question.`;
@@ -632,7 +638,7 @@ const stamp = (x) => x ? `${x.date.slice(0, 10)} · ${x.commit}` : "";
 const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
 const cards = [];
 if (E.fault_matrix) cards.push({ nm: "Fault matrix", num: `${E.fault_matrix.passed}<small>/${E.fault_matrix.runs}</small>`, bar: pct(E.fault_matrix.passed, E.fault_matrix.runs),
-  p: `Every fault and data outcome, both flows, against the contract. Sub-accounts opened: ${E.fault_matrix.opened}.${E.fault_matrix.misses.length ? " Open: " + E.fault_matrix.misses.map(esc).join("; ") : ""}`, x: E.fault_matrix });
+  p: `Every fault and data outcome, both flows, on both banks (B after its drift-proposed override). Sub-accounts opened: ${E.fault_matrix.opened}.${E.fault_matrix.misses.length ? " Open: " + E.fault_matrix.misses.map(esc).join("; ") : ""}`, x: E.fault_matrix });
 if (E.discovery) cards.push({ nm: "Discovery · Claude", llm: true, num: `${E.discovery.replays}<small>/${E.discovery.runs}</small>`, bar: pct(E.discovery.replays, E.discovery.runs),
   p: `Real runs recorded an artifact that then replayed on a different member. ${money(E.discovery.spent)} spent in total; no run needed escalation.`, x: E.discovery });
 if (E.stability) cards.push({ nm: "Replay stability", num: `${E.stability.ok}<small>/${E.stability.runs}</small>`, bar: pct(E.stability.ok, E.stability.runs),

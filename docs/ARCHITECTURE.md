@@ -625,6 +625,37 @@ typed the password into a fake "re-enter your password" form. Three guards now s
 - **Drift detection:** every replay reports which descriptor rank hit; fallback hits per tenant are aggregated into a
   signal ("tenant X: step `submit-search` now resolves at rank 3 in 40% of runs") → re-record or add override.
 
+### As built (Pass 2 item 6)
+**Variant B** is a second bank on the same vendor product (`interfaze mock-app --variant b`, or `/__variant` in
+tests). It has two template differences a real tenant would have:
+- the member search button says "Find Member" instead of "Search";
+- the Member # field has no `<label>`, only the text in the cell beside it.
+
+**Surviving a relabel.** Every name-based strategy dies when a control is renamed, because they all key on the same
+words. So the recorder adds one more fallback, `onlyInRegion` (D21): "the only button in the Member Inquiry
+fieldset".
+- It's recorded only when the target already has a labelled region scope and it matched exactly one control.
+- The schema refuses it without a region, because page-wide it would be a guess.
+- If the region ever holds two such controls, it fails. It never picks one.
+- The policy re-check on the live control and the network gate still apply, so a fallback can't land on a commit.
+
+**Drift → pending override → approval** (`src/interfaze/artifact/overrides.py`):
+1. A replay on a tenant (`--tenant b`) whose control is only found by a fallback still succeeds, and reports drift.
+2. It writes a pending override for that tenant to `artifacts/<capability>/overrides.pending/<tenant>.json`.
+   - If the control kept a usable name (a relabel), role+name stays first, with the new name.
+   - Otherwise (a lost `<label>`), the strategy that worked moves to the front.
+   - The name proposed is the control's accessible name, never an input's value, and never a name with digits.
+3. `interfaze override <artifact> --tenant b` shows it; `--approve` checks it applies cleanly and merges it.
+   Nothing applies itself.
+4. At load, `Replayer(tenant=…)` runs the base with that tenant's approved override. Ops name steps by id. A
+   missing step, a path that picks no item, or a base version outside `appliesTo` is refused loudly.
+
+**Measured** (fault matrix, bank-B arm):
+- First contact with B: both flows succeed with drift on exactly the two changed controls, and propose the right
+  override.
+- With the proposal approved, the whole contract holds on B as on A, and the happy path has no drift.
+- Bank A is unaffected by B's override.
+
 ---
 
 ## 7a. Page map: learned, per-bank app knowledge (built fully, by user decision)

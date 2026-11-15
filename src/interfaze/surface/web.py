@@ -15,7 +15,7 @@ from typing import Literal
 from playwright.async_api import BrowserContext, ElementHandle, Error as PlaywrightError, Frame, Locator, Page
 
 from interfaze.artifact.schema import (
-    Action, AnchorStrategy, LabelStrategy, Policy, Regex, RegionScope, RoleStrategy, Strategy, TableCellStrategy, Target, TextMatch,
+    Action, AnchorStrategy, LabelStrategy, OnlyInRegionStrategy, Policy, Regex, RegionScope, RoleStrategy, Strategy, TableCellStrategy, Target, TextMatch,
     TextStrategy, Visible,
 )
 from interfaze.pii import LABELS, PATTERNS
@@ -245,6 +245,9 @@ class WebSurface(Surface):
         kept = await self._unique(target, candidates, handle)
         if not kept and (region := await frame.evaluate("el => window.__ifz.regionOf(el)", handle)):
             target = target.model_copy(update={"within": RegionScope(role=region["role"], name=region["name"])})
+            # Inside a region, "its only <role>" is a fallback that survives a tenant relabelling the control
+            if purpose == "act":
+                candidates.append(OnlyInRegionStrategy(role=role))
             kept = await self._unique(target, candidates, handle)
         if not kept:
             raise SurfaceError("TARGET_UNRESOLVED", f"no stable way to find {role} {name!r} again; pick a labelled "
@@ -319,6 +322,9 @@ class WebSurface(Surface):
                     return await frame.get_by_label(py_pattern(strategy.label), exact=True).element_handles()
                 case TextStrategy():
                     return await frame.get_by_text(py_pattern(strategy.text), exact=True).element_handles()
+                case OnlyInRegionStrategy():
+                    # Narrowed to the target's region by _inside; alone it matches every control of the role
+                    return await frame.get_by_role(strategy.role).element_handles()
                 case AnchorStrategy():
                     found = await frame.evaluate_handle("([a, r, role]) => window.__ifz.anchor(a, r, role)",
                                                         [js_pattern(strategy.anchor_text), strategy.relation, strategy.role])

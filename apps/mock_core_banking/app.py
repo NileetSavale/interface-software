@@ -7,6 +7,11 @@ Faults (docs/ARCHITECTURE.md §8) are armed per server, for the next N member pa
 Some outcomes need no fault, the data produces them: 99999 isn't a member, 45678 is restricted, and a number
 starting with 0 is invalid.
 
+Variant B, a second bank on the same vendor product (docs/ARCHITECTURE.md §7):
+    VARIANT=b at start, or POST /__variant?name=b
+Same flows and messages, two template differences a real tenant would have: the member search button says
+"Find Member" instead of "Search", and the Member # field has no <LABEL>, only the text in the cell beside it.
+
 Layout mode, for the recorder-robustness eval (evals/robustness.py):
     POST /__layout?seed=7     DELETE /__layout
 reorders frames, fieldsets, table rows and columns and adds nesting, seeded so a run is repeatable, while every
@@ -46,6 +51,8 @@ app = FastAPI()
 _sessions: set[str] = set()
 _fault = {"name": os.environ.get("FAULT") or None, "times": -1}  # times -1: every time
 _layout: dict = {"seed": None}
+_variant = {"name": os.environ.get("VARIANT", "a")}
+VARIANTS = {"a", "b"}
 
 
 @app.post("/__faults")
@@ -60,6 +67,18 @@ def arm_fault(name: str, times: int = 1):
 def clear_fault():
     _fault.update(name=None, times=0)
     return {"armed": None}
+
+
+@app.post("/__variant")
+def set_variant(name: str):
+    if name not in VARIANTS:
+        return HTMLResponse(f"unknown variant; one of {sorted(VARIANTS)}", status_code=400)
+    _variant["name"] = name
+    return {"variant": name}
+
+
+def b() -> bool:
+    return _variant["name"] == "b"
 
 
 @app.post("/__layout")
@@ -185,8 +204,8 @@ def inquiry(request: Request):
   <TR><TD>Last name</TD><TD><INPUT TYPE="text" NAME="last" SIZE=16></TD><TD><INPUT TYPE="submit" VALUE="Search"{T("quick_find_search")}></TD></TR>
 </TABLE></FIELDSET></FORM>""", nest(f"""<FORM METHOD="GET" ACTION="/member" NAME="inq"><FIELDSET><LEGEND>Member Inquiry</LEGEND>
 <TABLE CELLPADDING=6 BORDER=0>
-  <TR><TD><LABEL FOR="m">Member #</LABEL></TD><TD><INPUT TYPE="text" NAME="id" ID="m" SIZE=8 MAXLENGTH=5{T("member_number")}></TD></TR>
-  <TR><TD></TD><TD><INPUT TYPE="submit" VALUE="Search"{T("member_search")}></TD></TR>
+  <TR><TD>{"Member #" if b() else '<LABEL FOR="m">Member #</LABEL>'}</TD><TD><INPUT TYPE="text" NAME="id" ID="m" SIZE=8 MAXLENGTH=5{T("member_number")}></TD></TR>
+  <TR><TD></TD><TD><INPUT TYPE="submit" VALUE="{"Find Member" if b() else "Search"}"{T("member_search")}></TD></TR>
 </TABLE></FIELDSET></FORM>""", "inquiry")], "inquiry")
     return page("\n".join(forms))
 
