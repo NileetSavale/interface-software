@@ -1,7 +1,7 @@
 {
   "suite": "robustness",
-  "date": "2026-11-15T06:40:49+00:00",
-  "commit": "4bbad13",
+  "date": "2026-11-15T07:46:56+00:00",
+  "commit": "40be003",
   "seeds": 30,
   "flows": [
     {
@@ -146,7 +146,7 @@
           }
         },
         {
-          "step": "start_sub_account_opening",
+          "step": "open_sub_account_form",
           "baseline": "open_sub_account_link",
           "same": 30,
           "WRONG": 0,

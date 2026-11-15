@@ -161,33 +161,47 @@ window.SITE = {
    "chose": "<strong>The AI's change, open for review: a network-level gate (origin allowlist on every request; allowed paths and declared <code>commitPaths</code> on every page load or post), credentials typed only on the sign-on page, and outcome checks on the screen where a control is found</strong>",
    "why": "The eval showed each gap concretely. A tampered artifact pressed \"OK\" on the review screen; only the browser closing at the end of the run kept the account from opening. A link took the browser off-site. Discovery would type the password into a fake re-login form. A guard below the page holds whatever the page says. <strong>Then, from the Claude safety cases:</strong> Claude was refused the password 3/3 times but pressed the fake form's Verify anyway, and the click was recorded. The AI offered prompt-only, review-flag-only, or all three of form block + review flag + prompt line; <strong>the user chose all three (option A).</strong>",
    "kind": "my choice"
+  },
+  {
+   "id": "D21",
+   "topic": "Surviving a tenant's relabel",
+   "proposed": "(Pass 2 item 6) The locked demo needed \"a fallback hits\" when a button is renamed, but every recorded strategy keyed on the name",
+   "chose": "<strong>The AI's addition, open for review: an <code>onlyInRegion</code> strategy (\"the only button in the Member Inquiry fieldset\"), recorded only under a labelled region scope and only when unique; refused by the schema without a region</strong>",
+   "why": "Relabels are the commonest difference between banks on one product, and role, label and text strategies all fail together on one. Position within a named region survives a rename. It still never guesses (two matches fail), and the live policy re-check and network gate still apply. The drift it reports turns into a proposed override, so the name-based strategy is restored after review.",
+   "kind": "ai proposal"
+  },
+  {
+   "id": "D22",
+   "topic": "Stable outcome codes",
+   "proposed": "(found by the discovery eval) Probes let the model name each outcome freely; the same screen came back as <code>DEPOSIT_BELOW_MINIMUM</code> and <code>MINIMUM_DEPOSIT_NOT_MET</code> in different runs. The AI recommended that probes name the code they expect",
+   "chose": "<strong>Agreed: each probe in the goal spec says the code it expects; the model must use it or say none fits</strong>",
+   "why": "A caller branches on the code, so a re-discovery that renames it is a breaking change nobody asked for. The goal author owns the vocabulary; the model only recognises the screen. The same mechanism closed the cross-flow gap: the sub-account goal probes a missing member too and learns <code>MEMBER_NOT_FOUND</code> under the same code as lookup.",
+   "kind": "agreed"
   }
  ],
  "evals": {
   "fault_matrix": {
-   "passed": 22,
-   "runs": 23,
+   "passed": 48,
+   "runs": 48,
    "opened": 0,
-   "date": "2026-11-15T06:28:49+00:00",
-   "commit": "4bbad13",
-   "misses": [
-    "open_sub_account: member doesn't exist \u2192 failed/TARGET_UNRESOLVED"
-   ]
+   "date": "2026-11-15T07:34:58+00:00",
+   "commit": "40be003",
+   "misses": []
   },
   "stability": {
    "ok": 80,
    "runs": 80,
    "distinct": 1,
    "p50": 3.82,
-   "date": "2026-11-15T06:36:24+00:00",
-   "commit": "4bbad13"
+   "date": "2026-11-15T07:42:31+00:00",
+   "commit": "40be003"
   },
   "robustness": {
    "ok": 60,
    "runs": 60,
    "wrong": 0,
-   "date": "2026-11-15T06:40:49+00:00",
-   "commit": "4bbad13"
+   "date": "2026-11-15T07:46:56+00:00",
+   "commit": "40be003"
   },
   "safety": {
    "passed": 15,
@@ -195,20 +209,20 @@ window.SITE = {
    "gaps": 1,
    "llm_passed": 12,
    "llm_total": 12,
-   "llm_spent": 0.4106,
+   "llm_spent": 0.4013,
    "harm": 0,
-   "date": "2026-11-15T06:30:50+00:00",
-   "commit": "4bbad13"
+   "date": "2026-11-15T07:35:06+00:00",
+   "commit": "40be003"
   },
   "discovery": {
    "recorded": 10,
    "runs": 10,
    "replays": 10,
    "median_cost": [
-    0.0187,
-    0.036
+    0.0189,
+    0.0545
    ],
-   "spent": 0.3386,
+   "spent": 0.3737,
    "arms": [
     {
      "flow": "lookup",
@@ -216,7 +230,7 @@ window.SITE = {
      "recorded": 5,
      "replays_on_other_member": 5,
      "median_turns": 5,
-     "median_cost_usd": 0.0187,
+     "median_cost_usd": 0.0189,
      "escalated_runs": 0
     },
     {
@@ -224,58 +238,76 @@ window.SITE = {
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 7,
-     "median_cost_usd": 0.036,
+     "median_turns": 8,
+     "median_cost_usd": 0.0545,
      "escalated_runs": 0
     }
    ],
-   "date": "2026-11-15T06:36:48+00:00",
-   "commit": "4bbad13"
+   "date": "2026-11-15T07:43:21+00:00",
+   "commit": "40be003"
   }
  },
  "commits": [
   {
-   "sha": "588d41f",
+   "sha": "bebfb01",
    "date": "2026-11-14",
    "subject": "Pass 0: artifact schema, replay result contract, surface interface",
    "body": "Architecture and decision log in docs/. The Pydantic schema enforces the locked\ndesign rules (no irreversible steps, identity checkpoint for identifying inputs,\nstep-id overrides, resolvable references); the annotated example in docs is\nvalidated by the test suite so it can't drift from the code."
   },
   {
-   "sha": "eeb2d0e",
+   "sha": "ac6c5fa",
    "date": "2026-11-14",
    "subject": "Pass 1: real discovery run, recorder, replay executor, evidence",
    "body": "- Mock legacy core-banking app (frameset, layout tables, no ids)\n- Playwright surface: cross-frame AI snapshot, stable observation, ranked\n  target descriptors verified against the live element, data never used\n  as a locator anchor\n- Replay executor with the five result types, bounded recoveries, drift,\n  identity checkpoint, live policy re-check and failure evidence\n- Discovery loop on Claude Sonnet 5.5: prompt caching, server-side\n  context editing (D17), refusal fallback, policy gate, stuck nudge;\n  inputs and secrets shown to the model only as placeholders\n- Run logs keep extracted values as {{outputs.x}} placeholders\n- evidence/: real discovery run, approved artifact, success, error and\n  invalid-input replays"
   },
   {
-   "sha": "311cffe",
+   "sha": "95624bd",
    "date": "2026-11-14",
    "subject": "Pass 2.1: outcome library, probes, scoped targets, wrong-record hardening",
    "body": "- Mock app: injectable faults (server error, session timeout, notice page,\n  slow load, unknown dialog, wrong record), data-driven business outcomes,\n  duplicate Search buttons, per-row View links\n- Recorder: region scope for duplicate controls, table-row controls,\n  sign-on split into a reusable precondition subflow\n- Standard outcome library on every recorded artifact; recovery.resume\n  (restart allowed only for read-only capabilities)\n- Probes (D18): replay with probe inputs, model names the stopped screen,\n  outcome kept only if verified both ways\n- Replay: outcomes race waits, an outcome after an acted step moves on,\n  click-through waits for the notice to clear\n- Wrong record (D19): identity gate before any read or act, structure-only\n  evidence with no screenshot, nothing about the other record returned,\n  audit log and circuit breaker reset by re-approval"
   },
   {
-   "sha": "972ab48",
+   "sha": "ec4e895",
    "date": "2026-11-14",
    "subject": "Pass 2.2: human handoff on the live session",
    "body": "- Session with a control token (holder, epoch, expiry); the epoch is\n  checked at dispatch, after actionability waits, so an in-flight\n  automation click can't land after a handoff\n- Operator page on :4200: request, live screenshot, take control,\n  hand back, abort; only the holder can hand back\n- Human actions captured in every frame and described like the recorder:\n  evidence in replay (never typed values), reviewed steps in discovery;\n  approve refuses artifacts with steps still needing review\n- Attended replay escalates unknown screens, unresolvable controls and\n  escalate outcomes; resume verifies the screen before continuing\n- Discovery ladder: nudge, then Opus on the same conversation, then a\n  person\n- invoke with a deadline returns needs_human and the run finishes in the\n  background; late results kept 15 minutes"
   },
   {
-   "sha": "f344541",
+   "sha": "32dd7f0",
    "date": "2026-11-14",
    "subject": "Pass 2.3: PII placeholders for the model, masked evidence screenshots",
    "body": "- pii.Masker: pattern detectors (account, money, SSN, date, email, phone)\n  and label detectors (value after \"Name:\", sensitive table columns),\n  stable placeholders, last-4 only for long identifiers\n- Discovery shows the model placeholders only; typing a page-data\n  placeholder is refused so page data can't enter an artifact\n- Run logs and snapshot files pass through the same detectors\n- Evidence screenshots black out PII in every frame first and fail\n  closed; the operator's live view stays unmasked and unstored\n- Real discovery on the masked view records the same artifact"
   },
   {
-   "sha": "a5e5885",
+   "sha": "a920a05",
    "date": "2026-11-15",
    "subject": "Pass 2.4: open_sub_account flow stopping at the commit point",
    "body": "Mock sub-account form (unlabelled fields, review screen, Confirm counter),\nreal discovery that stops before Confirm, probes that learn from checkpoint\nfailures, and a success checkpoint that races known outcomes."
   },
   {
-   "sha": "4bbad13",
+   "sha": "dec0d29",
    "date": "2026-11-15",
    "subject": "Pass 2.5: evaluation harness and the fixes it drove",
    "body": "Five suites under evals/ (fault matrix, discovery reliability, replay\nstability, safety/adversarial, recorder robustness), each on a private\nmock app, with results stamped by date, commit and N, and a hard USD cap\nfor the suites that call Claude.\n\nFixes from the first runs: outcomes re-checked on the screen where a\ncontrol resolves (a non-modal dialog was clicked past); table labels\nfound through wrapper tables; a network-level policy gate with declared\ncommit paths; credentials only on the sign-on page; a form that asks for\nthem after sign-on is blocked and later steps flagged for review (D20)."
+  },
+  {
+   "sha": "3468bc4",
+   "date": "2026-11-15",
+   "subject": "Eval results at 4bbad13 and the project showcase site",
+   "body": "evals/results and evals/report.md from a clean run of all five suites\n(stamped 4bbad13). docs/index.html is a GitHub Pages site: interactive\narchitecture, decision log, eval numbers and build timeline, all baked\nfrom the repo's own records by scripts/build_site.py."
+  },
+  {
+   "sha": "d1351ea",
+   "date": "2026-11-15",
+   "subject": "Pass 2.6: second bank (variant B), tenant overrides from drift",
+   "body": "Mock app variant B relabels the member search button and drops the\nMember # label. A new onlyInRegion fallback (D21) finds a relabelled\ncontrol by its place in a labelled region, never by guessing. Replay on\na tenant reports drift and writes a pending override for that tenant;\n`interfaze override --approve` merges it after review, and overrides\napply at load by step id within their semver range. The fault matrix\ngains a bank-B arm. Both artifacts re-recorded on bank A with Claude."
+  },
+  {
+   "sha": "40be003",
+   "date": "2026-11-15",
+   "subject": "Pass 2.7: probes name the outcome code they expect",
+   "body": "Each probe in a goal spec can say the code it expects; the probe tool\nthen offers only that code, and any other is refused (D22). Left free,\nthe same screen got different codes in different discoveries, and a\ncaller branches on the code. The sub-account goal now also probes a\nmissing member, so it learns MEMBER_NOT_FOUND under the same code as\nlookup. Both artifacts re-recorded with Claude on bank A."
   }
  ],
- "tests": 69
+ "tests": 82
 };

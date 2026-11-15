@@ -1,7 +1,7 @@
 {
   "suite": "stability",
-  "date": "2026-11-15T06:36:24+00:00",
-  "commit": "4bbad13",
+  "date": "2026-11-15T07:42:31+00:00",
+  "commit": "40be003",
   "n_per_arm": 20,
   "arms": [
     {
@@ -14,8 +14,8 @@
       },
       "distinct_outputs": 1,
       "p50_s": 3.82,
-      "p95_s": 3.94,
-      "max_s": 3.96,
+      "p95_s": 3.93,
+      "max_s": 4.05,
       "unsteady_steps": {}
     },
     {
@@ -27,9 +27,9 @@
         "success": 20
       },
       "distinct_outputs": 1,
-      "p50_s": 6.64,
-      "p95_s": 6.79,
-      "max_s": 6.83,
+      "p50_s": 6.65,
+      "p95_s": 6.7,
+      "max_s": 6.7,
       "unsteady_steps": {}
     },
     {
@@ -41,9 +41,9 @@
         "success": 20
       },
       "distinct_outputs": 1,
-      "p50_s": 4.66,
-      "p95_s": 4.76,
-      "max_s": 4.79,
+      "p50_s": 4.67,
+      "p95_s": 4.72,
+      "max_s": 4.73,
       "unsteady_steps": {}
     },
     {
@@ -55,9 +55,9 @@
         "success": 20
       },
       "distinct_outputs": 1,
-      "p50_s": 7.48,
-      "p95_s": 7.62,
-      "max_s": 7.68,
+      "p50_s": 7.41,
+      "p95_s": 7.55,
+      "max_s": 7.58,
       "unsteady_steps": {}
     }
   ]
