@@ -491,16 +491,17 @@ class Replayer:
         self.log.event("navigated", step=step_id, path=path_or_url)
 
     async def _evidence(self, label: str, scrub: bool = False) -> list[EvidenceRef]:
-        """What the screen looked like when the run stopped: the redacted accessibility snapshot and a screenshot.
-        scrub is for a screen showing someone else's record: structure only, and no screenshot, since pixels can't be
-        redacted reliably. (Masking screenshots in general is Pass 2 item 3.)"""
+        """What the screen looked like when the run stopped: the redacted accessibility snapshot and a screenshot with
+        PII blacked out. scrub is for a screen showing someone else's record: structure only, and no screenshot at
+        all, since masking is detector-based and a miss there would store a third person's data."""
         refs = []
         try:
             observation = await self.surface.observe()
             text = structure_only(observation.text) if scrub else observation.text
             refs.append(EvidenceRef(kind="a11y_snapshot", path=self.log.write(f"{label}.snapshot.txt", text)))
             if not scrub:
-                refs.append(EvidenceRef(kind="screenshot", path=await self.surface.screenshot(self.log.path(f"{label}.png"))))
+                if shot := await self.surface.screenshot(self.log.path(f"{label}.png")):
+                    refs.append(EvidenceRef(kind="screenshot", path=shot))
         except Exception as e:  # evidence is best effort; the failure itself is what matters
             self.log.event("evidence_failed", error=str(e))
         return refs

@@ -18,6 +18,7 @@ from interfaze.discovery.planner import ClaudePlanner, Planner
 from interfaze.discovery.probes import Prober
 from interfaze.discovery.recorder import Recorder
 from interfaze.evidence import RunLog, new_run_id, now
+from interfaze.pii import Masker
 from interfaze.policy import PolicyViolation, check_action, check_url, classify
 from interfaze.session import Intervention, Session
 from interfaze.surface.base import SurfaceError
@@ -95,6 +96,7 @@ class Discovery:
         self.policy = Policy(allowed_origins=[self.recorder.origin], max_risk=goal.get("maxRisk", "read"))
         self.cost = 0.0
         self._model_masks: list[tuple[str, str]] = []
+        self.masker = Masker()  # the placeholder table for page data the model sees; memory only (§6)
         self._repeats: list[tuple[str, str]] = []
         self._nudged = False
         for name, value in inputs.items():
@@ -106,7 +108,12 @@ class Discovery:
             self._model_masks = sorted([*self._model_masks, (value, label)], key=lambda p: -len(p[0]))
             self.log.mask(value, label)
 
-    def for_model(self, text: str) -> str:
+    def for_model(self, text: str, snapshot: bool = False) -> str:
+        """Inputs and secrets as their {{placeholders}}, then everything else that looks like PII as ⟨KIND_n⟩."""
+        text = self._known(text)
+        return self.masker.snapshot(text) if snapshot else self.masker.text(text)
+
+    def _known(self, text: str) -> str:
         for value, label in self._model_masks:
             text = text.replace(value, label)
         return text
@@ -133,7 +140,7 @@ class Discovery:
     async def _screen(self) -> str:
         observation = await self.surface.observe()
         self._fingerprint = observation.fingerprint
-        return self.for_model(observation.text)
+        return self.for_model(observation.text, snapshot=True)
 
     def _intro(self, screen: str) -> str:
         inputs = "\n".join(f"- {{{{inputs.{n}}}}}: {s['description']}" for n, s in self.goal.get("inputs", {}).items())
@@ -311,7 +318,7 @@ class Discovery:
                 case _:
                     return f"Unknown tool {name}. Use one of: {', '.join(t['name'] for t in TOOLS)}.", True, None
         except (SurfaceError, PolicyViolation, TemplateError, ValueError) as e:
-            return f"{e}\n\nCurrent screen:\n{await self._screen()}", True, None
+            return f"{self.for_model(str(e))}\n\nCurrent screen:\n{await self._screen()}", True, None
 
     async def _act(self, name: str, args: dict) -> str:
         action = {"click": "click", "type_text": "type", "select_option": "select"}[name]
@@ -320,13 +327,17 @@ class Discovery:
         risk = check_action(self.policy, action, role, label)
         target = await self.surface.describe(ref, "act")
         value = args.get("text", args.get("option"))
+        if value is not None and re.search(r"⟨[A-Z]+_\d+", value):
+            # A ⟨NAME_1⟩ stands for data read off the page; typing it would put that data in the artifact
+            raise ValueError("values read off the page can't be typed: type input placeholders ({{inputs.x}}) or "
+                             "credentials ({{secrets.X}}) only")
         rendered = render(value, self.inputs, self.env) if value is not None else None
         if rendered is not None and rendered != value:
             self._mask(rendered, value)  # the typed secret now shows on screen as {{secrets.APP_USER}}, not its value
         epoch = self.session.epoch
         await self.surface.act_on_ref(ref, action, rendered, guard=lambda: self.session.check(epoch))
         self.recorder.act(args["intent"], action, target, value, risk)
-        return f"Done: {action} {role} {label!r}.\n\nCurrent screen:\n{await self._screen()}"
+        return f"Done: {action} {role} {self.for_model(label)!r}.\n\nCurrent screen:\n{await self._screen()}"
 
     async def _extract(self, args: dict) -> str:
         target = await self.surface.describe(args["ref"], "read")

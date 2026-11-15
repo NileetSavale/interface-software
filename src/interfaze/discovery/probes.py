@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 
 from interfaze.artifact.schema import Artifact, Outcome, Regex, Visible
 from interfaze.discovery.planner import Planner
+from interfaze.pii import Masker
 from interfaze.replay.executor import Replayer
 from interfaze.replay.result import BusinessOutcome, Failed, Success
 
@@ -107,6 +108,7 @@ class Prober:
         screen = open(snapshot).read() if snapshot else ""
         for name, value in inputs.items():
             screen = screen.replace(value, f"{{{{inputs.{name}}}}}")
+        screen = Masker().snapshot(screen)  # the evidence snapshot is already redacted; this is belt and braces
         step = next((s for s in artifact.all_steps() if s.id == result.at_step), None)
         given = ", ".join(f"{{{{inputs.{k}}}}}" for k in spec["inputs"])
         prompt = (f"The capability '{artifact.capability.title}' was replayed with {given} set to {report.why}. "

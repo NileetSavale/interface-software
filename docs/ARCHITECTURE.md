@@ -524,6 +524,32 @@ full handoff in `evidence/`.
   depends on a11y coverage. A production version would add an NER pass and fail closed: no screenshot is sent to
   the model if any region can't be classified.
 
+### As built (Pass 2 item 3)
+- **Code:** `src/interfaze/pii.py` (Masker, PATTERNS, LABELS); `locate.js` `maskPII`; `WebSurface.screenshot`.
+- **The model's view.** Each snapshot goes through two stages before it's sent:
+  1. Inputs and secrets become their `{{placeholders}}`.
+  2. The Masker replaces the rest:
+     - label detectors catch the cell after `Name:` / `Member #:` / `Account…`, and every cell of a column headed
+       Name / Account / Balance;
+     - pattern detectors catch account numbers, money, SSN, dates, email and phone.
+
+  The model also sees the extract results ("currently ⟨NAME_1⟩"), action echoes and error messages through it.
+  A real discovery run on this masked view recorded the same artifact and learned the same outcomes, for $0.04.
+- **Differences from the locked design:**
+  - The input-match marker is simply `{{inputs.memberId}}` where the value appears. It tells the model the same
+    thing as `⟨ACCT_1 = {{inputs.memberId}}⟩`, more briefly.
+  - Last-4 is shown only for identifiers with 8 or more digits. On a 5-digit member number, last-4 would reveal
+    almost all of it.
+  - **Typing a `⟨…⟩` placeholder is refused** rather than filled in. A placeholder stands for data read off the
+    page, and typing it would put that data into the artifact. Only input and secret placeholders can be typed.
+  - No screenshot is ever sent to the model, so screenshot masking applies to evidence only.
+- **Evidence screenshots.** Before the shot, `maskPII` paints black every element that a pattern matches, every
+  value cell after a sensitive label, every cell in a sensitive column, and every filled text field. After the shot
+  the page is restored. If any frame can't be masked, no screenshot is written (fail closed). The operator's live
+  view is unmasked and never stored.
+- **Logs.** `RunLog.redact` applies the known masks, then the pattern detectors, to every event and file. Snapshot
+  files also get the label detectors.
+
 ### Redaction at the write boundary
 - This covers the EvidenceStore and the Recorder.
 - Input values are stored as `{{inputs.x}}`, and `sensitive` inputs and outputs are masked.

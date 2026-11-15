@@ -18,6 +18,7 @@ from interfaze.artifact.schema import (
     Action, AnchorStrategy, LabelStrategy, Regex, RegionScope, RoleStrategy, Strategy, TableCellStrategy, Target, TextMatch,
     TextStrategy, Visible,
 )
+from interfaze.pii import LABELS, PATTERNS
 from interfaze.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
 
 HUMAN_JS = (Path(__file__).parent / "human.js").read_text()
@@ -117,9 +118,28 @@ class WebSurface(Surface):
                 names[ref] = ""
         return _IFRAME.sub(label, text)
 
-    async def screenshot(self, path: str) -> str:
-        await self.page.screenshot(path=path, full_page=True)
-        return path
+    async def screenshot(self, path: str) -> str | None:
+        """A screenshot for evidence, with PII blacked out in every frame first. Fails closed: if any frame can't be
+        masked, no screenshot is written. (The operator's live view is unmasked and never stored.)"""
+        try:
+            await self.mask_pii(True)
+            await self.page.screenshot(path=path, full_page=True)
+            return path
+        except PlaywrightError:
+            return None
+        finally:
+            await self.mask_pii(False, strict=False)
+
+    async def mask_pii(self, on: bool, strict: bool = True) -> list[str]:
+        masked = []
+        for frame in self.page.frames:
+            try:
+                masked += await frame.evaluate("([p, l, on]) => window.__ifz.maskPII(p, l, on)",
+                                               [[p for _, p in PATTERNS], [l for _, l in LABELS], on])
+            except PlaywrightError:
+                if strict:
+                    raise
+        return masked
 
     # ── Discovery: acting on refs from the latest snapshot ─────────────────────────────────────────────────────
 

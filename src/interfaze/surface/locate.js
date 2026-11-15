@@ -105,5 +105,49 @@
     return null;
   }
 
-  window.__ifz = { anchor, tableCell, describeValue, regionOf, textOf };
+  // Blacks out PII before a screenshot is saved, by the same detectors the text masking uses (interfaze.pii, passed
+  // in): values matching a pattern, the cell after a sensitive label, every cell of a sensitive column, and every
+  // filled text field. on=false restores the page. Returns the texts it masked, so a test can check them.
+  function maskPII(patterns, labels, on) {
+    if (!on) {
+      for (const el of document.querySelectorAll("[data-ifz-masked]")) {
+        el.style.cssText = el.dataset.ifzMasked; delete el.dataset.ifzMasked;
+      }
+      return [];
+    }
+    const pats = patterns.map((p) => new RegExp(p));
+    const labs = labels.map((l) => new RegExp(l.replace(/^\(\?i\)/, ""), "i"));
+    const sensitive = (label) => labs.some((r) => r.test(label));
+    const masked = [];
+    const hide = (el) => {
+      if (el.dataset.ifzMasked !== undefined) return;
+      el.dataset.ifzMasked = el.style.cssText;
+      el.style.setProperty("background", "#000", "important");
+      el.style.setProperty("color", "#000", "important");
+      masked.push(textOf(el) || el.value || "");
+    };
+    const leaves = Array.from(document.querySelectorAll("td,th,span,b,font,a,li,p,label,div,dd"));
+    for (const el of leaves) {
+      const t = textOf(el);
+      if (!t || !pats.some((r) => r.test(t))) continue;
+      if (Array.from(el.querySelectorAll("*")).some((c) => pats.some((r) => r.test(textOf(c))))) continue; // innermost
+      hide(el);
+    }
+    for (const cell of document.querySelectorAll("td")) {
+      const prev = cell.previousElementSibling;
+      if (prev && textOf(prev).endsWith(":") && sensitive(textOf(prev))) hide(cell);
+    }
+    for (const table of document.querySelectorAll("table")) {
+      const header = headerRow(table);
+      if (!header) continue;
+      const cols = Array.from(header.cells).map((c, i) => (sensitive(textOf(c)) ? i : -1)).filter((i) => i >= 0);
+      for (const row of table.rows) if (row !== header) for (const i of cols) if (row.cells[i]) hide(row.cells[i]);
+    }
+    for (const input of document.querySelectorAll("input:not([type=hidden]):not([type=submit]):not([type=button]),textarea")) {
+      if (input.value) hide(input);
+    }
+    return masked;
+  }
+
+  window.__ifz = { anchor, tableCell, describeValue, regionOf, textOf, maskPII };
 })();

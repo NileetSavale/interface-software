@@ -119,8 +119,10 @@ def test_discovery_records_a_safe_scoped_artifact(discovered):
     # The probe values were masked from the model like any input
     assert not any("99999" in seen or "01234" in seen for seen in planner.seen)
 
-    # The model never saw the member number or the credentials
-    assert not any("12345" in seen or "teller01" in seen for seen in planner.seen)
+    # The model never saw the member number, the credentials, or the record's data (§6): placeholders only
+    for raw in ("12345", "teller01", "Jane Doe", "4,210.55", "812.07", "0001-"):
+        assert not any(raw in seen for seen in planner.seen), raw
+    assert any("⟨NAME_1⟩" in seen for seen in planner.seen)
     # The run log keeps neither those nor the values read off the screen
     log = (RUNS / outcome["run_id"] / "events.jsonl").read_text()
     for value in ("12345", "teller01", "demo-only-password", "Jane Doe", "4,210.55"):

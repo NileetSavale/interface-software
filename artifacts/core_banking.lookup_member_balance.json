@@ -14,8 +14,8 @@
   },
   "status": "draft",
   "provenance": {
-    "discoveryRunId": "disc_20261115T011533Z_e1283e",
-    "recordedAt": "2026-11-15T01:15:44+00:00",
+    "discoveryRunId": "disc_20261115T022424Z_6068ef",
+    "recordedAt": "2026-11-15T02:24:37+00:00",
     "model": "claude-sonnet-5-5"
   },
   "inputs": {
@@ -122,7 +122,7 @@
           "matches": "(?i)No members found for"
         }
       },
-      "description": "The application searched for the member number and reported that no matching member exists. (learned from probe: a member number that doesn't exist)"
+      "description": "The application searched for the member number and reported that no matching member exists, so the name could not be read. (learned from probe: a member number that doesn't exist)"
     },
     {
       "code": "INVALID_MEMBER_NUMBER",

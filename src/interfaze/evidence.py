@@ -1,7 +1,9 @@
 """The run log: one JSON line per event, plus screenshots, snapshots and a Playwright trace, all under runs/<run_id>/.
 
-Everything passes through redact() on the way to disk, which is the only place run data leaves memory. Pass 1 masks
-the values it knows are sensitive (sensitive inputs and secrets); pattern-based PII detection comes in Pass 2.
+Everything passes through redact() on the way to disk, which is the only place run data leaves memory: first the
+values known to be sensitive (sensitive inputs, secrets, extracted outputs) become their placeholders, then the PII
+detectors (interfaze.pii) mask whatever else looks like an account number, an amount, an SSN… Snapshots also get the
+label detectors, which need the page's structure: the cell after "Name:" is a name.
 """
 import json
 import re
@@ -9,6 +11,8 @@ import secrets
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+from interfaze.pii import Masker
 
 RUNS = Path("runs")
 
@@ -30,15 +34,16 @@ class RunLog:
         # value -> what to show instead; longest first so a value that contains another is masked whole
         self._masks = sorted(((v, k) for v, k in (masked or {}).items() if v), key=lambda p: -len(p[0]))
         self._start = time.monotonic()
+        self._pii = Masker()
 
     def mask(self, value: str, label: str):
         if value:
             self._masks = sorted([*self._masks, (value, label)], key=lambda p: -len(p[0]))
 
-    def redact(self, text: str) -> str:
+    def redact(self, text: str, snapshot: bool = False) -> str:
         for value, label in self._masks:
             text = text.replace(value, label)
-        return text
+        return self._pii.snapshot(text) if snapshot else self._pii.text(text)
 
     def event(self, kind: str, /, **data):
         record = {"t": round(time.monotonic() - self._start, 3), "at": now(), "event": kind, **data}
@@ -47,7 +52,7 @@ class RunLog:
 
     def write(self, name: str, text: str) -> str:
         path = self.dir / name
-        path.write_text(self.redact(text))
+        path.write_text(self.redact(text, snapshot=name.endswith(".snapshot.txt")))
         return str(path)
 
     def path(self, name: str) -> str:

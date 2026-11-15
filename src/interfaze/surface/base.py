@@ -109,4 +109,5 @@ class Surface(ABC):
     async def navigate(self, url: str) -> None: ...
 
     @abstractmethod
-    async def screenshot(self, path: str) -> str: ...
+    async def screenshot(self, path: str) -> str | None:
+        """Evidence screenshot with PII masked; None if it couldn't be masked (fail closed)."""
