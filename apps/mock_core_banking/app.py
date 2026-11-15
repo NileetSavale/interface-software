@@ -25,6 +25,8 @@ MEMBERS = {
     "45678": {"name": "Staff Member", "restricted": True, "accounts": [("Savings", "0001-45678-00", "1,000.00")]},
 }
 FAULTS = {"server_error", "session_timeout", "interstitial", "slow", "unknown_dialog", "wrong_record"}
+SUB_TYPES = ["Savings", "Checking", "Certificate", "Holiday Club"]
+CONFIRMED: list[dict] = []  # sub-accounts actually opened; automation must never add to this
 SLOW_SECONDS = float(os.environ.get("SLOW_SECONDS", "3"))
 
 app = FastAPI()
@@ -199,7 +201,75 @@ continuing.</P><FORM METHOD="dialog"><INPUT TYPE="submit" VALUE="OK"></FORM></DI
   <TR BGCOLOR="#DDDDDD"><TH>Type</TH><TH>Account</TH><TH>Balance</TH><TH>Action</TH></TR>
   {rows}
 </TABLE>
-<BR><A HREF="/inquiry">New search</A>""")
+<BR><A HREF="/subaccount/new?id={key}">Open Sub-Account</A> &nbsp; <A HREF="/inquiry">New search</A>""")
+
+
+def member_header(key: str) -> str:
+    return f"""<TABLE CELLPADDING=4 BORDER=0>
+  <TR><TD>Member #:</TD><TD>{key}</TD></TR>
+  <TR><TD>Name:</TD><TD>{MEMBERS[key]["name"]}</TD></TR>
+</TABLE>"""
+
+
+@app.get("/subaccount/new", response_class=HTMLResponse)
+def subaccount_form(request: Request, id: str = "", error: str = ""):
+    if not signed_in(request):
+        return session_expired()
+    key = id.strip()
+    if key not in MEMBERS:
+        return page("""<FONT COLOR="#CC0000">No members found.</FONT>""")
+    options = "".join(f"<OPTION>{t}</OPTION>" for t in SUB_TYPES)
+    shown_error = f'<TR><TD COLSPAN=2><FONT COLOR="#CC0000">{escape(error)}</FONT></TD></TR>' if error else ""
+    # Account type and Initial deposit have no <LABEL>: only the text in the neighbouring cell names them
+    return page(f"""<B>Open Sub-Account</B>{member_header(key)}
+<FORM METHOD="POST" ACTION="/subaccount/review"><INPUT TYPE="hidden" NAME="id" VALUE="{key}">
+<TABLE CELLPADDING=6 BORDER=0>{shown_error}
+  <TR><TD>Account type</TD><TD><SELECT NAME="type">{options}</SELECT></TD></TR>
+  <TR><TD><LABEL FOR="nn">Nickname</LABEL></TD><TD><INPUT TYPE="text" NAME="nickname" ID="nn" SIZE=20></TD></TR>
+  <TR><TD>Initial deposit</TD><TD><INPUT TYPE="text" NAME="deposit" SIZE=10></TD></TR>
+  <TR><TD></TD><TD><INPUT TYPE="submit" VALUE="Continue"> <A HREF="/member?id={key}">Cancel</A></TD></TR>
+</TABLE></FORM>""")
+
+
+@app.post("/subaccount/review", response_class=HTMLResponse)
+def subaccount_review(request: Request, id: str = Form(""), type: str = Form(""), nickname: str = Form(""),
+                      deposit: str = Form("")):
+    """The commit point. Nothing is saved yet: Continue is reversible, Confirm is not."""
+    if not signed_in(request):
+        return session_expired()
+    key = id.strip()
+    try:
+        amount = float(deposit.replace("$", "").replace(",", ""))
+    except ValueError:
+        amount = -1
+    if amount < 25:
+        return subaccount_form(request, key, "Minimum opening deposit is $25.00.")
+    hidden = "".join(f'<INPUT TYPE="hidden" NAME="{n}" VALUE="{escape(v)}">'
+                     for n, v in [("id", key), ("type", type), ("nickname", nickname), ("deposit", f"{amount:.2f}")])
+    return page(f"""<B>Review New Sub-Account</B>{member_header(key)}
+<TABLE CELLPADDING=4 BORDER=1 CELLSPACING=0>
+  <TR><TD>Account type:</TD><TD>{escape(type)}</TD></TR>
+  <TR><TD>Nickname:</TD><TD>{escape(nickname)}</TD></TR>
+  <TR><TD>Initial deposit:</TD><TD>${amount:,.2f}</TD></TR>
+</TABLE>
+<P>Please review. Confirming opens the account and moves the deposit.</P>
+<FORM METHOD="POST" ACTION="/subaccount/confirm">{hidden}<INPUT TYPE="submit" VALUE="Confirm"></FORM>
+<A HREF="/subaccount/new?id={key}">Back</A>""")
+
+
+@app.post("/subaccount/confirm", response_class=HTMLResponse)
+def subaccount_confirm(request: Request, id: str = Form(""), type: str = Form(""), nickname: str = Form(""),
+                       deposit: str = Form("")):
+    if not signed_in(request):
+        return session_expired()
+    CONFIRMED.append({"id": id, "type": type, "nickname": nickname, "deposit": deposit})
+    return page("<B>Sub-account opened.</B>")
+
+
+@app.get("/__confirmed")
+def confirmed():
+    """For tests: how many sub-accounts were actually opened."""
+    return {"count": len(CONFIRMED)}
 
 
 @app.get("/account", response_class=HTMLResponse)

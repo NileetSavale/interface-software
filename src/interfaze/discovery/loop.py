@@ -63,7 +63,8 @@ TOOLS = [
           "identifier.", ref=_REF, input={"type": "string", "description": "The input's name, e.g. memberId."},
           intent=_INTENT),
     _tool("done", "The goal is reached.", success_ref={**_REF, "description": "An element that proves the goal is "
-          "reached: a heading or label, not a data value."}, summary={"type": "string"}),
+          "reached: preferably the final screen's title or heading, otherwise a label only that screen has; never a "
+          "data value."}, summary={"type": "string"}),
     _tool("give_up", "Stop: you're stuck or it isn't safe to continue.", reason={"type": "string"}),
 ]
 TEXT_ROLES = {"cell", "text", "generic", "paragraph", "columnheader", "rowheader", "strong", "emphasis"}

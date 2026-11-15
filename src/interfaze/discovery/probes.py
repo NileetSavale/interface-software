@@ -42,7 +42,9 @@ PROBE_TOOLS = [
     _tool("not_an_outcome", "The screen isn't a definite answer (the automation broke, or it's unclear).",
           reason={"type": "string"}),
 ]
-LEARNABLE = {"TARGET_UNRESOLVED", "AMBIGUOUS_TARGET", "EXPECT_FAILED", "TIMEOUT"}
+# Failures where the app showed a screen the artifact doesn't know: worth asking what it says. (A form that comes back
+# with an error passes every step and only fails the success checkpoint.)
+LEARNABLE = {"TARGET_UNRESOLVED", "AMBIGUOUS_TARGET", "EXPECT_FAILED", "TIMEOUT", "CHECKPOINT_FAILED"}
 
 
 @dataclass
@@ -111,9 +113,15 @@ class Prober:
         screen = Masker().snapshot(screen)  # the evidence snapshot is already redacted; this is belt and braces
         step = next((s for s in artifact.all_steps() if s.id == result.at_step), None)
         given = ", ".join(f"{{{{inputs.{k}}}}}" for k in spec["inputs"])
+        if step:
+            where = f"It stopped at step '{step.id}' ({step.intent}): expected {result.expected}, but it wasn't there."
+        else:
+            # Every step ran; the app answered the last one with something other than the success screen
+            last = artifact.steps[-1]
+            where = (f"Every step ran, the last being '{last.intent}', but the screen that came back isn't the success "
+                     f"screen (expected {result.expected}). This screen is the application's response to that step.")
         prompt = (f"The capability '{artifact.capability.title}' was replayed with {given} set to {report.why}. "
-                  f"It stopped at step '{result.at_step}' ({step.intent if step else 'checkpoint'}): expected "
-                  f"{result.expected}, but it wasn't there.\n\nCurrent screen:\n{screen}")
+                  f"{where}\n\nCurrent screen:\n{screen}")
         turn = await self.planner.turn(PROBE_SYSTEM, PROBE_TOOLS, [{"role": "user", "content": prompt}])
         report.cost_usd = turn.usage.cost(self.planner.model)
         call = next(iter(turn.tool_calls()), None)

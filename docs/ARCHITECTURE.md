@@ -239,6 +239,25 @@ Shaping choices (each one is defensible on its own):
   "Search" buttons), the recorder retries inside the element's nearest labelled region (a fieldset legend, a
   dialog, a landmark) and records `within`. It never records a position.
 - **Controls in table rows** use `tableCell` with a `role` (the "View" link in the row where Type = Savings).
+- **The success checkpoint races the outcomes too.** A form that comes back with an error ("Minimum opening
+  deposit…") passes every step and fails only at the end, so the checkpoint waits for success *or* any declared
+  outcome. Probes learn from a checkpoint failure as well, and tell the model that the screen is the app's response
+  to the last step.
+
+### `open_sub_account` (Pass 2 item 4)
+- **The flow:** Member detail → Open Sub-Account → a form → Continue → Review New Sub-Account, which has a
+  **Confirm** button. Account type and Initial deposit have no `<label>`, so the recorder finds them by the text in
+  the neighbouring cell (`anchor`).
+- **Real discovery** cost $0.04. Claude stopped at the review screen on its own, and the probe learned
+  `DEPOSIT_BELOW_MINIMUM`.
+- **Replay** for another member succeeds, and $5.00 returns the business outcome. `GET /__confirmed` stays at 0
+  throughout.
+- **Tests:**
+  - Discovery's click on Confirm is refused, and the refusal is shown to the model.
+  - No Confirm step can appear in the artifact.
+  - Continue is `reversible`.
+  - `SESSION_EXPIRED` escalates rather than restarting.
+  - A deliberately loose locator that lands on Confirm during replay is refused by the live policy re-check.
 
 ---
 

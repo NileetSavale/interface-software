@@ -1,0 +1,500 @@
+{
+  "schemaVersion": "1",
+  "capability": {
+    "id": "core_banking.open_sub_account",
+    "version": "1.0.0",
+    "title": "Prepare a new sub-account for a member",
+    "description": "Fills in the new sub-account form for a member and stops at the review screen. Opening the account (Confirm) is left to a person."
+  },
+  "app": {
+    "product": "mock-core-banking",
+    "versionRange": ">=1.0 <2.0",
+    "surface": "web",
+    "entryPath": "/"
+  },
+  "status": "draft",
+  "provenance": {
+    "discoveryRunId": "disc_20261115T025211Z_159668",
+    "recordedAt": "2026-11-15T02:52:31+00:00",
+    "model": "claude-sonnet-5-5"
+  },
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "member"
+    },
+    "accountType": {
+      "type": "enum",
+      "description": "Kind of sub-account",
+      "values": [
+        "Savings",
+        "Checking",
+        "Certificate",
+        "Holiday Club"
+      ],
+      "sensitive": false
+    },
+    "nickname": {
+      "type": "string",
+      "description": "Nickname shown on statements",
+      "pattern": "^[A-Za-z ]{1,20}$",
+      "sensitive": false
+    },
+    "initialDeposit": {
+      "type": "string",
+      "description": "Opening deposit in dollars, e.g. 250.00",
+      "pattern": "^[0-9]+\\.[0-9]{2}$",
+      "sensitive": true
+    }
+  },
+  "outputs": {},
+  "outcomes": [
+    {
+      "code": "APP_ERROR",
+      "kind": "fatal",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)internal server error|an unexpected error|service unavailable"
+        }
+      },
+      "description": "The application failed. Stop and keep the evidence."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)not authori[sz]ed|access denied|insufficient (privileges|permissions)"
+        }
+      },
+      "description": "The operator account may not do this. An answer for the caller, not a fault."
+    },
+    {
+      "code": "UNEXPECTED_DIALOG",
+      "kind": "escalate",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "role": "dialog"
+      },
+      "description": "A dialog the capability doesn't know. A person decides."
+    },
+    {
+      "code": "SLOW_LOAD",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)^\\s*(loading|please wait)\\b"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "wait",
+          "timeoutMs": 5000
+        },
+        "maxAttempts": 2,
+        "resume": "step"
+      },
+      "description": "The app shows a wait message. Wait longer, then carry on."
+    },
+    {
+      "code": "SESSION_EXPIRED",
+      "kind": "escalate",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)session (has )?(expired|timed out)"
+        }
+      },
+      "description": "The session ended part-way through a change. A person checks what was saved."
+    },
+    {
+      "code": "DEPOSIT_BELOW_MINIMUM",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)Minimum opening deposit is"
+        }
+      },
+      "description": "The application rejected the opening deposit as below the minimum and returned the Open Sub-Account form instead of the review screen. (learned from probe: an opening deposit below the minimum)"
+    }
+  ],
+  "policy": {
+    "allowedOrigins": [
+      "http://127.0.0.1:4100"
+    ],
+    "allowedPaths": [
+      "/*"
+    ],
+    "maxRisk": "reversible"
+  },
+  "subflows": {
+    "sign_on": [
+      {
+        "id": "open_sign_on_page",
+        "intent": "open the sign-on page",
+        "action": "navigate",
+        "value": "/",
+        "risk": "read",
+        "recordedBy": "author",
+        "needsReview": false
+      },
+      {
+        "id": "enter_user_id",
+        "intent": "enter user id",
+        "action": "type",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "User ID"
+            },
+            {
+              "kind": "label",
+              "label": "User ID"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "User ID",
+              "relation": "right-of",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.APP_USER}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "enter_password",
+        "intent": "enter password",
+        "action": "type",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "Password"
+            },
+            {
+              "kind": "label",
+              "label": "Password"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "Password",
+              "relation": "right-of",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.APP_PASSWORD}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "sign",
+        "intent": "sign on",
+        "action": "click",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "button",
+              "name": "Sign On"
+            },
+            {
+              "kind": "text",
+              "text": "Sign On"
+            }
+          ]
+        },
+        "risk": "read",
+        "expect": {
+          "kind": "visible",
+          "frame": [
+            "nav"
+          ],
+          "role": "link",
+          "name": "Member Inquiry"
+        },
+        "recordedBy": "model",
+        "needsReview": false
+      }
+    ]
+  },
+  "preconditions": [
+    {
+      "use": "sign_on",
+      "unless": {
+        "kind": "visible",
+        "frame": [
+          "nav"
+        ],
+        "role": "link",
+        "name": "Member Inquiry"
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "open_member_inquiry",
+      "intent": "open member inquiry",
+      "action": "click",
+      "target": {
+        "frame": [
+          "nav"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Member Inquiry"
+          },
+          {
+            "kind": "text",
+            "text": "Member Inquiry"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "enter_member_number",
+      "intent": "enter member number",
+      "action": "type",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Member #"
+          },
+          {
+            "kind": "label",
+            "label": "Member #"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Member #",
+            "relation": "right-of",
+            "role": "textbox"
+          }
+        ]
+      },
+      "value": "{{inputs.memberId}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "search_member",
+      "intent": "search member",
+      "action": "click",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "within": {
+          "role": "group",
+          "name": "Member Inquiry"
+        },
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Search"
+          },
+          {
+            "kind": "text",
+            "text": "Search"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "start_sub_account_opening",
+      "intent": "start sub-account opening",
+      "action": "click",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Open Sub-Account"
+          },
+          {
+            "kind": "text",
+            "text": "Open Sub-Account"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "choose_account_type",
+      "intent": "choose account type",
+      "action": "select",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "anchor",
+            "anchorText": "Account type",
+            "relation": "right-of",
+            "role": "combobox"
+          }
+        ]
+      },
+      "value": "{{inputs.accountType}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "enter_nickname",
+      "intent": "enter nickname",
+      "action": "type",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Nickname"
+          },
+          {
+            "kind": "label",
+            "label": "Nickname"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Nickname",
+            "relation": "right-of",
+            "role": "textbox"
+          }
+        ]
+      },
+      "value": "{{inputs.nickname}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "enter_deposit",
+      "intent": "enter deposit",
+      "action": "type",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "anchor",
+            "anchorText": "Initial deposit",
+            "relation": "right-of",
+            "role": "textbox"
+          }
+        ]
+      },
+      "value": "{{inputs.initialDeposit}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "continue_review",
+      "intent": "continue to review",
+      "action": "click",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Continue"
+          },
+          {
+            "kind": "text",
+            "text": "Continue"
+          }
+        ]
+      },
+      "risk": "reversible",
+      "recordedBy": "model",
+      "needsReview": false
+    }
+  ],
+  "success": {
+    "checkpoint": [
+      {
+        "kind": "visible",
+        "frame": [
+          "main"
+        ],
+        "text": "Account type:"
+      },
+      {
+        "kind": "identity",
+        "input": "memberId",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Member #:",
+              "relation": "right-of"
+            }
+          ]
+        },
+        "equals": "{{inputs.memberId}}"
+      }
+    ]
+  },
+  "overrides": {}
+}

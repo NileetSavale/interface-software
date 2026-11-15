@@ -155,18 +155,24 @@ class Replayer:
 
     async def _run_steps(self):
         await self._navigate("preflight", self.artifact.app.entry_path)
+        steps_done = False
         while True:
             try:
-                for pre in self.artifact.preconditions:
-                    if pre.unless and await self.surface.wait_any([pre.unless], 2_000) is not None:
-                        self.log.event("precondition_skipped", subflow=pre.use)
-                        continue
-                    await self._run_flow(self.artifact.subflows[pre.use], recovering=False)
-                await self._run_flow(self.artifact.steps, recovering=False)
+                if not steps_done:
+                    for pre in self.artifact.preconditions:
+                        if pre.unless and await self.surface.wait_any([pre.unless], 2_000) is not None:
+                            self.log.event("precondition_skipped", subflow=pre.use)
+                            continue
+                        await self._run_flow(self.artifact.subflows[pre.use], recovering=False)
+                    await self._run_flow(self.artifact.steps, recovering=False)
+                    steps_done = True
+                await self._checkpoint()
                 break
             except _Restart:
                 self.outputs.clear()
-        await self._checkpoint()
+                steps_done = False
+            except _Retry:
+                continue  # a recovery or a person dealt with what the checkpoint met: check again
         return Success(run_id=self.run_id, completed_at=now(), outputs=self.outputs,
                        recovered=self.recovered, drift=self.drift)
 
@@ -364,7 +370,14 @@ class Replayer:
         for assertion in self.artifact.success.checkpoint:
             match assertion:
                 case Visible():
-                    if await self.surface.wait_any([assertion], 5_000) is None:
+                    # The last step's response may be a declared outcome (a form back with "minimum deposit"), not
+                    # the success screen: race them, as every other wait does
+                    last = self.artifact.steps[-1]
+                    watched = self._watched(last)
+                    index = await self.surface.wait_any([assertion, *(o.detect for o in watched)], 5_000)
+                    if index:
+                        await self._handle(watched[index - 1], last, recovering=False, acted=True)
+                    if index is None:
                         raise self._fail("checkpoint", "CHECKPOINT_FAILED", _describe(assertion), "not on screen",
                                          evidence=await self._evidence("checkpoint"))
                 case OutputPresent(output=name):
