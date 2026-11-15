@@ -4,6 +4,7 @@ Everything passes through redact() on the way to disk, which is the only place r
 the values it knows are sensitive (sensitive inputs and secrets); pattern-based PII detection comes in Pass 2.
 """
 import json
+import re
 import secrets
 import time
 from datetime import datetime, timezone
@@ -54,3 +55,53 @@ class RunLog:
 
     def close(self):
         self._file.close()
+
+
+class Audit:
+    """Security events that outlive a run, one JSON line each in runs/audit.jsonl, and the circuit breaker built on
+    them. A WRONG_RECORD means the app served someone else's data: twice within the window and the capability stops
+    running unattended until a person re-approves it (which writes a reset)."""
+
+    TRIP_AFTER = 2
+    WINDOW_S = 24 * 3600
+
+    def __init__(self, path: Path = RUNS / "audit.jsonl"):
+        self.path = path
+
+    def record(self, event: str, capability: str, **data):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        with self.path.open("a") as f:
+            f.write(json.dumps({"at": now(), "epoch": time.time(), "event": event, "capability": capability, **data}) + "\n")
+
+    def tripped(self, capability: str) -> bool:
+        """Whether the breaker is open: enough wrong records since the last reset, inside the window."""
+        if not self.path.exists():
+            return False
+        recent = []
+        for line in self.path.read_text().splitlines():
+            entry = json.loads(line)
+            if entry["capability"] != capability:
+                continue
+            if entry["event"] == "breaker_reset":
+                recent = []
+            elif entry["event"] == "wrong_record" and time.time() - entry["epoch"] < self.WINDOW_S:
+                recent.append(entry)
+        return len(recent) >= self.TRIP_AFTER
+
+
+# A value-bearing element ("- cell \"Jane Doe\"", YAML-quoted when it holds a #) and a bare text node ("- text: …")
+_VALUE_LINE = re.compile(r'^(\s*- \'?(?:cell|text|generic|paragraph|rowheader|strong|emphasis|listitem) )"((?:[^"\\]|\\.)*)"')
+_TEXT_LINE = re.compile(r'^(\s*- text: )(.*)$')
+
+
+def structure_only(snapshot: str) -> str:
+    """A snapshot with the record's data taken out, for evidence of a screen that showed someone else's record: every
+    digit, and the text of every value cell, are masked. Labels ("Name:"), headings, columns and controls stay, so the
+    page is still recognisable."""
+    def mask(match: re.Match) -> str:
+        text = match.group(2)
+        return match.group(0) if text.rstrip().endswith(":") else f'{match.group(1)}"▒"'
+    def mask_text(match: re.Match) -> str:
+        return match.group(0) if match.group(2).strip().strip("\"").endswith(":") else f"{match.group(1)}▒"
+    lines = (_TEXT_LINE.sub(mask_text, _VALUE_LINE.sub(mask, line)) for line in snapshot.splitlines())
+    return re.sub(r"\d", "#", "\n".join(lines))

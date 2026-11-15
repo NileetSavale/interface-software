@@ -15,6 +15,29 @@
       "identifies": "member"
     }
   },
-  "secrets": ["APP_USER", "APP_PASSWORD"],
-  "maxRisk": "read"
+  "secrets": [
+    "APP_USER",
+    "APP_PASSWORD"
+  ],
+  "maxRisk": "read",
+  "probes": [
+    {
+      "inputs": {
+        "memberId": "99999"
+      },
+      "why": "a member number that doesn't exist"
+    },
+    {
+      "inputs": {
+        "memberId": "01234"
+      },
+      "why": "a member number the application rejects as malformed"
+    },
+    {
+      "inputs": {
+        "memberId": "45678"
+      },
+      "why": "a member the operator may not view"
+    }
+  ]
 }

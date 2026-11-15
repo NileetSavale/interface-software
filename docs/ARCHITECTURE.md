@@ -206,13 +206,39 @@ Shaping choices (each one is defensible on its own):
 - YAML was rejected because of implicit type conversion (`NO` becomes `false`). The review card already covers
   readability.
 
-### ✅ Locked: where outcomes come from
-1. **Discovery proposes:** error states the model meets while exploring become draft detectors.
-2. **A standard library adds the common ones:** `SESSION_EXPIRED`, `APP_ERROR`, `PERMISSION_DENIED`,
-   `UNEXPECTED_DIALOG`, `SLOW_LOAD`.
-3. **A human approves at review**, which moves `status` from `draft` to `approved`. The reviewer adds business
-   outcomes the happy path never showed (e.g. `MEMBER_NOT_FOUND`).
+### ✅ Locked: where outcomes come from (updated in Pass 2 by D18)
+1. **Probes learn the flow-specific ones** (`src/interfaze/discovery/probes.py`). The goal spec lists probe inputs
+   with a reason (`99999`: "a member number that doesn't exist"). After recording:
+   - the artifact is replayed with each probe, with no model;
+   - where it stops, the model sees that one screen (inputs masked) and names it: code, kind, and a short phrase
+     copied from the message. A phrase with a number or a placeholder in it is refused (it would only match this
+     input);
+   - the phrase becomes the detector, and the outcome is kept only if the probe now ends in it **and** the
+     discovery inputs still succeed.
+   The real run learned `MEMBER_NOT_FOUND` and `INVALID_MEMBER_NUMBER` this way for about one cent each.
+2. **A standard library adds the common ones** (`src/interfaze/artifact/library.py`): `APP_ERROR` (fatal),
+   `PERMISSION_DENIED` (business), `UNEXPECTED_DIALOG` (escalate), `SLOW_LOAD` (wait), and `SESSION_EXPIRED`. For a
+   read-only capability, `SESSION_EXPIRED` signs on again and restarts the steps. For one that changed something,
+   it escalates, because steps that changed state must not run twice.
+3. **A human approves at review**, which moves `status` from `draft` to `approved`, and can still add, edit or
+   delete any outcome.
 - Only `approved` artifacts run unattended. A `draft` replays only with an operator attached.
+
+### Pass 2 refinements to recording and replay
+- **Sign-on becomes a subflow.** The recorder splits off the steps up to the first click after the last credential
+  is typed. They become `subflows.sign_on`, which starts with a navigate to `entryPath`, and run as a precondition
+  that is skipped when the first task control is already visible. The `SESSION_EXPIRED` recovery reuses it.
+- **`recovery.resume`: `step | start`.** Signing on again lands on the home screen, so retrying the step that met the
+  timeout can't work. `start` runs the steps again from the first. The schema allows it only when
+  `maxRisk: read`.
+- **An outcome met after a step acted moves the run on.** For example, the notice page that appears after Search
+  is clicked through, then the next step runs. The step that already acted is not repeated.
+- **Outcomes race the waits.** Target resolution and postconditions poll the declared outcomes as they wait, so an
+  error page ends the run in about 3 s instead of after the 10 s timeout.
+- **Duplicate controls get a region scope.** When no strategy is unique in the frame (the inquiry page has two
+  "Search" buttons), the recorder retries inside the element's nearest labelled region (a fieldset legend, a
+  dialog, a landmark) and records `within`. It never records a position.
+- **Controls in table rows** use `tableCell` with a `role` (the "View" link in the row where Type = Savings).
 
 ---
 
@@ -262,6 +288,21 @@ wait(runId, timeoutMs) → ReplayResult | { status: "running" | "paused" }
   balance must never come back as `success`, because in a bank that's a data exposure, not a bug.
 - It also runs in discovery before the recorder saves the artifact, so a run that ended on the wrong record can't
   become a capability.
+
+**Hardened in Pass 2 (D19): a wrong record is a security incident, not a failed step.**
+- **Identity gate, before the first touch.** Every step that reads from the page or acts on it first resolves its
+  target, then checks the record's identifier if the page shows one. So nothing is read from someone else's
+  record, and for a capability that changes state, nothing is done to it. The end-of-run checkpoint stays as a
+  second line.
+- **Evidence without the other person's data.** No screenshot, because pixels can't be redacted reliably. The
+  snapshot keeps labels (`Name:`), column headers and controls; every value cell, text node and digit is masked.
+- **The caller isn't told whose record it was.** The result says "a different member". Last-4 goes only to the
+  audit log.
+- **No retry, no recovery.** Each run has its own browser context, discarded when the run ends, so no session state
+  carries over.
+- **Circuit breaker.** Wrong-record events go to `runs/audit.jsonl`. Two within 24 hours for one
+  `capability@version` and every replay of it fails at preflight with `CIRCUIT_OPEN`, even clean requests, until a
+  person re-approves it. Approval writes the reset.
 
 ### Taxonomy
 | Kind | Examples (mock app can inject all) | Response |
@@ -556,20 +597,23 @@ A graph of an app's screens that grows with every verified run.
 | Frameset (nav + main) | frame-scoped TargetDescriptors |
 | Accounts table with a "View" link per row | ambiguity rule → `rowWhere` scope |
 | An input with no `<label>`, only text in the neighbouring cell | text-anchor strategy |
-| Two "Search" buttons (nav quick-search + main form) | scope, not index |
+| Two "Search" buttons on the inquiry page (Quick Find + Member Inquiry fieldsets) | scope, not index |
 | `Confirm` on the review page | irreversible block |
-| Member search does **prefix matching** (12345 → 12345, 123450, 123451) | input-match markers + identity checkpoint (`WRONG_RECORD`) |
+| The `wrong_record` fault: a stale cache serves the neighbouring member | identity checkpoint (`WRONG_RECORD`) |
 
-**Faults** (`?fault=` or `FAULT=` env)
+**Faults.** Armed per server for the next N member pages with `POST /__faults?name=…&times=N`, or with `FAULT=` at
+start. The business outcomes need no fault; the data produces them (99999 not found, 45678 restricted, a leading 0
+invalid).
 | Fault | Expected outcome |
 |---|---|
-| `not_found` | business `MEMBER_NOT_FOUND` |
-| `validation` | business `INVALID_INPUT` |
-| `permission_denied` | business `PERMISSION_DENIED` |
+| member 99999 | business `MEMBER_NOT_FOUND` (learned by a probe) |
+| member 01234 | business `INVALID_INPUT` (learned by a probe) |
+| member 45678 | business `PERMISSION_DENIED` (library) |
 | `session_timeout` | recoverable → re-login subflow |
 | `interstitial` | recoverable → click "Acknowledge" |
-| `slow` | recoverable → bounded wait/retry |
+| `slow` | auto-wait absorbs it (3 s); no recovery needed |
 | `server_error` | fatal `APP_ERROR` |
+| `wrong_record` | fatal `WRONG_RECORD` |
 | `unknown_dialog` | needs_human → the handoff demo |
 
 **Variant B** (`VARIANT=b`, the second tenant)

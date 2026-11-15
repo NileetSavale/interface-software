@@ -734,7 +734,7 @@
     },
     "Recovery": {
       "additionalProperties": false,
-      "description": "What to do before retrying the step. A run allows at most 3 recoveries in total, whatever these say.",
+      "description": "What to do, then where to pick up. A run allows at most 3 recoveries in total, whatever these say.",
       "properties": {
         "do": {
           "discriminator": {
@@ -764,6 +764,16 @@
           "minimum": 1,
           "title": "Maxattempts",
           "type": "integer"
+        },
+        "resume": {
+          "default": "step",
+          "description": "step: retry the step that met the outcome. start: run the steps again from the first, for when the recovery lands somewhere else (signing on again opens the home screen). Read-only capabilities only: nothing that changed state may run twice.",
+          "enum": [
+            "step",
+            "start"
+          ],
+          "title": "Resume",
+          "type": "string"
         }
       },
       "required": [
@@ -1146,6 +1156,19 @@
         "column": {
           "title": "Column",
           "type": "string"
+        },
+        "role": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Set for a control in the cell (the row's View link); unset reads the cell itself.",
+          "title": "Role"
         }
       },
       "required": [

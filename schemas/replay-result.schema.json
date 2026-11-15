@@ -163,6 +163,7 @@
             "EXPECT_FAILED",
             "CHECKPOINT_FAILED",
             "WRONG_RECORD",
+            "CIRCUIT_OPEN",
             "FATAL_OUTCOME",
             "POLICY_VIOLATION",
             "RECOVERY_EXHAUSTED",

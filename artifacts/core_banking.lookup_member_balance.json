@@ -12,10 +12,10 @@
     "surface": "web",
     "entryPath": "/"
   },
-  "status": "approved",
+  "status": "draft",
   "provenance": {
-    "discoveryRunId": "disc_20261115T005032Z_98ac60",
-    "recordedAt": "2026-11-15T00:50:45+00:00",
+    "discoveryRunId": "disc_20261115T011533Z_e1283e",
+    "recordedAt": "2026-11-15T01:15:44+00:00",
     "model": "claude-sonnet-5-5"
   },
   "inputs": {
@@ -37,7 +37,106 @@
       "redact": "none"
     }
   },
-  "outcomes": [],
+  "outcomes": [
+    {
+      "code": "APP_ERROR",
+      "kind": "fatal",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)internal server error|an unexpected error|service unavailable"
+        }
+      },
+      "description": "The application failed. Stop and keep the evidence."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)not authori[sz]ed|access denied|insufficient (privileges|permissions)"
+        }
+      },
+      "description": "The operator account may not do this. An answer for the caller, not a fault."
+    },
+    {
+      "code": "UNEXPECTED_DIALOG",
+      "kind": "escalate",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "role": "dialog"
+      },
+      "description": "A dialog the capability doesn't know. A person decides."
+    },
+    {
+      "code": "SLOW_LOAD",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)^\\s*(loading|please wait)\\b"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "wait",
+          "timeoutMs": 5000
+        },
+        "maxAttempts": 2,
+        "resume": "step"
+      },
+      "description": "The app shows a wait message. Wait longer, then carry on."
+    },
+    {
+      "code": "SESSION_EXPIRED",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)session (has )?(expired|timed out)"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "subflow",
+          "subflow": "sign_on"
+        },
+        "maxAttempts": 1,
+        "resume": "start"
+      },
+      "description": "Sign on again and run the steps from the first."
+    },
+    {
+      "code": "MEMBER_NOT_FOUND",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)No members found for"
+        }
+      },
+      "description": "The application searched for the member number and reported that no matching member exists. (learned from probe: a member number that doesn't exist)"
+    },
+    {
+      "code": "INVALID_MEMBER_NUMBER",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)Invalid member number"
+        }
+      },
+      "description": "The application rejected the member number as malformed and showed an \"Invalid member number\" message with a link to start a new search. (learned from probe: a member number the application rejects as malformed)"
+    }
+  ],
   "policy": {
     "allowedOrigins": [
       "http://127.0.0.1:4100"
@@ -47,95 +146,127 @@
     ],
     "maxRisk": "read"
   },
-  "subflows": {},
-  "preconditions": [],
+  "subflows": {
+    "sign_on": [
+      {
+        "id": "open_sign_on_page",
+        "intent": "open the sign-on page",
+        "action": "navigate",
+        "value": "/",
+        "risk": "read",
+        "recordedBy": "author",
+        "needsReview": false
+      },
+      {
+        "id": "enter_user_id",
+        "intent": "enter user id",
+        "action": "type",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "User ID"
+            },
+            {
+              "kind": "label",
+              "label": "User ID"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "User ID",
+              "relation": "right-of",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.APP_USER}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "enter_password",
+        "intent": "enter password",
+        "action": "type",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "Password"
+            },
+            {
+              "kind": "label",
+              "label": "Password"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "Password",
+              "relation": "right-of",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.APP_PASSWORD}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "sign",
+        "intent": "sign on",
+        "action": "click",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "button",
+              "name": "Sign On"
+            },
+            {
+              "kind": "text",
+              "text": "Sign On"
+            }
+          ]
+        },
+        "risk": "read",
+        "expect": {
+          "kind": "visible",
+          "frame": [
+            "nav"
+          ],
+          "role": "link",
+          "name": "Member Inquiry"
+        },
+        "recordedBy": "model",
+        "needsReview": false
+      }
+    ]
+  },
+  "preconditions": [
+    {
+      "use": "sign_on",
+      "unless": {
+        "kind": "visible",
+        "frame": [
+          "nav"
+        ],
+        "role": "link",
+        "name": "Member Inquiry"
+      }
+    }
+  ],
   "steps": [
-    {
-      "id": "enter_user_id",
-      "intent": "enter user id",
-      "action": "type",
-      "target": {
-        "frame": [
-          "main"
-        ],
-        "strategies": [
-          {
-            "kind": "role",
-            "role": "textbox",
-            "name": "User ID"
-          },
-          {
-            "kind": "label",
-            "label": "User ID"
-          },
-          {
-            "kind": "anchor",
-            "anchorText": "User ID",
-            "relation": "right-of",
-            "role": "textbox"
-          }
-        ]
-      },
-      "value": "{{secrets.APP_USER}}",
-      "risk": "read",
-      "recordedBy": "model",
-      "needsReview": false
-    },
-    {
-      "id": "enter_password",
-      "intent": "enter password",
-      "action": "type",
-      "target": {
-        "frame": [
-          "main"
-        ],
-        "strategies": [
-          {
-            "kind": "role",
-            "role": "textbox",
-            "name": "Password"
-          },
-          {
-            "kind": "label",
-            "label": "Password"
-          },
-          {
-            "kind": "anchor",
-            "anchorText": "Password",
-            "relation": "right-of",
-            "role": "textbox"
-          }
-        ]
-      },
-      "value": "{{secrets.APP_PASSWORD}}",
-      "risk": "read",
-      "recordedBy": "model",
-      "needsReview": false
-    },
-    {
-      "id": "sign",
-      "intent": "sign on",
-      "action": "click",
-      "target": {
-        "frame": [
-          "main"
-        ],
-        "strategies": [
-          {
-            "kind": "role",
-            "role": "button",
-            "name": "Sign On"
-          },
-          {
-            "kind": "text",
-            "text": "Sign On"
-          }
-        ]
-      },
-      "risk": "read",
-      "recordedBy": "model",
-      "needsReview": false
-    },
     {
       "id": "open_member_inquiry",
       "intent": "open member inquiry",
@@ -199,6 +330,10 @@
         "frame": [
           "main"
         ],
+        "within": {
+          "role": "group",
+          "name": "Member Inquiry"
+        },
         "strategies": [
           {
             "kind": "role",

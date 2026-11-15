@@ -42,6 +42,9 @@ def cmd_approve(args) -> int:
     artifact = load_artifact(args.artifact)
     artifact = artifact.model_copy(update={"status": "approved"})
     Path(args.artifact).write_text(dump_artifact(artifact))
+    # Approving is the person's sign-off that any wrong-record incidents were looked at: it closes the breaker
+    from interfaze.evidence import Audit
+    Audit().record("breaker_reset", f"{artifact.capability.id}@{artifact.capability.version}", by="approve")
     print(f"{artifact.capability.id}@{artifact.capability.version} approved for unattended replay")
     return 0
 

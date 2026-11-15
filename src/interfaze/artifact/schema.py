@@ -78,6 +78,8 @@ class TableCellStrategy(Model):
     table_anchor: TextMatch = Field(description="Caption or heading text that identifies the table.")
     row_where: RowWhere
     column: str
+    role: str | None = Field(default=None, description="Set for a control in the cell (the row's View link); "
+                                                       "unset reads the cell itself.")
 
 
 class TextStrategy(Model):
@@ -284,9 +286,15 @@ class WaitLonger(Model):
 
 
 class Recovery(Model):
-    """What to do before retrying the step. A run allows at most 3 recoveries in total, whatever these say."""
+    """What to do, then where to pick up. A run allows at most 3 recoveries in total, whatever these say."""
     do: Annotated[RunSubflow | ClickThrough | WaitLonger, Field(discriminator="kind")]
     max_attempts: int = Field(default=1, ge=1, le=3)
+    resume: Literal["step", "start"] = Field(
+        default="step",
+        description="step: retry the step that met the outcome. start: run the steps again from the first, for when "
+                    "the recovery lands somewhere else (signing on again opens the home screen). Read-only "
+                    "capabilities only: nothing that changed state may run twice.",
+    )
 
 
 class Outcome(Model):
@@ -383,6 +391,8 @@ class Artifact(Model):
                 problems.append(f"outcome {o.code} is attached to unknown step {o.at.split(':', 1)[1]}")
             if isinstance(o.recovery and o.recovery.do, RunSubflow) and o.recovery.do.subflow not in self.subflows:
                 problems.append(f"outcome {o.code} recovers with unknown subflow {o.recovery.do.subflow}")
+            if o.recovery and o.recovery.resume == "start" and self.policy.max_risk != "read":
+                problems.append(f"outcome {o.code} restarts the steps, which only a read-only capability may do")
 
         for s in steps:
             for branch in s.wait_for.any_of if s.wait_for else []:

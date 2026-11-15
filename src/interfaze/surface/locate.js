@@ -45,7 +45,7 @@
     return out;
   }
 
-  function tableCell(tableM, column, rowColumn, rowEquals) {
+  function tableCell(tableM, column, rowColumn, rowEquals, role) {
     const out = [];
     for (const table of document.querySelectorAll("table")) {
       const label = tableLabel(table);
@@ -55,7 +55,9 @@
       const ci = heads.indexOf(column), ri = heads.indexOf(rowColumn);
       if (ci < 0 || ri < 0) continue;
       for (const row of table.rows) {
-        if (row !== header && row.cells[ri] && textOf(row.cells[ri]) === norm(rowEquals) && row.cells[ci]) out.push(row.cells[ci]);
+        const cell = row !== header && row.cells[ri] && textOf(row.cells[ri]) === norm(rowEquals) && row.cells[ci];
+        const el = cell && control(cell, role);
+        if (el) out.push(el);
       }
     }
     return out;
@@ -86,5 +88,22 @@
     return out;
   }
 
-  window.__ifz = { anchor, tableCell, describeValue, textOf };
+  // The nearest labelled region around an element: what tells two same-named controls apart (scope, not index).
+  // A fieldset is named by its legend, a dialog or landmark by aria-label. Names with digits are data, so skipped.
+  function regionOf(el) {
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      let role = null, name = null;
+      if (p.tagName === "FIELDSET" && p.querySelector(":scope > legend")) {
+        role = "group"; name = textOf(p.querySelector(":scope > legend"));
+      } else if (p.tagName === "DIALOG") {
+        role = "dialog"; name = p.getAttribute("aria-label");
+      } else if (p.getAttribute("role") && p.getAttribute("aria-label")) {
+        role = p.getAttribute("role"); name = p.getAttribute("aria-label");
+      }
+      if (role && isLabel(name)) return { role, name: norm(name) };
+    }
+    return null;
+  }
+
+  window.__ifz = { anchor, tableCell, describeValue, regionOf, textOf };
 })();

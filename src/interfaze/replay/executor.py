@@ -15,7 +15,7 @@ from interfaze.artifact.schema import (
     TEMPLATE, Visible, WaitLonger,
 )
 from interfaze.artifact.templates import TemplateError, render
-from interfaze.evidence import RunLog, new_run_id, now
+from interfaze.evidence import Audit, RunLog, new_run_id, now, structure_only
 from interfaze.policy import PolicyViolation, check_action, check_url
 from interfaze.replay.result import (
     BusinessOutcome, DriftEvent, EvidenceRef, Failed, FailureClass, InputError, InvalidInput, RecoveryEvent, Success,
@@ -34,7 +34,13 @@ class _Stop(Exception):
 
 
 class _Retry(Exception):
-    """A recovery ran; do the current step again."""
+    """A recovery ran. If the step had already acted it's done and the run moves on; otherwise it runs again."""
+    def __init__(self, step_done: bool):
+        self.step_done = step_done
+
+
+class _Restart(Exception):
+    """A recovery ran and left the app somewhere else; run the steps again from the first."""
 
 
 def validate_inputs(artifact: Artifact, inputs: dict[str, str]) -> list[InputError]:
@@ -75,7 +81,8 @@ def last4(value: str) -> str:
 
 class Replayer:
     def __init__(self, artifact: Artifact, base_url: str, inputs: dict[str, str], *, headed: bool = False,
-                 allow_draft: bool = False, env: dict[str, str] | None = None, run_id: str | None = None):
+                 allow_draft: bool = False, env: dict[str, str] | None = None, run_id: str | None = None,
+                 audit: Audit | None = None):
         self.artifact = artifact
         self.base_url = base_url.rstrip("/")
         self.inputs = {k: str(v) for k, v in inputs.items()}
@@ -83,6 +90,8 @@ class Replayer:
         self.allow_draft = allow_draft
         self.env = env
         self.run_id = run_id or new_run_id("replay")
+        self.audit = audit or Audit()
+        self.key = f"{artifact.capability.id}@{artifact.capability.version}"
         self.outputs: dict[str, object] = {}
         self.recovered: list[RecoveryEvent] = []
         self.drift: list[DriftEvent] = []
@@ -108,6 +117,11 @@ class Replayer:
             return self._finish(Failed(run_id=self.run_id, completed_at=now(), at_step="preflight",
                                        error_class="NOT_APPROVED", expected="status approved",
                                        observed=f"status {self.artifact.status}"))
+        if self.audit.tripped(self.key):
+            return self._finish(Failed(run_id=self.run_id, completed_at=now(), at_step="preflight",
+                                       error_class="CIRCUIT_OPEN", expected="no recent wrong-record incidents",
+                                       observed=f"{Audit.TRIP_AFTER}+ WRONG_RECORD in the last day; re-approve after "
+                                                f"review to reset"))
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=not self.headed)
             try:
@@ -127,12 +141,17 @@ class Replayer:
 
     async def _run_steps(self):
         await self._navigate("preflight", self.artifact.app.entry_path)
-        for pre in self.artifact.preconditions:
-            if pre.unless and await self.surface.wait_any([pre.unless], 2_000) is not None:
-                self.log.event("precondition_skipped", subflow=pre.use)
-                continue
-            await self._run_flow(self.artifact.subflows[pre.use], recovering=False)
-        await self._run_flow(self.artifact.steps, recovering=False)
+        while True:
+            try:
+                for pre in self.artifact.preconditions:
+                    if pre.unless and await self.surface.wait_any([pre.unless], 2_000) is not None:
+                        self.log.event("precondition_skipped", subflow=pre.use)
+                        continue
+                    await self._run_flow(self.artifact.subflows[pre.use], recovering=False)
+                await self._run_flow(self.artifact.steps, recovering=False)
+                break
+            except _Restart:
+                self.outputs.clear()
         await self._checkpoint()
         return Success(run_id=self.run_id, completed_at=now(), outputs=self.outputs,
                        recovered=self.recovered, drift=self.drift)
@@ -143,8 +162,9 @@ class Replayer:
                 try:
                     await self._run_step(step, recovering)
                     break
-                except _Retry:
-                    continue
+                except _Retry as retry:
+                    if retry.step_done:
+                        break
 
     # ── One step ───────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -157,6 +177,7 @@ class Replayer:
         elif step.action == "extract":
             for name, extractor in step.extract.items():
                 hit = await self._resolve(step, extractor, timeout, recovering)
+                await self._identity_gate(step.id)
                 text = await self.surface.read_text(hit.handle)
                 self.outputs[name] = parse_value(text, extractor.parse)
                 # The caller gets the value; the run log and evidence on disk only the placeholder
@@ -164,20 +185,8 @@ class Replayer:
                     self.log.mask(shown, f"{{{{outputs.{name}}}}}")
             self.log.event("extracted", step=step.id, outputs=sorted(step.extract))
         else:
-            hit = await self._resolve(step, step.target, timeout, recovering)
-            await self._check_policy(step, hit)
             value = self._render(step.id, step.value) if step.value is not None else None
-            try:
-                await self.surface.act(hit.handle, step.action, value)
-            except SurfaceError as e:
-                if e.retry != "safe":
-                    raise self._fail(step.id, "SURFACE_ERROR", f"{step.action} on the target", str(e))
-                await asyncio.sleep(0.5)
-                hit = await self._resolve(step, step.target, timeout, recovering)
-                try:
-                    await self.surface.act(hit.handle, step.action, value)
-                except SurfaceError as e2:
-                    raise self._fail(step.id, "SURFACE_ERROR", f"{step.action} on the target", str(e2))
+            hit = await self._act(step, step.target, step.action, value, timeout, recovering, check_policy=True)
             self.log.event("acted", step=step.id, action=step.action, value=step.value, rank=hit.rank, strategy=hit.strategy)
 
         if step.wait_for and step.wait_for.any_of:
@@ -185,12 +194,47 @@ class Replayer:
         elif step.wait_for and step.wait_for.load_state:
             await self.surface.wait_any([], timeout, step.wait_for.frame, step.wait_for.load_state)
         await self._outcomes(step, "after", recovering)
-        if step.expect and await self.surface.wait_any([step.expect], timeout) is None:
-            await self._outcomes(step, "after", recovering)  # an error page explains a missing postcondition better
-            raise self._fail(step.id, "EXPECT_FAILED", _describe(step.expect), "not on screen", evidence=await self._evidence(step.id))
+        if step.expect:
+            # Race the postcondition against every outcome that could explain its absence, so an error page is
+            # reported as soon as it shows, not after the timeout
+            watched = self._watched(step)
+            index = await self.surface.wait_any([step.expect, *(o.detect for o in watched)], timeout)
+            if index:
+                await self._handle(watched[index - 1], step, recovering, acted=True)
+            if index is None:
+                await self._outcomes(step, "after", recovering)
+                raise self._fail(step.id, "EXPECT_FAILED", _describe(step.expect), "not on screen",
+                                 evidence=await self._evidence(step.id))
+
+    async def _act(self, step: Step, target, action: str, value: str | None, timeout: int, recovering: bool,
+                   check_policy: bool = False) -> Resolved:
+        """Resolve, then act. A transient failure (the element went stale while the frame re-rendered) gets one
+        retry on a freshly resolved element; anything else stops the run."""
+        for attempt in (1, 2):
+            hit = await self._resolve(step, target, timeout, recovering)
+            await self._identity_gate(step.id)
+            if check_policy:
+                await self._check_policy(step, hit)
+            try:
+                await self.surface.act(hit.handle, action, value)
+                return hit
+            except SurfaceError as e:
+                if e.retry != "safe" or attempt == 2:
+                    raise self._fail(step.id, "SURFACE_ERROR", f"{action} on the target", str(e))
+                await asyncio.sleep(0.5)
+
+    def _watched(self, step: Step) -> list[Outcome]:
+        return [o for o in self.artifact.outcomes if o.at in ("any", f"after:{step.id}")]
 
     async def _resolve(self, step: Step, target, timeout: int, recovering: bool) -> Resolved:
-        hit = await self.surface.resolve(target, timeout)
+        # Short resolve attempts with an outcome check between them: a declared outcome (an error page, "no member
+        # found") ends the wait at once instead of after the full timeout
+        deadline = asyncio.get_running_loop().time() + timeout / 1000
+        while True:
+            hit = await self.surface.resolve(target, min(1_000, timeout))
+            if isinstance(hit, Resolved) or asyncio.get_running_loop().time() >= deadline:
+                break
+            await self._outcomes(step, "during", recovering)  # only outcomes declared for any point match
         if isinstance(hit, Resolved):
             if hit.rank > 0:
                 self.drift.append(DriftEvent(step_id=step.id, hit_rank=hit.rank, strategy=hit.strategy))
@@ -216,23 +260,28 @@ class Replayer:
     async def _wait_branches(self, step: Step, recovering: bool):
         outcomes = {o.code: o for o in self.artifact.outcomes}
         conditions = [outcomes[b.code].detect if isinstance(b, OutcomeSeen) else b for b in step.wait_for.any_of]
-        index = await self.surface.wait_any(conditions, step.wait_for.timeout_ms, step.wait_for.frame)
+        named = {b.code for b in step.wait_for.any_of if isinstance(b, OutcomeSeen)}
+        others = [o for o in self._watched(step) if o.code not in named]
+        index = await self.surface.wait_any([*conditions, *(o.detect for o in others)], step.wait_for.timeout_ms,
+                                            step.wait_for.frame)
+        if index is not None and index >= len(conditions):
+            await self._handle(others[index - len(conditions)], step, recovering, acted=True)
         if index is None:
             await self._outcomes(step, "after", recovering)
             raise self._fail(step.id, "TIMEOUT", "one of: " + ", ".join(_describe(c) for c in conditions),
                              f"none within {step.wait_for.timeout_ms} ms", evidence=await self._evidence(step.id))
         branch = step.wait_for.any_of[index]
         if isinstance(branch, OutcomeSeen):
-            await self._handle(outcomes[branch.code], step, recovering)
+            await self._handle(outcomes[branch.code], step, recovering, acted=True)
 
     # ── Outcomes ───────────────────────────────────────────────────────────────────────────────────────────────
 
     async def _outcomes(self, step: Step, when: str, recovering: bool):
         for outcome in self.artifact.outcomes:
             if outcome.at in ("any", f"{when}:{step.id}") and await self.surface.holds(outcome.detect):
-                await self._handle(outcome, step, recovering)
+                await self._handle(outcome, step, recovering, acted=when == "after")
 
-    async def _handle(self, outcome: Outcome, step: Step, recovering: bool):
+    async def _handle(self, outcome: Outcome, step: Step, recovering: bool, acted: bool = False):
         self.log.event("outcome", code=outcome.code, kind=outcome.kind, step=step.id)
         match outcome.kind:
             case "business":
@@ -248,9 +297,9 @@ class Replayer:
             case "recoverable":
                 if recovering:
                     return  # a recovery's own steps don't trigger recoveries; the step that started it retries
-                await self._recover(outcome, step)
+                await self._recover(outcome, step, acted)
 
-    async def _recover(self, outcome: Outcome, step: Step):
+    async def _recover(self, outcome: Outcome, step: Step, acted: bool):
         self._recoveries[outcome.code] += 1
         attempt = self._recoveries[outcome.code]
         if attempt > outcome.recovery.max_attempts or len(self.recovered) >= MAX_RECOVERIES_PER_RUN:
@@ -263,14 +312,22 @@ class Replayer:
                 await self._run_flow(self.artifact.subflows[name], recovering=True)
             case ClickThrough(target=target):
                 action = "clicked through"
-                hit = await self._resolve(step, target, DEFAULT_TIMEOUT_MS, recovering=True)
-                await self.surface.act(hit.handle, "click")
+                await self._act(step, target, "click", None, DEFAULT_TIMEOUT_MS, recovering=True)
+                await self._wait_cleared(outcome)
             case WaitLonger(timeout_ms=ms):
                 action = f"waited {ms} ms"
                 await asyncio.sleep(ms / 1000)
         self.recovered.append(RecoveryEvent(code=outcome.code, step_id=step.id, attempt=attempt, action=action))
-        self.log.event("recovered", code=outcome.code, step=step.id, attempt=attempt, action=action)
-        raise _Retry()
+        self.log.event("recovered", code=outcome.code, step=step.id, attempt=attempt, action=action,
+                       resume=outcome.recovery.resume)
+        raise _Restart() if outcome.recovery.resume == "start" else _Retry(step_done=acted)
+
+    async def _wait_cleared(self, outcome: Outcome):
+        """After clicking through, wait for the page to move on, so the same notice isn't met twice. If it's still
+        there at the deadline the run carries on, and the recovery cap decides."""
+        deadline = asyncio.get_running_loop().time() + DEFAULT_TIMEOUT_MS / 1000
+        while await self.surface.holds(outcome.detect) and asyncio.get_running_loop().time() < deadline:
+            await asyncio.sleep(0.1)
 
     # ── Checkpoint ─────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -290,14 +347,35 @@ class Replayer:
                         raise self._fail("checkpoint", "CHECKPOINT_FAILED", f"the {assertion.input} on screen",
                                          "not found", evidence=await self._evidence("checkpoint"))
                     shown = await self.surface.read_text(hit.handle)
-                    wanted = self._render("checkpoint", assertion.equals)
-                    if shown.strip() != wanted.strip():
-                        # Never return a neighbouring record's data as success (D16). The observed value is shown
-                        # last-4 only: it's someone else's identifier.
-                        self.outputs.clear()
-                        raise self._fail("checkpoint", "WRONG_RECORD", f"{assertion.input} = {assertion.equals}",
-                                         f"{assertion.input} = {last4(shown)}", evidence=await self._evidence("checkpoint"))
+                    if shown.strip() != self._render("checkpoint", assertion.equals).strip():
+                        await self._wrong_record("checkpoint", assertion, shown)
         self.log.event("checkpoint_passed")
+
+    async def _identity_gate(self, step_id: str):
+        """D16, enforced before the first touch: once the page shows a record's identifier, no step reads from it or
+        acts on it until that identifier matches the input. Runs after the step's target resolved, so the page it
+        checks is the page the step is about to use. A page without the identifier (sign-on, search form) passes."""
+        for assertion in self.artifact.success.checkpoint:
+            if not isinstance(assertion, IdentityMatches):
+                continue
+            hit = await self.surface.resolve(assertion.target, 0)
+            if not isinstance(hit, Resolved):
+                continue
+            shown = await self.surface.read_text(hit.handle)
+            if shown.strip() != self._render(step_id, assertion.equals).strip():
+                await self._wrong_record(step_id, assertion, shown)
+
+    async def _wrong_record(self, step_id: str, assertion: IdentityMatches, shown: str):
+        """Someone else's record is on screen: a security incident, not a retryable fault. Nothing read from it is
+        returned, the evidence keeps the page's structure but none of its data, the caller isn't told whose record
+        it was, and the audit log feeds the circuit breaker. No recovery or retry applies."""
+        self.outputs.clear()
+        self.audit.record("wrong_record", self.key, run_id=self.run_id, step=step_id, input=assertion.input,
+                          observed_last4=last4(shown))
+        self.log.event("identity_mismatch", step=step_id, input=assertion.input, observed_last4=last4(shown))
+        raise self._fail(step_id, "WRONG_RECORD", f"{assertion.input} = {assertion.equals}",
+                         f"a different {self.artifact.inputs[assertion.input].identifies or 'record'}",
+                         evidence=await self._evidence(step_id, scrub=True))
 
     # ── Helpers ────────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -320,14 +398,17 @@ class Replayer:
         await self.surface.navigate(url)
         self.log.event("navigated", step=step_id, path=path_or_url)
 
-    async def _evidence(self, label: str) -> list[EvidenceRef]:
+    async def _evidence(self, label: str, scrub: bool = False) -> list[EvidenceRef]:
         """What the screen looked like when the run stopped: the redacted accessibility snapshot and a screenshot.
-        (Screenshots aren't masked yet; that's Pass 2. The mock app's data is fake.)"""
+        scrub is for a screen showing someone else's record: structure only, and no screenshot, since pixels can't be
+        redacted reliably. (Masking screenshots in general is Pass 2 item 3.)"""
         refs = []
         try:
             observation = await self.surface.observe()
-            refs.append(EvidenceRef(kind="a11y_snapshot", path=self.log.write(f"{label}.snapshot.txt", observation.text)))
-            refs.append(EvidenceRef(kind="screenshot", path=await self.surface.screenshot(self.log.path(f"{label}.png"))))
+            text = structure_only(observation.text) if scrub else observation.text
+            refs.append(EvidenceRef(kind="a11y_snapshot", path=self.log.write(f"{label}.snapshot.txt", text)))
+            if not scrub:
+                refs.append(EvidenceRef(kind="screenshot", path=await self.surface.screenshot(self.log.path(f"{label}.png"))))
         except Exception as e:  # evidence is best effort; the failure itself is what matters
             self.log.event("evidence_failed", error=str(e))
         return refs

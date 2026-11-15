@@ -50,14 +50,15 @@
     { "code": "MEMBER_NOT_FOUND", "kind": "business", "at": "after:submit_search",
       "detect": { "text": { "matches": "(?i)no (member|record)s? found" } } },
     { "code": "INVALID_INPUT", "kind": "business", "at": "after:submit_search",
-      "detect": { "role": "alert", "text": { "matches": "(?i)invalid" } } },
+      "detect": { "text": { "matches": "(?i)invalid member" } } },
     { "code": "PERMISSION_DENIED", "kind": "business",
       "detect": { "text": { "matches": "(?i)not authori[sz]ed|access denied" } } },
 
     // recoverable: handled inside the run, reported as RecoveryEvents beside the result
     { "code": "SESSION_EXPIRED", "kind": "recoverable",
       "detect": { "role": "heading", "name": { "matches": "(?i)session (expired|timed out)" } },
-      "recovery": { "do": { "kind": "subflow", "subflow": "login" }, "maxAttempts": 1 } },
+      // signing on again opens the home screen, not the page the step was on: run the steps again from the first
+      "recovery": { "do": { "kind": "subflow", "subflow": "login" }, "maxAttempts": 1, "resume": "start" } },
     { "code": "NOTICE_INTERSTITIAL", "kind": "recoverable",
       "detect": { "role": "button", "name": "Acknowledge" },
       "recovery": { "do": { "kind": "click",

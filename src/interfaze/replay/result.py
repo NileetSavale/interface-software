@@ -16,6 +16,7 @@ FailureClass = Literal[
     "EXPECT_FAILED",        # a step's postcondition didn't hold
     "CHECKPOINT_FAILED",    # the success checkpoint didn't hold
     "WRONG_RECORD",         # the record on screen isn't the one asked for (D16)
+    "CIRCUIT_OPEN",         # repeated WRONG_RECORDs; the capability waits for a person to re-approve it
     "FATAL_OUTCOME",        # a declared fatal outcome matched, e.g. APP_ERROR; see outcomeCode
     "POLICY_VIOLATION",     # the step would leave the allowlist or exceed the policy's risk
     "RECOVERY_EXHAUSTED",   # a recoverable outcome kept recurring past its attempts, or the run's cap of 3

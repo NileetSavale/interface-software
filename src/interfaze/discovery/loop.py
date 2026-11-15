@@ -10,10 +10,11 @@ from urllib.parse import urlsplit
 from playwright.async_api import async_playwright
 from pydantic import ValidationError
 
-from interfaze.artifact.io import dump_artifact
+from interfaze.artifact.io import dump_artifact, load_artifact
 from interfaze.artifact.schema import Policy, Visible
 from interfaze.artifact.templates import TemplateError, render
 from interfaze.discovery.planner import ClaudePlanner, Planner
+from interfaze.discovery.probes import Prober
 from interfaze.discovery.recorder import Recorder
 from interfaze.evidence import RunLog, new_run_id
 from interfaze.policy import PolicyViolation, check_action, check_url
@@ -39,7 +40,7 @@ transfer, delete and the like): policy blocks it, and goals end at a review scre
 appears that you can't handle safely, call give_up and say why."""
 
 
-def _tool(name: str, description: str, **props) -> dict:
+def _tool(name: str, description: str, /, **props) -> dict:
     return {"name": name, "description": description, "strict": True, "input_schema": {
         "type": "object", "properties": props, "required": list(props), "additionalProperties": False}}
 
@@ -112,6 +113,9 @@ class Discovery:
                 outcome = await self._loop()
             finally:
                 await browser.close()
+        if outcome["status"] == "recorded" and self.goal.get("probes"):
+            outcome["probes"] = await self._probe(Path(outcome["artifact"]))
+            outcome["cost_usd"] = round(self.cost, 4)
         self.log.event("discovery_finished", **outcome)
         self.log.close()
         return outcome
@@ -170,6 +174,24 @@ class Discovery:
             if self.cost >= self.budget:
                 return self._result("budget", reason=f"reached the ${self.budget:.2f} budget")
         return self._result("max_steps", reason=f"reached {self.max_steps} steps")
+
+    async def _probe(self, path: Path) -> list[dict]:
+        """Replay the recording with each probe input and learn the outcomes it meets (D18, probes.py)."""
+        artifact = load_artifact(path)
+        prober = Prober(self.base_url, self.inputs, self.planner, self.run_id, env=self.env)
+        reports = []
+        for spec in self.goal["probes"]:
+            if self.cost >= self.budget:
+                reports.append({"why": spec.get("why", ""), "result": "skipped: budget reached"})
+                continue
+            artifact, report = await prober.probe(artifact, spec)
+            self.cost += report.cost_usd
+            self.log.event("probe", why=report.why, result=report.result, learned=report.learned, runs=report.run_ids,
+                           cost_usd=round(report.cost_usd, 5))
+            reports.append({"why": report.why, "result": report.result})
+        path.write_text(dump_artifact(artifact))
+        self.log.write("artifact.json", dump_artifact(artifact))
+        return reports
 
     def _stuck_nudge(self, calls: list[dict]) -> str | None:
         """Syntactic stuck detection (OpenHands-style): the same action on a screen that isn't changing. One nudge,

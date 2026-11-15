@@ -114,11 +114,15 @@ class ScriptedPlanner:
         last = messages[-1]["content"]
         if isinstance(last, list):
             self.seen += [b["content"] for b in last if isinstance(b, dict) and b.get("type") == "tool_result"]
+        elif len(messages) == 1:
+            self.seen.append(last)
         if not self._calls:
             return Turn(content=[{"type": "text", "text": "out of script"}], stop_reason="end_turn")
         name, args = self._calls.pop(0)
         if callable(args):
-            screens = [s for s in [_first_text(messages), *self.seen] if "Current screen:" in s]
+            # A single-message conversation (a probe) shows its screen in that message; otherwise it's the latest
+            history = [_first_text(messages)] if len(messages) == 1 else [_first_text(messages), *self.seen]
+            screens = [s for s in history if "Current screen:" in s]
             args = args(screens[-1])
         return Turn(content=[{"type": "tool_use", "id": f"call_{len(self.seen)}", "name": name, "input": args}],
                     stop_reason="tool_use")

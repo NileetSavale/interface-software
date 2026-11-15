@@ -21,6 +21,10 @@ def step(data: dict, step_id: str) -> dict:
     return next(s for s in data["steps"] if s["id"] == step_id)
 
 
+def outcome(data: dict, code: str) -> dict:
+    return next(o for o in data["outcomes"] if o["code"] == code)
+
+
 def rejects(data: dict, message: str):
     with pytest.raises(ValidationError) as e:
         Artifact.model_validate(data)
@@ -53,7 +57,14 @@ def test_reversible_step_needs_policy_to_allow_it(example):
     step(example, "submit_search")["risk"] = "reversible"
     rejects(example, "reversible but the policy allows read only")
     example["policy"]["maxRisk"] = "reversible"
+    outcome(example, "SESSION_EXPIRED")["recovery"]["resume"] = "step"
     Artifact.model_validate(example)
+
+
+# Running the steps again from the first is safe only when none of them changed anything
+def test_restart_recovery_needs_read_only_capability(example):
+    example["policy"]["maxRisk"] = "reversible"
+    rejects(example, "outcome SESSION_EXPIRED restarts the steps, which only a read-only capability may do")
 
 
 # D16: an input that names a record must be checked against the record on screen

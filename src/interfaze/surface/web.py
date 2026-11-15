@@ -160,19 +160,29 @@ class WebSurface(Surface):
             if role in {"link", "button"}:
                 candidates.append(TextStrategy(text=name))
         found = await frame.evaluate("el => window.__ifz.describeValue(el)", handle)
-        candidates += [TableCellStrategy.model_validate(c) if c["kind"] == "tableCell" else
-                       AnchorStrategy.model_validate({**c, **({"role": role} if purpose == "act" else {})}) for c in found]
+        as_control = {"role": role} if purpose == "act" else {}
+        candidates += [TableCellStrategy.model_validate({**c, **as_control}) if c["kind"] == "tableCell" else
+                       AnchorStrategy.model_validate({**c, **as_control}) for c in found]
 
-        # Keep only strategies that find exactly this element, checked against the live page
-        kept = []
-        for strategy in candidates:
-            hits = await self._find(frame, strategy)
-            if len(hits) == 1 and await frame.evaluate("([a, b]) => a === b", [hits[0], handle]):
-                kept.append(strategy)
+        # Keep only strategies that find exactly this element, checked against the live page. When none does on the
+        # whole frame (two "Search" buttons), try again inside the element's labelled region.
+        target = Target(frame=path, strategies=candidates or [RoleStrategy(role=role, name=name)])
+        kept = await self._unique(target, candidates, handle)
+        if not kept and (region := await frame.evaluate("el => window.__ifz.regionOf(el)", handle)):
+            target = target.model_copy(update={"within": RegionScope(role=region["role"], name=region["name"])})
+            kept = await self._unique(target, candidates, handle)
         if not kept:
             raise SurfaceError("TARGET_UNRESOLVED", f"no stable way to find {role} {name!r} again; pick a labelled "
                                                     f"control or a value in a labelled row or table")
-        return Target(frame=path, strategies=kept)
+        return target.model_copy(update={"strategies": kept})
+
+    async def _unique(self, target: Target, candidates: list[Strategy], handle: ElementHandle) -> list[Strategy]:
+        kept = []
+        for strategy in candidates:
+            hits = await self._hits(target, strategy)
+            if len(hits) == 1 and await hits[0].evaluate("(a, b) => a === b", handle):
+                kept.append(strategy)
+        return kept
 
     # ── Replay: resolving recorded targets ─────────────────────────────────────────────────────────────────────
 
@@ -239,8 +249,9 @@ class WebSurface(Surface):
                                                         [js_pattern(strategy.anchor_text), strategy.relation, strategy.role])
                 case TableCellStrategy():
                     found = await frame.evaluate_handle(
-                        "([t, c, rc, re]) => window.__ifz.tableCell(t, c, rc, re)",
-                        [js_pattern(strategy.table_anchor), strategy.column, strategy.row_where.column, strategy.row_where.equals])
+                        "([t, c, rc, re, role]) => window.__ifz.tableCell(t, c, rc, re, role)",
+                        [js_pattern(strategy.table_anchor), strategy.column, strategy.row_where.column,
+                         strategy.row_where.equals, strategy.role])
                 case _:
                     return []  # structural and bbox: not implemented on the web surface yet
             items = await found.get_properties()
