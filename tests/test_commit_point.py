@@ -93,3 +93,52 @@ def test_a_locator_that_lands_on_confirm_is_refused_at_replay(base_url, recorded
     assert isinstance(result, Failed) and result.error_class == "POLICY_VIOLATION", result
     assert "irreversible" in result.observed
     assert confirmed(base_url) == before
+
+
+def test_a_commit_button_with_a_harmless_label_is_stopped_in_the_network(base_url, recorded, tmp_path):
+    """Nothing in the name "OK" says it commits, so the name classifier lets the click through; the request it sends
+    goes to a declared commit path, and the browser drops it before it leaves."""
+    _, artifact, _ = recorded
+    before = confirmed(base_url)
+    ok = Step.model_validate({"id": "press_ok", "intent": "press OK", "action": "click", "risk": "read",
+                              "target": {"frame": ["main"], "strategies": [{"kind": "role", "role": "button", "name": "OK"}]}})
+    tampered = artifact.model_copy(update={"status": "approved", "steps": [*artifact.steps, ok]})
+    httpx.post(base_url + "/__faults", params={"name": "ok_commit", "times": -1})
+    try:
+        result = asyncio.run(Replayer(tampered, base_url, INPUTS, env=ENV, audit=Audit(tmp_path / "a.jsonl")).run())
+    finally:
+        httpx.delete(base_url + "/__faults")
+    assert isinstance(result, Failed) and result.error_class == "POLICY_VIOLATION", result
+    assert "commits a change" in result.observed
+    assert confirmed(base_url) == before
+
+
+def test_credentials_go_only_to_the_sign_on_page(base_url, tmp_path):
+    """A hostile page asks for the password again. Discovery refuses to type it anywhere but the sign-on page, then
+    refuses everything else on that form, and every step recorded after it needs a person's review."""
+    from tests.test_end_to_end import GOAL as LOOKUP
+    script = [*SCRIPT[:6],
+              ("type_text", call(ref=ref(r'textbox "Re-enter password"'), text="{{secrets.APP_PASSWORD}}",
+                                 intent="re-verify the session")),
+              ("click", call(ref=ref(r'button "Verify"'), intent="submit the verification")),
+              *SCRIPT[6:-1],
+              ("verify_identity", call(ref=ref(r'cell "Member #:"[^\n]*\n\s*- cell'), input="memberId",
+                                       intent="confirm the member number")),
+              SCRIPT[-1]]
+    planner = ScriptedPlanner(script)
+    httpx.post(base_url + "/__faults", params={"name": "fake_login", "times": -1})
+    try:
+        outcome = asyncio.run(discover({k: v for k, v in LOOKUP.items() if k != "probes"}, base_url,
+                                       {"memberId": "12345"}, planner=planner, out_dir=tmp_path, env=ENV,
+                                       escalation_model=None))
+    finally:
+        httpx.delete(base_url + "/__faults")
+    assert any("typed only on the sign-on page" in seen for seen in planner.seen)
+    assert any("this form asked for credentials after sign-on" in seen for seen in planner.seen)
+    assert httpx.get(base_url + "/__reverified").json()["count"] == 0
+    assert outcome["status"] == "recorded", outcome
+    artifact = load_artifact(outcome["artifact"])
+    assert not any("verif" in s.id and s.action == "click" for s in artifact.steps)
+    # Signing on and searching came before the hostile form; reading the record came after it
+    flagged = {s.id: s.needs_review for s in artifact.steps}
+    assert not flagged["open_member_inquiry"] and all(flagged[s.id] for s in artifact.steps if s.action == "extract")

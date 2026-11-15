@@ -15,10 +15,11 @@ from typing import Literal
 from playwright.async_api import BrowserContext, ElementHandle, Error as PlaywrightError, Frame, Locator, Page
 
 from interfaze.artifact.schema import (
-    Action, AnchorStrategy, LabelStrategy, Regex, RegionScope, RoleStrategy, Strategy, TableCellStrategy, Target, TextMatch,
+    Action, AnchorStrategy, LabelStrategy, Policy, Regex, RegionScope, RoleStrategy, Strategy, TableCellStrategy, Target, TextMatch,
     TextStrategy, Visible,
 )
 from interfaze.pii import LABELS, PATTERNS
+from interfaze.policy import refused
 from interfaze.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
 
 HUMAN_JS = (Path(__file__).parent / "human.js").read_text()
@@ -60,18 +61,49 @@ class WebSurface(Surface):
         self.page = page
         self._snapshot = ""
         self._snapshots = 0
+        self.blocked: list[str] = []  # requests the policy refused, in order; the caller checks after each action
+        self._documents = [0, 0]  # page loads and posts: [sent, decided by the policy gate]
 
     @classmethod
-    async def open(cls, context: BrowserContext, on_human: Callable[[dict], Awaitable[None]] | None = None) -> "WebSurface":
+    async def open(cls, context: BrowserContext, on_human: Callable[[dict], Awaitable[None]] | None = None,
+                   policy: Policy | None = None) -> "WebSurface":
         """on_human receives what a person does in this browser, already described as a recorded target. The page
-        reports every click and change; the callback decides whether a person was holding control at the time."""
+        reports every click and change; the callback decides whether a person was holding control at the time.
+
+        With a policy, every request the browser makes goes through it first (policy.refused): the guard sits below
+        anything a page can say, so a misleading label or a link elsewhere can't get past it. A person holding
+        control is held to it too."""
+        blocked: list[str] = []
+        documents = [0, 0]
+        if policy:
+            def is_document(request) -> bool:
+                return request.is_navigation_request() or request.method != "GET"
+
+            async def gate(route):
+                request = route.request
+                document = is_document(request)
+                try:
+                    if reason := refused(policy, request.url, document):
+                        blocked.append(reason)
+                        await route.abort("blockedbyclient")
+                    else:
+                        await route.continue_()
+                finally:
+                    documents[1] += document
+            context.on("request", lambda request: documents.__setitem__(0, documents[0] + is_document(request)))
+            await context.route("**/*", gate)
         await context.add_init_script(script=LOCATE_JS)
         if on_human:
             async def relay(payload: dict):
                 await on_human(human_action(payload))
             await context.expose_function("__ifzHuman", relay)
             await context.add_init_script(script=HUMAN_JS)
-        return cls(await context.new_page())
+        surface = cls(await context.new_page())
+        surface.blocked, surface._documents = blocked, (documents if policy else None)
+        return surface
+
+    def refusals_since(self, mark: int) -> list[str]:
+        return self.blocked[mark:]
 
     # ── Observing ──────────────────────────────────────────────────────────────────────────────────────────────
 
@@ -175,6 +207,19 @@ class WebSurface(Surface):
 
     async def frame_of(self, ref: str) -> list[str]:
         return frame_path(await (await self._ref_handle(ref)).owner_frame())
+
+    async def form_of(self, ref: str) -> str | None:
+        """Which form a control belongs to, as document path + the form's place among that document's forms; None
+        outside a form."""
+        return await (await self._ref_handle(ref)).evaluate("""el => {
+            const form = el.form || el.closest('form');
+            if (!form) return null;
+            return el.ownerDocument.location.pathname + '#form' + Array.from(el.ownerDocument.forms).indexOf(form);
+        }""")
+
+    async def path_of(self, ref: str) -> str:
+        """The URL path of the document the ref is in (its frame's, not the top page's)."""
+        return await (await self._ref_handle(ref)).evaluate("el => el.ownerDocument.location.pathname")
 
     async def describe(self, ref: str, purpose: Literal["act", "read"] = "act") -> Target:
         role, name = self.ref_line(ref)
@@ -303,7 +348,9 @@ class WebSurface(Surface):
                 guard()
             match action:
                 case "click":
+                    sent = self._documents[0] if self._documents else 0
                     await handle.click(timeout=5_000)
+                    await self._settle(sent)
                 case "type":
                     await handle.fill(value or "", timeout=5_000)
                 case "select":
@@ -320,6 +367,18 @@ class WebSurface(Surface):
             message = str(e).splitlines()[0]
             code: ErrorCode = "TIMEOUT" if "Timeout" in message else "NOT_ACTIONABLE"
             raise SurfaceError(code, message, retry="safe") from e
+
+    async def _settle(self, sent: int, window_s: float = 0.3):
+        """A click's page load or form post can leave after click() returns. Wait briefly for one to start, and then
+        for the policy gate to decide it, so a refusal is reported against the click that caused it."""
+        if self._documents is None:
+            return
+        deadline = time.monotonic() + window_s
+        while time.monotonic() < deadline:
+            started, decided = self._documents
+            if started > sent and decided >= started:
+                return
+            await asyncio.sleep(0.02)
 
     async def read_text(self, handle: object) -> str:
         assert isinstance(handle, ElementHandle)

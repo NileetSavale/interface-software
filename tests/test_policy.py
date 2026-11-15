@@ -35,3 +35,14 @@ def test_url_allowlist():
         check_url(POLICY, "https://evil.example/")
     with pytest.raises(PolicyViolation, match="path"):
         check_url(Policy(allowed_origins=["http://localhost:4100"], allowed_paths=["/inquiry*"]), "http://localhost:4100/admin")
+
+
+def test_network_gate_refuses_commit_paths_and_other_origins():
+    from interfaze.policy import refused
+    policy = Policy(allowed_origins=["http://localhost:4100"], commit_paths=["/subaccount/confirm"])
+    assert "commits a change" in refused(policy, "http://localhost:4100/subaccount/confirm", document=True)
+    assert "origin" in refused(policy, "http://verify-member.example.net/start", document=True)
+    # A page's own subresource elsewhere is still kept on the allowlist; data: never leaves the browser
+    assert "origin" in refused(policy, "https://cdn.example.com/x.png", document=False)
+    assert refused(policy, "data:image/png;base64,AAAA", document=False) is None
+    assert refused(policy, "http://localhost:4100/subaccount/review", document=True) is None

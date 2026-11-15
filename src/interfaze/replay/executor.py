@@ -134,7 +134,8 @@ class Replayer:
             browser = await p.chromium.launch(headless=not self.headed)
             try:
                 self.surface = await WebSurface.open(await browser.new_context(),
-                                                     on_human=self._on_human if self.hub else None)
+                                                     on_human=self._on_human if self.hub else None,
+                                                     policy=self.artifact.policy)
                 result = await self._run_steps()
             except _Stop as stop:
                 result = stop.result
@@ -242,8 +243,13 @@ class Replayer:
             await self._identity_gate(step.id)
             if check_policy:
                 await self._check_policy(step, hit)
+            mark = len(self.surface.blocked)
             try:
                 await self.surface.act(hit.handle, action, value, guard=lambda: self.session.check(epoch))
+                if refusals := self.surface.refusals_since(mark):
+                    # The click sent the browser somewhere the policy forbids; the network layer dropped it
+                    raise self._fail(step.id, "POLICY_VIOLATION", f"a {step.risk} action", refusals[0],
+                                     evidence=await self._evidence(step.id))
                 return hit
             except SurfaceError as e:
                 if e.retry != "safe" or attempt == 2:
@@ -263,6 +269,9 @@ class Replayer:
                 break
             await self._outcomes(step, "during", recovering)  # only outcomes declared for any point match
         if isinstance(hit, Resolved):
+            # The control can appear on the next screen before anything else does, after the "before" check ran on
+            # the last one: check again on the screen it was found on, so a non-modal dialog can't be clicked past
+            await self._outcomes(step, "during", recovering)
             if hit.rank > 0:
                 self.drift.append(DriftEvent(step_id=step.id, hit_rank=hit.rank, strategy=hit.strategy))
                 self.log.event("drift", step=step.id, rank=hit.rank, strategy=hit.strategy)

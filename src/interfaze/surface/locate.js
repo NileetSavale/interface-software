@@ -9,11 +9,18 @@
   // m is {exact: "..."} or {regex: [source, flags]}
   const matches = (text, m) => (m.exact !== undefined ? text === norm(m.exact) : new RegExp(m.regex[0], m.regex[1]).test(text));
 
+  // The text just before a table names it. Legacy layouts often wrap a table in more layout tables, so the search
+  // climbs through any wrapper that holds nothing but this table, and stops at the first one with other content.
   function tableLabel(table) {
     if (table.caption) return textOf(table.caption);
-    let p = table.previousElementSibling;
-    while (p && p.tagName === "BR") p = p.previousElementSibling;
-    return p && p.tagName !== "TABLE" ? textOf(p) : null;
+    const own = textOf(table);
+    for (let el = table; el && el !== document.body; el = el.parentElement) {
+      if (el !== table && textOf(el) !== own) return null;
+      let p = el.previousElementSibling;
+      while (p && (p.tagName === "BR" || !textOf(p))) p = p.previousElementSibling;
+      if (p) return p.tagName !== "TABLE" ? textOf(p) : null;
+    }
+    return null;
   }
 
   function headerRow(table) {

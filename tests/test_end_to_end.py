@@ -209,3 +209,15 @@ def test_attended_replay_hands_an_unknown_screen_to_a_person(base_url, discovere
     result, replayer = asyncio.run(attended_replay(base_url, approved, "12345", person, tmp_path, fault="interstitial"))
     assert isinstance(result, Success) and result.outputs["memberName"] == "Jane Doe", result
     assert '"verdict": "retry step"' in (replayer.log.dir / "events.jsonl").read_text()
+
+
+def test_replay_survives_a_reshuffled_layout(replay, base_url):
+    """Seed 1 swaps frame, fieldset, row and column order and wraps the accounts table twice: labels and headers
+    still find the same cells (evals/robustness.py runs this across many seeds)."""
+    httpx.post(base_url + "/__layout", params={"seed": 1})
+    try:
+        result = replay("12345")
+    finally:
+        httpx.delete(base_url + "/__layout")
+    assert isinstance(result, Success), result
+    assert result.outputs == {"memberName": "Jane Doe", "savingsBalance": "4210.55"}

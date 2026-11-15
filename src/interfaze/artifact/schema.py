@@ -318,6 +318,9 @@ class Policy(Model):
     allowed_origins: list[str] = Field(min_length=1)
     allowed_paths: list[str] = Field(default_factory=lambda: ["/*"], description="Glob patterns on the URL path.")
     max_risk: Literal["read", "reversible"] = "read"
+    commit_paths: list[str] = Field(default_factory=list, description=(
+        "URL paths (globs) that commit something, e.g. a confirm endpoint. Any request to one is blocked in the "
+        "browser's network layer, whatever the button that sent it is called. From the app's integration config."))
 
 
 class Precondition(Model):

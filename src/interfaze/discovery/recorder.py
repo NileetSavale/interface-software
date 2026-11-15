@@ -36,11 +36,14 @@ class Recorder:
         self.outputs: dict[str, OutputSpec] = {}
         self.identity: list[IdentityMatches] = []
         self._ids: set[str] = set()
+        # Set once the page has shown something hostile: every step recorded after it needs a person's look
+        self.review_from: str | None = None
 
     def act(self, intent: str, action: str, target: Target, value: str | None, risk: str, recorded_by: str = "model",
             needs_review: bool = False):
         self.steps.append(Step(id=step_id(intent, self._ids), intent=intent, action=action, target=target, value=value,
-                               risk=risk, recorded_by=recorded_by, needs_review=needs_review))
+                               risk=risk, recorded_by=recorded_by,
+                               needs_review=needs_review or self.review_from is not None))
 
     def extract(self, intent: str, output: str, kind: str, target: Target):
         if output in self.outputs:
@@ -48,7 +51,7 @@ class Recorder:
         self.outputs[output] = OutputSpec(type=kind)
         extractor = Extractor(**target.model_dump(), parse=PARSE[kind])
         self.steps.append(Step(id=step_id(intent, self._ids), intent=intent, action="extract",
-                               extract={output: extractor}, risk="read"))
+                               extract={output: extractor}, risk="read", needs_review=self.review_from is not None))
 
     def verify_identity(self, input_name: str, target: Target):
         self.identity.append(IdentityMatches(input=input_name, target=target, equals=f"{{{{inputs.{input_name}}}}}"))
@@ -87,7 +90,8 @@ class Recorder:
             inputs={k: InputSpec.model_validate(v) for k, v in goal.get("inputs", {}).items()},
             outputs=self.outputs,
             outcomes=standard_outcomes(has_sign_on=bool(subflows), read_only=max_risk == "read"),
-            policy=Policy(allowed_origins=[self.origin], max_risk=max_risk),
+            policy=Policy(allowed_origins=[self.origin], max_risk=max_risk,
+                          commit_paths=self.goal.get("commitPaths", [])),
             subflows=subflows,
             preconditions=preconditions,
             steps=steps,

@@ -13,6 +13,7 @@
     "initialDeposit": {"type": "string", "description": "Opening deposit in dollars, e.g. 250.00", "pattern": "^[0-9]+\\.[0-9]{2}$", "sensitive": true}
   },
   "secrets": ["APP_USER", "APP_PASSWORD"],
+  "commitPaths": ["/subaccount/confirm"],
   "maxRisk": "reversible",
   "probes": [
     {"inputs": {"initialDeposit": "5.00"}, "why": "an opening deposit below the minimum"}

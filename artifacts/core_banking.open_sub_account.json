@@ -138,7 +138,10 @@
     "allowedPaths": [
       "/*"
     ],
-    "maxRisk": "reversible"
+    "maxRisk": "reversible",
+    "commitPaths": [
+      "/subaccount/confirm"
+    ]
   },
   "subflows": {
     "sign_on": [

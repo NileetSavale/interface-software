@@ -647,6 +647,14 @@
           ],
           "title": "Maxrisk",
           "type": "string"
+        },
+        "commitPaths": {
+          "description": "URL paths (globs) that commit something, e.g. a confirm endpoint. Any request to one is blocked in the browser's network layer, whatever the button that sent it is called. From the app's integration config.",
+          "items": {
+            "type": "string"
+          },
+          "title": "Commitpaths",
+          "type": "array"
         }
       },
       "required": [

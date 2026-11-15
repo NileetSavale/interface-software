@@ -45,9 +45,26 @@ def check_action(policy: Policy, action: str, role: str, name: str) -> Risk:
 
 
 def check_url(policy: Policy, url: str) -> None:
+    if reason := refused(policy, url, document=True):
+        raise PolicyViolation(reason)
+
+
+def refused(policy: Policy, url: str, document: bool) -> str | None:
+    """Why the browser may not request this URL, or None. Every request must stay on an allowed origin; a document
+    load or form post must also be on an allowed path and not on a commit path. Enforced in the network layer
+    (WebSurface), so it holds for a click on anything: a link to another site, or a commit button labelled "OK"."""
     parts = urlsplit(url)
+    if parts.scheme not in ("http", "https"):
+        return None  # data:, blob:, about: never leave the browser
     origin = f"{parts.scheme}://{parts.netloc}"
     if origin not in policy.allowed_origins:
-        raise PolicyViolation(f"blocked by policy: {origin} isn't an allowed origin")
-    if not any(fnmatch.fnmatch(parts.path or "/", pattern) for pattern in policy.allowed_paths):
-        raise PolicyViolation(f"blocked by policy: path {parts.path} isn't allowed")
+        return f"blocked by policy: {origin} isn't an allowed origin"
+    if not document:
+        return None
+    path = parts.path or "/"
+    if not any(fnmatch.fnmatch(path, pattern) for pattern in policy.allowed_paths):
+        return f"blocked by policy: path {path} isn't allowed"
+    if any(fnmatch.fnmatch(path, pattern) for pattern in policy.commit_paths):
+        return (f"blocked by policy: {path} commits a change (irreversible). Automation can reach a commit point "
+                f"but never press it; stop here.")
+    return None
