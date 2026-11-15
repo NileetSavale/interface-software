@@ -108,12 +108,13 @@ class ScriptedPlanner:
     def __init__(self, calls: list[tuple[str, dict]], model: str = "scripted"):
         self.model = model
         self._calls = list(calls)
-        self.seen: list[str] = []  # the tool results it was shown, for assertions
+        self.seen: list[str] = []  # the tool results and notes it was shown, for assertions
 
     async def turn(self, system: str, tools: list[dict], messages: list) -> Turn:
         last = messages[-1]["content"]
         if isinstance(last, list):
-            self.seen += [b["content"] for b in last if isinstance(b, dict) and b.get("type") == "tool_result"]
+            self.seen += [b["content"] if b.get("type") == "tool_result" else b["text"]
+                          for b in last if isinstance(b, dict) and b.get("type") in ("tool_result", "text")]
         elif len(messages) == 1:
             self.seen.append(last)
         if not self._calls:

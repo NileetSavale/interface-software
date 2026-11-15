@@ -430,6 +430,45 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
+### As built (Pass 2 item 2)
+- **Code:**
+  - `src/interfaze/session.py`: Session, ControlToken, Intervention.
+  - `src/interfaze/operator.py`: OperatorHub and the page on :4200.
+  - `src/interfaze/runs.py`: invoke / get_result / wait.
+  - `surface/human.js`: the listener for human actions.
+  - CLI: `replay --attended --deadline N` and `discover --attended`.
+- **The epoch is checked at dispatch, not before.**
+  - `surface.act(..., guard=)` first runs Playwright's actionability waits as a trial click.
+  - It then checks the epoch, then dispatches.
+  - So a click that was waiting for its element while control passed to a person is dropped, not sent.
+- **What escalates in an attended replay:**
+  - an `escalate` outcome;
+  - a control no strategy can find;
+  - a wait in which none of the expected screens appeared;
+  - a failed postcondition.
+  `WRONG_RECORD` and fatal outcomes never escalate. Without an operator, each of these fails as before.
+- **The resume check, in order:**
+  1. The outcome that paused the run must be gone; otherwise the run goes back to `PAUSED_FOR_HUMAN`.
+  2. If the step had already acted, the run moves on.
+  3. If the step's control is on screen, the step runs again.
+  4. If the next step's control is on screen, the person did this step, so it's skipped.
+  5. Otherwise the run is paused again.
+  An operator who hands back without fixing anything is refused, and the test covers it.
+- **Human actions:**
+  - In replay they're evidence only: role, name with digits masked, the target as recorded, and whether
+    something was typed, never what.
+  - In discovery they become steps with `recordedBy: human, needsReview: true`.
+  - A typed value is kept only if it equals an input or a secret, and then as its placeholder. Otherwise the step
+    isn't recorded at all.
+  - `interfaze approve` refuses an artifact that still has `needsReview` steps.
+  - The usual fix for a taught click-through is an outcome, not a step, so a reviewer has to decide which.
+- **The discovery ladder: nudge → `claude-opus-5-5` → a person.** The switch to Opus keeps the same messages,
+  system prompt and tools, so it isn't a history edit. The API ignores the thinking blocks the new model can't
+  read, and we don't strip them. `give_up` climbs the ladder too, not just the stuck detector.
+- **Invoke.** `invoke` returns `needs_human` (with the run id and intervention) once the deadline passes while a
+  person is involved, or `running` if the run is just slow. The run continues in the background, and its result
+  is kept for 15 minutes.
+
 ---
 
 ## 6. Safety (decision #6)

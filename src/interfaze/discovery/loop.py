@@ -4,6 +4,7 @@ The model only asks; this code decides (loop_runner's rule). Every tool call is 
 here, and a failure goes back to the model as a tool result rather than ending the run.
 """
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -16,8 +17,9 @@ from interfaze.artifact.templates import TemplateError, render
 from interfaze.discovery.planner import ClaudePlanner, Planner
 from interfaze.discovery.probes import Prober
 from interfaze.discovery.recorder import Recorder
-from interfaze.evidence import RunLog, new_run_id
-from interfaze.policy import PolicyViolation, check_action, check_url
+from interfaze.evidence import RunLog, new_run_id, now
+from interfaze.policy import PolicyViolation, check_action, check_url, classify
+from interfaze.session import Intervention, Session
 from interfaze.surface.base import SurfaceError
 from interfaze.surface.web import WebSurface
 
@@ -70,7 +72,8 @@ STOP_AFTER = 5
 
 class Discovery:
     def __init__(self, goal: dict, base_url: str, inputs: dict[str, str], planner: Planner, *, max_steps: int = 30,
-                 budget_usd: float = 1.0, out_dir: Path = Path("artifacts"), env: dict[str, str] | None = None):
+                 budget_usd: float = 1.0, out_dir: Path = Path("artifacts"), env: dict[str, str] | None = None,
+                 escalation_model: str | None = "claude-opus-5-5", operator_hub=None, pause_timeout_s: float = 600):
         self.goal = goal
         self.base_url = base_url.rstrip("/")
         self.inputs = inputs
@@ -81,6 +84,12 @@ class Discovery:
         self.env = env
         self.run_id = new_run_id("disc")
         self.log = RunLog(self.run_id)
+        self.session = Session(self.log)
+        # The escalation ladder (§5): nudge, then a stronger model on the same conversation, then a person
+        self.escalation_model = escalation_model
+        self.hub = operator_hub
+        self.pause_timeout_s = pause_timeout_s
+        self._rung = 0
         parts = urlsplit(self.base_url)
         self.recorder = Recorder(goal, f"{parts.scheme}://{parts.netloc}", self.run_id, planner.model)
         self.policy = Policy(allowed_origins=[self.recorder.origin], max_risk=goal.get("maxRisk", "read"))
@@ -108,7 +117,8 @@ class Discovery:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=not self.goal.get("_headed", False))
             try:
-                self.surface = await WebSurface.open(await browser.new_context())
+                self.surface = await WebSurface.open(await browser.new_context(),
+                                                     on_human=self._on_human if self.hub else None)
                 await self.surface.navigate(self.base_url + self.goal.get("entryPath", "/"))
                 outcome = await self._loop()
             finally:
@@ -166,10 +176,16 @@ class Discovery:
             user_turn = list(results)
             if (nudge := self._stuck_nudge(calls)) and not finished:
                 user_turn.append({"type": "text", "text": nudge})  # appended after the results, never edited later
+            stuck = len(self._repeats) >= STOP_AFTER and not finished
+            if stuck or (finished and finished["status"] == "gave_up"):
+                reason = finished["reason"] if finished else "repeated the same action on an unchanged screen"
+                if note := await self._escalate(reason):
+                    user_turn.append({"type": "text", "text": note})
+                    finished, stuck = None, False
             messages.append({"role": "user", "content": user_turn})
             if finished:
                 return finished
-            if len(self._repeats) >= STOP_AFTER:
+            if stuck:
                 return self._result("stuck", reason="repeated the same action on an unchanged screen")
             if self.cost >= self.budget:
                 return self._result("budget", reason=f"reached the ${self.budget:.2f} budget")
@@ -193,9 +209,76 @@ class Discovery:
         self.log.write("artifact.json", dump_artifact(artifact))
         return reports
 
+    async def _escalate(self, reason: str) -> str | None:
+        """The next rung of the ladder, or None when there's none left. Returns the note the model reads next."""
+        if self._rung == 0 and self.escalation_model and self.planner.model != self.escalation_model:
+            self._rung = 1
+            self.log.event("escalated", to=self.escalation_model, reason=reason)
+            # Same conversation, same system prompt and tools: a switch isn't an edit, so the history stays valid
+            self.planner.model = self.escalation_model
+            self._repeats, self._nudged = [], False
+            return (f"(A more capable model is now handling this run, because: {reason}. Look at the current screen "
+                    f"afresh and continue toward the goal, or call give_up if it truly can't be done safely.)")
+        if self._rung <= 1 and self.hub:
+            self._rung = 2
+            return await self._hand_to_person(reason)
+        return None
+
+    async def _hand_to_person(self, reason: str) -> str | None:
+        observation = await self.surface.observe()
+        intervention = Intervention(
+            id=new_run_id("int"), run_id=self.run_id, subject=self.goal["capability"],
+            step_id=f"after_{self.recorder.steps[-1].id}" if self.recorder.steps else "start",
+            intent=self.goal["goal"], reason=f"discovery is stuck: {reason}", since=now(),
+            snapshot=self.log.redact(observation.text))
+        self.session.pause(intervention)
+        self.hub.publish(intervention, self.session, self.surface)
+        state = await self.session.wait_for_hand_back(self.pause_timeout_s)
+        if state != "resuming":
+            self.session.abort("system", f"handoff ended: {state}")
+            self.hub.close(intervention.id, state)
+            return None
+        # Discovery doesn't check a step here: the model looks at the screen next and carries on from it
+        self.session.resume_verified()
+        self.hub.close(intervention.id, "handed back")
+        done = "\n".join(f"{i}. {a['action']} {a['role']} {a['name']!r}"
+                         for i, a in enumerate(intervention.human_actions, 1)) or "(nothing)"
+        return (f"(An operator took control because you were stuck, and did:\n{done}\nThose steps are recorded. "
+                f"Continue toward the goal from here.)\n\nCurrent screen:\n{await self._screen()}")
+
+    async def _on_human(self, action: dict):
+        """In discovery a person's action becomes a step, recordedBy human and flagged for review: the person taught
+        the step the model couldn't find. A typed value is kept only as an input or secret placeholder; anything else
+        the person typed is never recorded."""
+        if not self.session.human_in_control():
+            return
+        name = self.for_model(action["name"])
+        shown = {"action": action["action"], "role": action["role"], "name": re.sub(r"\d", "#", name)}
+        target, value = action["target"], action["value"]
+        if value is not None:
+            known = [*self._model_masks, *self._secret_values()]
+            value = next((label for raw, label in known if raw == value), None)
+        risk = classify(action["action"], action["role"], name)
+        if target is None or risk == "irreversible" or (action["value"] is not None and value is None):
+            self.session.record_human({**shown, "recorded": False})
+            return
+        self.recorder.act(f"operator {action['action']} {action['role']} {shown['name']}"[:80], action["action"],
+                          target, value, risk, recorded_by="human", needs_review=True)
+        self.session.record_human({**shown, "recorded": True})
+
+    def _secret_values(self) -> list[tuple[str, str]]:
+        pairs = []
+        for name in self.goal.get("secrets", []):
+            placeholder = f"{{{{secrets.{name}}}}}"
+            try:
+                pairs.append((render(placeholder, {}, self.env), placeholder))
+            except TemplateError:
+                pass
+        return pairs
+
     def _stuck_nudge(self, calls: list[dict]) -> str | None:
-        """Syntactic stuck detection (OpenHands-style): the same action on a screen that isn't changing. One nudge,
-        then the run stops. Pass 2 escalates to Opus and then to a human instead of stopping."""
+        """Syntactic stuck detection (OpenHands-style): the same action on a screen that isn't changing. One nudge;
+        past that, the escalation ladder takes over."""
         key = (json.dumps([c["name"] for c in calls] + [c["input"].get("ref") for c in calls]), self._fingerprint)
         self._repeats = [*self._repeats, key] if self._repeats and self._repeats[-1] == key else [key]
         if len(self._repeats) >= NUDGE_AFTER and not self._nudged:
@@ -240,7 +323,8 @@ class Discovery:
         rendered = render(value, self.inputs, self.env) if value is not None else None
         if rendered is not None and rendered != value:
             self._mask(rendered, value)  # the typed secret now shows on screen as {{secrets.APP_USER}}, not its value
-        await self.surface.act_on_ref(ref, action, rendered)
+        epoch = self.session.epoch
+        await self.surface.act_on_ref(ref, action, rendered, guard=lambda: self.session.check(epoch))
         self.recorder.act(args["intent"], action, target, value, risk)
         return f"Done: {action} {role} {label!r}.\n\nCurrent screen:\n{await self._screen()}"
 
@@ -290,11 +374,14 @@ class Discovery:
 
 async def discover(goal: dict, base_url: str, inputs: dict[str, str], *, model: str = "claude-sonnet-5-5",
                    max_steps: int = 30, budget_usd: float = 1.0, headed: bool = False,
-                   out_dir: Path = Path("artifacts"), planner: Planner | None = None, env: dict | None = None) -> dict:
+                   out_dir: Path = Path("artifacts"), planner: Planner | None = None, env: dict | None = None,
+                   escalation_model: str | None = "claude-opus-5-5", operator_hub=None,
+                   pause_timeout_s: float = 600) -> dict:
     goal = {**goal, "_headed": headed}
     check_url(_entry_policy(base_url), base_url + goal.get("entryPath", "/"))
     run = Discovery(goal, base_url, inputs, planner or ClaudePlanner(model), max_steps=max_steps,
-                    budget_usd=budget_usd, out_dir=out_dir, env=env)
+                    budget_usd=budget_usd, out_dir=out_dir, env=env, escalation_model=escalation_model,
+                    operator_hub=operator_hub, pause_timeout_s=pause_timeout_s)
     return await run.run()
 
 

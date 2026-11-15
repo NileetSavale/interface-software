@@ -5,6 +5,7 @@ Same inputs, same steps: the only branching is on outcomes the artifact declares
 and are reported beside the result; drift (a fallback strategy hit) never fails a run, it's reported.
 """
 import asyncio
+import json
 import re
 from collections import Counter
 
@@ -16,6 +17,8 @@ from interfaze.artifact.schema import (
 )
 from interfaze.artifact.templates import TemplateError, render
 from interfaze.evidence import Audit, RunLog, new_run_id, now, structure_only
+from interfaze.operator import _public
+from interfaze.session import ControlLost, Intervention, Session
 from interfaze.policy import PolicyViolation, check_action, check_url
 from interfaze.replay.result import (
     BusinessOutcome, DriftEvent, EvidenceRef, Failed, FailureClass, InputError, InvalidInput, RecoveryEvent, Success,
@@ -82,7 +85,7 @@ def last4(value: str) -> str:
 class Replayer:
     def __init__(self, artifact: Artifact, base_url: str, inputs: dict[str, str], *, headed: bool = False,
                  allow_draft: bool = False, env: dict[str, str] | None = None, run_id: str | None = None,
-                 audit: Audit | None = None):
+                 audit: Audit | None = None, operator_hub=None, pause_timeout_s: float = 600):
         self.artifact = artifact
         self.base_url = base_url.rstrip("/")
         self.inputs = {k: str(v) for k, v in inputs.items()}
@@ -91,6 +94,9 @@ class Replayer:
         self.env = env
         self.run_id = run_id or new_run_id("replay")
         self.audit = audit or Audit()
+        # Attended: an operator channel is open, so escalations pause for a person instead of failing
+        self.hub = operator_hub
+        self.pause_timeout_s = pause_timeout_s
         self.key = f"{artifact.capability.id}@{artifact.capability.version}"
         self.outputs: dict[str, object] = {}
         self.recovered: list[RecoveryEvent] = []
@@ -98,6 +104,8 @@ class Replayer:
         self._recoveries: Counter[str] = Counter()
         self.surface: WebSurface | None = None
         self.log = RunLog(self.run_id)
+        self.session = Session(self.log)
+        self._next: Step | None = None
         # Sensitive inputs and every secret the artifact uses are masked wherever they'd be written
         for name, spec in artifact.inputs.items():
             if spec.sensitive and name in self.inputs:
@@ -125,10 +133,16 @@ class Replayer:
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=not self.headed)
             try:
-                self.surface = await WebSurface.open(await browser.new_context())
+                self.surface = await WebSurface.open(await browser.new_context(),
+                                                     on_human=self._on_human if self.hub else None)
                 result = await self._run_steps()
             except _Stop as stop:
                 result = stop.result
+            except ControlLost as e:
+                # Only an abort takes control away from a replay mid-action: it pauses itself for everything else
+                result = Failed(run_id=self.run_id, completed_at=now(), at_step="control", error_class="OPERATOR_ABORTED",
+                                expected="automation to hold control", observed=str(e), recovered=self.recovered,
+                                drift=self.drift)
             finally:
                 await browser.close()
         return self._finish(result)
@@ -157,7 +171,9 @@ class Replayer:
                        recovered=self.recovered, drift=self.drift)
 
     async def _run_flow(self, steps: list[Step], recovering: bool):
-        for step in steps:
+        for i, step in enumerate(steps):
+            if not recovering:
+                self._next = steps[i + 1] if i + 1 < len(steps) else None
             while True:
                 try:
                     await self._run_step(step, recovering)
@@ -203,20 +219,25 @@ class Replayer:
                 await self._handle(watched[index - 1], step, recovering, acted=True)
             if index is None:
                 await self._outcomes(step, "after", recovering)
+                if self.hub and not recovering:
+                    await self._escalate(step, f"EXPECT_FAILED: '{step.intent}' didn't produce the expected screen",
+                                         acted=True)
                 raise self._fail(step.id, "EXPECT_FAILED", _describe(step.expect), "not on screen",
                                  evidence=await self._evidence(step.id))
 
     async def _act(self, step: Step, target, action: str, value: str | None, timeout: int, recovering: bool,
                    check_policy: bool = False) -> Resolved:
         """Resolve, then act. A transient failure (the element went stale while the frame re-rendered) gets one
-        retry on a freshly resolved element; anything else stops the run."""
+        retry on a freshly resolved element; anything else stops the run. The control epoch is captured when the
+        decision to act is made and checked again just before the input is dispatched."""
         for attempt in (1, 2):
+            epoch = self.session.epoch
             hit = await self._resolve(step, target, timeout, recovering)
             await self._identity_gate(step.id)
             if check_policy:
                 await self._check_policy(step, hit)
             try:
-                await self.surface.act(hit.handle, action, value)
+                await self.surface.act(hit.handle, action, value, guard=lambda: self.session.check(epoch))
                 return hit
             except SurfaceError as e:
                 if e.retry != "safe" or attempt == 2:
@@ -243,6 +264,9 @@ class Replayer:
         # Nothing found. A declared outcome (an error page, "no member found") explains that better than a miss.
         await self._outcomes(step, "after", recovering)
         ambiguous = any(code == "AMBIGUOUS_TARGET" for _, code in hit.attempts)
+        if self.hub and not recovering:
+            await self._escalate(step, f"{'AMBIGUOUS_TARGET' if ambiguous else 'TARGET_UNRESOLVED'}: can't find the "
+                                       f"control for '{step.intent}'", acted=False)
         raise self._fail(step.id, "AMBIGUOUS_TARGET" if ambiguous else "TARGET_UNRESOLVED",
                          f"exactly one match for: {', '.join(k for k, _ in hit.attempts)}",
                          "; ".join(f"{k}: {c}" for k, c in hit.attempts), evidence=await self._evidence(step.id))
@@ -268,6 +292,9 @@ class Replayer:
             await self._handle(others[index - len(conditions)], step, recovering, acted=True)
         if index is None:
             await self._outcomes(step, "after", recovering)
+            if self.hub and not recovering:
+                await self._escalate(step, f"TIMEOUT: none of the screens expected after '{step.intent}' appeared",
+                                     acted=True)
             raise self._fail(step.id, "TIMEOUT", "one of: " + ", ".join(_describe(c) for c in conditions),
                              f"none within {step.wait_for.timeout_ms} ms", evidence=await self._evidence(step.id))
         branch = step.wait_for.any_of[index]
@@ -291,7 +318,9 @@ class Replayer:
                 raise self._fail(step.id, "FATAL_OUTCOME", "no error state", outcome.code, outcome_code=outcome.code,
                                  evidence=await self._evidence(step.id))
             case "escalate":
-                # Pass 2: with an operator attached this becomes needs_human and the session is handed over
+                if self.hub and not recovering:
+                    await self._escalate(step, f"{outcome.code}: {outcome.description or 'needs a person'}", acted,
+                                         outcome=outcome)
                 raise self._fail(step.id, "ESCALATION_UNATTENDED", "an operator to take over", outcome.code,
                                  outcome_code=outcome.code, evidence=await self._evidence(step.id))
             case "recoverable":
@@ -376,6 +405,69 @@ class Replayer:
         raise self._fail(step_id, "WRONG_RECORD", f"{assertion.input} = {assertion.equals}",
                          f"a different {self.artifact.inputs[assertion.input].identifies or 'record'}",
                          evidence=await self._evidence(step_id, scrub=True))
+
+    # ── Handing over to a person (§5) ──────────────────────────────────────────────────────────────────────────
+
+    async def _escalate(self, step: Step, reason: str, acted: bool, outcome: Outcome | None = None):
+        """Pause, hand the live session to an operator, and continue only once the screen proves it's safe to.
+        Ends by raising _Retry (carry on) or _Stop (aborted, or nobody came)."""
+        observation = await self.surface.observe()
+        intervention = Intervention(
+            id=new_run_id("int"), run_id=self.run_id, subject=self.key, step_id=step.id, intent=step.intent,
+            reason=reason, since=now(), snapshot=self.log.redact(observation.text),
+            screenshot=await self.surface.screenshot(self.log.path(f"{step.id}.intervention.png")))
+        self.log.write(f"{intervention.id}.json", json.dumps({**_public(intervention), "snapshot": "(see .png)"}, indent=2))
+        self.session.pause(intervention)
+        self.hub.publish(intervention, self.session, self.surface)
+        while True:
+            state = await self.session.wait_for_hand_back(self.pause_timeout_s)
+            if state == "aborted":
+                self.hub.close(intervention.id, "aborted")
+                raise self._fail(step.id, "OPERATOR_ABORTED", "the operator to hand back", "the operator aborted the run")
+            if state == "timeout":
+                self.hub.close(intervention.id, "timed out")
+                raise self._fail(step.id, "ESCALATION_UNATTENDED", "an operator to take over",
+                                 f"nobody took over within {self.pause_timeout_s:.0f} s")
+            if verdict := await self._resume_check(step, acted, outcome):
+                self.session.resume_verified()
+                self.hub.close(intervention.id, f"resumed: {verdict}")
+                self.log.event("resumed", step=step.id, verdict=verdict,
+                               human_actions=len(intervention.human_actions))
+                raise _Retry(step_done=verdict != "retry step")
+            self.session.resume_rejected("resume check failed: the screen doesn't show the step done or ready to do")
+
+    async def _resume_check(self, step: Step, acted: bool, outcome: Outcome | None) -> str | None:
+        """Resume verifies, it doesn't assume. The outcome that paused the run must be gone; then either this step can
+        run (its control is on screen), or the person already did it (the next step's control is on screen)."""
+        await self.surface.observe()  # let the screen settle after the person's last action
+        if outcome and await self.surface.holds(outcome.detect):
+            return None
+        if acted:
+            return "step had already acted"
+        if await self._ready(step):
+            return "retry step"
+        if self._next and await self._ready(self._next):
+            return "operator did the step"
+        return None
+
+    async def _ready(self, step: Step) -> bool:
+        targets = list(step.extract.values()) if step.extract else [step.target] if step.target else []
+        for target in targets:
+            if not isinstance(await self.surface.resolve(target, 1_500), Resolved):
+                return False
+        return bool(targets)
+
+    async def _on_human(self, action: dict):
+        """What a person did while holding control. In a replay it's evidence only: the artifact never changes."""
+        if not self.session.human_in_control():
+            return  # the page reports automation's own clicks too
+        target = action["target"]
+        self.session.record_human({
+            "action": action["action"], "role": action["role"],
+            "name": re.sub(r"\d", "#", self.log.redact(action["name"])),
+            "target": target.model_dump(by_alias=True, exclude_none=True) if target else None,
+            "typed": action["value"] is not None,  # never the value itself
+        })
 
     # ── Helpers ────────────────────────────────────────────────────────────────────────────────────────────────
 

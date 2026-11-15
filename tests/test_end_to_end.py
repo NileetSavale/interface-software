@@ -3,13 +3,9 @@ approve it, replay it with other inputs. No API calls, so it runs on every test 
 import asyncio
 import re
 from pathlib import Path
-import socket
-import threading
-import time
 
 import httpx
 import pytest
-import uvicorn
 
 from interfaze.artifact.io import load_artifact
 from interfaze.discovery.loop import discover
@@ -18,7 +14,7 @@ from interfaze.evidence import RUNS, Audit
 from interfaze.replay.executor import Replayer
 from interfaze.replay.result import BusinessOutcome, Failed, InvalidInput, Success
 
-ENV = {"APP_USER": "teller01", "APP_PASSWORD": "demo-only-password"}
+from tests.conftest import ENV
 GOAL = {
     "capability": "core_banking.lookup_member_balance", "title": "Look up a member's savings balance",
     "description": "Returns the member's name and savings balance.", "product": "mock-core-banking",
@@ -32,19 +28,6 @@ GOAL = {
         {"inputs": {"memberId": "45678"}, "why": "a restricted member"},
     ],
 }
-
-
-@pytest.fixture(scope="module")
-def base_url():
-    with socket.socket() as s:
-        s.bind(("127.0.0.1", 0))
-        port = s.getsockname()[1]
-    server = uvicorn.Server(uvicorn.Config("apps.mock_core_banking.app:app", port=port, log_level="warning"))
-    threading.Thread(target=server.run, daemon=True).start()
-    while not server.started:
-        time.sleep(0.05)
-    yield f"http://127.0.0.1:{port}"
-    server.should_exit = True
 
 
 def ref(pattern: str):
@@ -210,3 +193,17 @@ def test_unlearned_outcome_fails_where_it_stopped(replay):
     # The INVALID_INPUT proposal was refused, so until review adds it the page is a hard failure that says where
     invalid = replay("01234")
     assert isinstance(invalid, Failed) and invalid.at_step == "read_member_name"
+
+
+def test_attended_replay_hands_an_unknown_screen_to_a_person(base_url, discovered, tmp_path):
+    from tests.test_handoff import attended_replay, clicks
+    approved = discovered[2].model_copy(update={"status": "approved"})
+
+    async def person(hub, intervention, http):
+        # This artifact has no wait branches after Search, so the notice shows up as a control it can't find
+        assert intervention.step_id == "read_member_name" and intervention.reason.startswith("TARGET_UNRESOLVED")
+        await clicks(hub, intervention, http, "Acknowledge")
+
+    result, replayer = asyncio.run(attended_replay(base_url, approved, "12345", person, tmp_path, fault="interstitial"))
+    assert isinstance(result, Success) and result.outputs["memberName"] == "Jane Doe", result
+    assert '"verdict": "retry step"' in (replayer.log.dir / "events.jsonl").read_text()

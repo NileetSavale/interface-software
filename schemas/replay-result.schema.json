@@ -170,6 +170,7 @@
             "TIMEOUT",
             "NOT_APPROVED",
             "ESCALATION_UNATTENDED",
+            "OPERATOR_ABORTED",
             "SURFACE_ERROR"
           ],
           "title": "Errorclass",

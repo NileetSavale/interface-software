@@ -9,6 +9,7 @@ import hashlib
 import re
 import time
 from pathlib import Path
+from collections.abc import Awaitable, Callable
 from typing import Literal
 
 from playwright.async_api import BrowserContext, ElementHandle, Error as PlaywrightError, Frame, Locator, Page
@@ -19,6 +20,7 @@ from interfaze.artifact.schema import (
 )
 from interfaze.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
 
+HUMAN_JS = (Path(__file__).parent / "human.js").read_text()
 LOCATE_JS = (Path(__file__).parent / "locate.js").read_text()
 POLL_SECONDS = 0.15
 _SNAPSHOT_LINE = re.compile(r"""^\s*-\s+'?(?P<role>[a-z]+)(?:\s+"(?P<name>(?:[^"\\]|\\.)*)")?.*\[ref=(?P<ref>\w+)\]""")
@@ -59,8 +61,15 @@ class WebSurface(Surface):
         self._snapshots = 0
 
     @classmethod
-    async def open(cls, context: BrowserContext) -> "WebSurface":
+    async def open(cls, context: BrowserContext, on_human: Callable[[dict], Awaitable[None]] | None = None) -> "WebSurface":
+        """on_human receives what a person does in this browser, already described as a recorded target. The page
+        reports every click and change; the callback decides whether a person was holding control at the time."""
         await context.add_init_script(script=LOCATE_JS)
+        if on_human:
+            async def relay(payload: dict):
+                await on_human(human_action(payload))
+            await context.expose_function("__ifzHuman", relay)
+            await context.add_init_script(script=HUMAN_JS)
         return cls(await context.new_page())
 
     # ── Observing ──────────────────────────────────────────────────────────────────────────────────────────────
@@ -137,8 +146,9 @@ class WebSurface(Surface):
                 return m.group("role"), (m.group("name") or "").replace('\\"', '"')
         raise SurfaceError("STALE_REF", f"ref {ref} isn't in the latest snapshot", retry="safe")
 
-    async def act_on_ref(self, ref: str, action: Action, value: str | None = None) -> None:
-        await self.act(await self._ref_handle(ref), action, value)
+    async def act_on_ref(self, ref: str, action: Action, value: str | None = None,
+                         guard: Callable[[], None] | None = None) -> None:
+        await self.act(await self._ref_handle(ref), action, value, guard)
 
     async def read_ref(self, ref: str) -> str:
         return await self.read_text(await self._ref_handle(ref))
@@ -261,9 +271,16 @@ class WebSurface(Surface):
 
     # ── Acting and checking ────────────────────────────────────────────────────────────────────────────────────
 
-    async def act(self, handle: object, action: Action, value: str | None = None) -> None:
+    async def act(self, handle: object, action: Action, value: str | None = None,
+                  guard: Callable[[], None] | None = None) -> None:
+        """guard runs at the last moment before the input is dispatched, after Playwright's actionability waits
+        (that's what the trial click is for), and raises to drop the action: the control-token epoch check."""
         assert isinstance(handle, ElementHandle)
         try:
+            if guard:
+                if action in ("click", "check", "uncheck"):
+                    await handle.click(trial=True, timeout=5_000)
+                guard()
             match action:
                 case "click":
                     await handle.click(timeout=5_000)
@@ -345,3 +362,26 @@ def frame_path(frame: Frame) -> list[str]:
         path.insert(0, frame.name)
         frame = frame.parent_frame
     return path
+
+
+def human_action(payload: dict) -> dict:
+    """A person's click or change, as the recorder would have described it: the same ranked strategies, built from
+    what the page reported at the moment of the event. Not verified for uniqueness (the page has usually moved on),
+    which is one reason human steps always need review."""
+    role, name = payload["role"], payload.get("name") or ""
+    strategies: list[Strategy] = []
+    if name and not re.search(r"\d", name):
+        strategies.append(RoleStrategy(role=role, name=name))
+        if role in {"textbox", "combobox", "checkbox", "radio"}:
+            strategies.append(LabelStrategy(label=name))
+        if role in {"link", "button"}:
+            strategies.append(TextStrategy(text=name))
+    for place in payload.get("places") or []:
+        place = {**place, "role": role}
+        strategies.append(TableCellStrategy.model_validate(place) if place["kind"] == "tableCell"
+                          else AnchorStrategy.model_validate(place))
+    region = payload.get("region")
+    target = Target(frame=payload.get("frame") or [], strategies=strategies,
+                    within=RegionScope(**region) if region else None) if strategies else None
+    action = "click" if payload["kind"] == "click" else ("select" if role == "combobox" else "type")
+    return {"action": action, "role": role, "name": name, "target": target, "value": payload.get("value")}

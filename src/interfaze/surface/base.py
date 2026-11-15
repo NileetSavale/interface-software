@@ -8,6 +8,7 @@ Observations are serialisable (they go to the model and, redacted, into evidence
 surface-specific and live only as long as the page they came from.
 """
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -82,11 +83,14 @@ class Surface(ABC):
         as AMBIGUOUS_TARGET, never resolved by picking one."""
 
     @abstractmethod
-    async def act(self, handle: object, action: Action, value: str | None = None) -> None:
-        """Perform one action. Raises SurfaceError. Control-token checks happen in the Session, not here."""
+    async def act(self, handle: object, action: Action, value: str | None = None,
+                  guard: Callable[[], None] | None = None) -> None:
+        """Perform one action. Raises SurfaceError. guard is called at the last moment before the input is
+        dispatched and raises to drop it: that's where the Session's control-token epoch is checked."""
 
     @abstractmethod
-    async def act_on_ref(self, ref: str, action: Action, value: str | None = None) -> None:
+    async def act_on_ref(self, ref: str, action: Action, value: str | None = None,
+                         guard: Callable[[], None] | None = None) -> None:
         """Discovery's path: act on a ref from the latest observation. Raises SurfaceError(STALE_REF) for old refs."""
 
     @abstractmethod

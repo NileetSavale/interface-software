@@ -37,9 +37,10 @@ class Recorder:
         self.identity: list[IdentityMatches] = []
         self._ids: set[str] = set()
 
-    def act(self, intent: str, action: str, target: Target, value: str | None, risk: str, recorded_by: str = "model"):
+    def act(self, intent: str, action: str, target: Target, value: str | None, risk: str, recorded_by: str = "model",
+            needs_review: bool = False):
         self.steps.append(Step(id=step_id(intent, self._ids), intent=intent, action=action, target=target, value=value,
-                               risk=risk, recorded_by=recorded_by))
+                               risk=risk, recorded_by=recorded_by, needs_review=needs_review))
 
     def extract(self, intent: str, output: str, kind: str, target: Target):
         if output in self.outputs:

@@ -23,6 +23,7 @@ FailureClass = Literal[
     "TIMEOUT",              # a wait ran out with no branch matched
     "NOT_APPROVED",         # a draft artifact was invoked unattended
     "ESCALATION_UNATTENDED",  # an escalate outcome matched and no operator is attached to take over
+    "OPERATOR_ABORTED",     # an operator ended the run from the intervention
     "SURFACE_ERROR",        # the browser or app surface itself failed
 ]
 
