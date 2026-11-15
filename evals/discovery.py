@@ -2,8 +2,12 @@
 
 Per run: did it record an artifact, does that artifact replay for a different member (a recording that only works
 for the member it was made on isn't a capability), how many turns, what it cost, and how often the ladder was used
-(stuck nudges, escalation to the stronger model, a person). The map-on arm and variant B arrive with the page map
-and the second tenant (build items 6 and 7); until then this is the map-off, variant-A baseline.
+(stuck nudges, escalation to the stronger model, a person).
+
+Two arms per goal: map off, and map on. The map is seeded from one approved replay of the lookup artifact on this
+bank: what a bank's map knows after its first capability has run once. Each map-on run gets a frozen copy, so runs
+don't feed each other. The open_sub_account arm is the interesting one: the map knows only the screens it shares
+with lookup (sign-on, the menu, the search).
 
 Spends real money: needs ANTHROPIC_API_KEY. The budget is checked before every run and passed down as the run's own
 cap, so the suite stops cleanly instead of overshooting.
@@ -15,8 +19,9 @@ import statistics
 import tempfile
 from pathlib import Path
 
-from evals.common import ENV, HAPPY, ROOT, events, label, mock_app, replay, save
+from evals.common import ENV, HAPPY, ROOT, artifact, events, label, mock_app, replay, save
 from interfaze.artifact.io import load_artifact
+from interfaze.pagemap import PageMap
 
 GOALS = {"lookup": ROOT / "goals" / "lookup_member_balance.json",
          "open_sub_account": ROOT / "goals" / "open_sub_account.json"}
@@ -62,44 +67,52 @@ def run(n: int = 5, budget: float = 10.0, **_) -> dict:
     spend = Budget(budget)
     arms = []
     with mock_app() as app:
+        seed = PageMap(bank="a")
+        seeded, _, _ = replay(app, artifact("lookup", app), HAPPY["lookup"], page_map=seed)
+        assert seeded.status == "success", seeded
         for flow, path in GOALS.items():
-            goal = json.loads(path.read_text())
-            inputs = {**HAPPY[flow], **DISCOVERED_ON}
-            runs = []
-            for i in range(n):
-                if not spend.allows_another():
-                    print(f"budget: ${spend.spent:.2f} of ${spend.usd:.2f} spent, stopping", flush=True)
-                    break
-                r = discover_once(app, goal, inputs, spend)
-                outcome = r["outcome"]
-                replayed = None
-                if outcome["status"] == "recorded":
-                    # Policy rebinds to this app's origin, as in the other suites
-                    recorded = load_artifact(outcome["artifact"])
-                    policy = recorded.policy.model_copy(update={"allowed_origins": [app.base_url]})
-                    result, _, _ = replay(app, recorded.model_copy(update={"status": "approved", "policy": policy}),
-                                          HAPPY[flow])
-                    replayed = label(result)
-                runs.append({"run": i + 1, "status": outcome["status"], "replay_other_member": replayed,
-                             "steps": outcome.get("steps"), "turns": r["turns"], "cost_usd": outcome.get("cost_usd"),
-                             "nudges": r["nudges"], "escalations": r["escalations"], "tool_errors": len(r["errors"]),
-                             "probes": [p["result"] for p in outcome.get("probes", [])], "run_id": outcome["run_id"]})
-                print(f"{flow:<17} {i + 1}/{n} {outcome['status']} replay={replayed} turns={r['turns']} "
-                      f"${outcome.get('cost_usd', 0):.3f}", flush=True)
-            costs = [r["cost_usd"] or 0 for r in runs]
-            arms.append({
-                "flow": flow, "variant": "a", "map": "off", "n": len(runs),
-                "recorded": sum(r["status"] == "recorded" for r in runs),
-                "replays_on_other_member": sum((r["replay_other_member"] or "").startswith("success") for r in runs),
-                "median_turns": statistics.median([r["turns"] for r in runs]) if runs else None,
-                "median_cost_usd": round(statistics.median(costs), 4) if costs else None,
-                "total_cost_usd": round(sum(costs), 4),
-                "nudged_runs": sum(r["nudges"] > 0 for r in runs),
-                "escalated_runs": sum(r["escalations"] > 0 for r in runs),
-                "runs": runs,
-            })
+            for map_mode in ("off", "on"):
+                goal = json.loads(path.read_text())
+                inputs = {**HAPPY[flow], **DISCOVERED_ON}
+                runs = []
+                for i in range(n):
+                    if not spend.allows_another():
+                        print(f"budget: ${spend.spent:.2f} of ${spend.usd:.2f} spent, stopping", flush=True)
+                        break
+                    r = discover_once(app, goal, inputs, spend, page_map=seed.frozen() if map_mode == "on" else None)
+                    outcome = r["outcome"]
+                    replayed = None
+                    if outcome["status"] == "recorded":
+                        # Policy rebinds to this app's origin, as in the other suites
+                        recorded = load_artifact(outcome["artifact"])
+                        policy = recorded.policy.model_copy(update={"allowed_origins": [app.base_url]})
+                        result, _, _ = replay(app, recorded.model_copy(update={"status": "approved", "policy": policy}),
+                                              HAPPY[flow])
+                        replayed = label(result)
+                    runs.append({"run": i + 1, "status": outcome["status"], "replay_other_member": replayed,
+                                 "steps": outcome.get("steps"), "turns": r["turns"], "cost_usd": outcome.get("cost_usd"),
+                                 "nudges": r["nudges"], "escalations": r["escalations"], "tool_errors": len(r["errors"]),
+                                 "probes": [p["result"] for p in outcome.get("probes", [])],
+                                 "known_actions_used": outcome.get("known_actions_used", 0), "run_id": outcome["run_id"]})
+                    print(f"{flow:<17} map {map_mode:<3} {i + 1}/{n} {outcome['status']} replay={replayed} "
+                          f"turns={r['turns']} known={runs[-1]['known_actions_used']} ${outcome.get('cost_usd', 0):.3f}",
+                          flush=True)
+                costs = [r["cost_usd"] or 0 for r in runs]
+                arms.append({
+                    "flow": flow, "variant": "a", "map": map_mode, "n": len(runs),
+                    "median_known_actions": statistics.median([r["known_actions_used"] for r in runs]) if runs else None,
+                    "recorded": sum(r["status"] == "recorded" for r in runs),
+                    "replays_on_other_member": sum((r["replay_other_member"] or "").startswith("success") for r in runs),
+                    "median_turns": statistics.median([r["turns"] for r in runs]) if runs else None,
+                    "median_cost_usd": round(statistics.median(costs), 4) if costs else None,
+                    "total_cost_usd": round(sum(costs), 4),
+                    "nudged_runs": sum(r["nudges"] > 0 for r in runs),
+                    "escalated_runs": sum(r["escalations"] > 0 for r in runs),
+                    "runs": runs,
+                })
         assert app.confirmed() == 0
-    return {"n_per_arm": n, "budget_usd": budget, "spent_usd": round(spend.spent, 4), "arms": arms}
+    return {"n_per_arm": n, "budget_usd": budget, "spent_usd": round(spend.spent, 4), "map_seed": seed.version(),
+            "arms": arms}
 
 
 if __name__ == "__main__":

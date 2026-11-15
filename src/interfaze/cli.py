@@ -46,6 +46,14 @@ async def start_operator_page(port: int):
     return hub
 
 
+def bank_map(path: str | None):
+    """A bank's page map (§7a), created on first use; it learns from the verified runs that use it."""
+    if not path:
+        return None
+    from interfaze.pagemap import PageMap
+    return PageMap(Path(path), bank=Path(path).stem)
+
+
 def pending_path(artifact_path: str, capability: str, tenant: str) -> Path:
     """Where drift on a tenant leaves its proposed override: beside the artifact, never inside it."""
     return Path(artifact_path).parent / capability / "overrides.pending" / f"{tenant}.json"
@@ -57,6 +65,7 @@ def cmd_replay(args) -> int:
     inputs = parse_inputs(args.input)
     tenant = {"tenant": args.tenant, "pending_dir": pending_path(args.artifact, artifact.capability.id, args.tenant).parent} \
         if args.tenant else {}
+    tenant["page_map"] = bank_map(args.map)
     if not args.attended:
         result = asyncio.run(Replayer(artifact, args.base_url, inputs, headed=args.headed,
                                       allow_draft=args.allow_draft, **tenant).run())
@@ -139,7 +148,8 @@ def cmd_discover(args) -> int:
         outcome = await discover(goal, args.base_url, parse_inputs(args.input), model=args.model,
                                  max_steps=args.max_steps, budget_usd=args.budget,
                                  headed=args.headed or args.attended, out_dir=Path(args.out),
-                                 escalation_model=args.escalation_model or None, operator_hub=hub)
+                                 escalation_model=args.escalation_model or None, operator_hub=hub,
+                                 page_map=bank_map(args.map))
         if hub:
             await hub.stop()
         return outcome
@@ -183,6 +193,7 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--deadline", type=float, default=30, help="attended: seconds before returning needs_human")
     p.add_argument("--operator-port", type=int, default=4200)
     p.add_argument("--tenant", help="run this tenant's version (its approved override); drift proposes one")
+    p.add_argument("--map", help="this bank's page map (JSON): a bounded fallback, and it learns from the run")
     p.set_defaults(fn=cmd_replay)
 
     p = sub.add_parser("override", help="review or approve a tenant's pending override")
@@ -207,12 +218,14 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--escalation-model", default="claude-opus-5-5", help="takes over when the first model is "
                                                                          "stuck; empty to skip that rung")
     p.add_argument("--attended", action="store_true", help="the last rung: hand the live browser to an operator")
+    p.add_argument("--map", help="this bank's page map (JSON): known actions for the model, learned into after")
     p.add_argument("--operator-port", type=int, default=4200)
     p.set_defaults(fn=cmd_discover)
 
     p = sub.add_parser("mock-app", help="serve the mock core-banking app")
     p.add_argument("--port", type=int, default=4100)
-    p.add_argument("--variant", default="a", choices=["a", "b"], help="b: a second bank's templates")
+    p.add_argument("--variant", default="a", choices=["a", "b", "c"],
+                   help="b: a second bank's templates; c: b with the menu link renamed")
     p.set_defaults(fn=cmd_mock_app)
 
     args = parser.parse_args(argv)

@@ -177,16 +177,26 @@ window.SITE = {
    "chose": "<strong>Agreed: each probe in the goal spec says the code it expects; the model must use it or say none fits</strong>",
    "why": "A caller branches on the code, so a re-discovery that renames it is a breaking change nobody asked for. The goal author owns the vocabulary; the model only recognises the screen. The same mechanism closed the cross-flow gap: the sub-account goal probes a missing member too and learns <code>MEMBER_NOT_FOUND</code> under the same code as lookup.",
    "kind": "agreed"
+  },
+  {
+   "id": "D23",
+   "topic": "When a postcondition carries another bank's label",
+   "proposed": "(found building the page map, Pass 2 item 7) Sign-on is proved by the next step's control, so a bank that renames that control fails sign-on, and the \"already signed in?\" check misreads after a re-sign-on",
+   "chose": "<strong>The AI's addition, open for review: the page map may confirm a postcondition or the precondition check, but only exactly: the screen now showing must be where this same action is known, from trusted edges, to lead on this bank. Reported as <code>MAP_FALLBACK</code> with the pinned map version</strong>",
+   "why": "The check still asks \"did we reach the right screen?\", answered from the bank's own verified history instead of another bank's label. It's deterministic for a given map version, and it adds no way through that a verified run on that bank hasn't already taken.",
+   "kind": "ai proposal"
   }
  ],
  "evals": {
   "fault_matrix": {
-   "passed": 48,
-   "runs": 48,
+   "passed": 72,
+   "runs": 73,
    "opened": 0,
-   "date": "2026-11-15T07:34:58+00:00",
-   "commit": "40be003",
-   "misses": []
+   "date": "2026-11-15T08:46:38+00:00",
+   "commit": "c73a241+dirty",
+   "misses": [
+    "bank C lookup: session timeout \u2192 failed/TARGET_UNRESOLVED"
+   ]
   },
   "stability": {
    "ok": 80,
@@ -319,7 +329,13 @@ window.SITE = {
    "date": "2026-11-15",
    "subject": "Pass 2.8: README, REPORT and regenerated evidence",
    "body": "README with setup, running without live services, and a verified demo\npath. REPORT under the seven required headings. evidence/ rebuilt by\nscripts/make_evidence.py: the real Claude discoveries behind the current\nartifacts, twelve fresh replays (success, business outcomes, recovery,\nhard failures, wrong record, commit point, handoff with a PII-masked\nscreen recording, second-bank drift and override, a blocked commit) and\nClaude declining a fake password form; scanned for PII. Replay can\nrecord a masked video; the CLI defaults to the origin artifacts are\nrecorded on."
+  },
+  {
+   "sha": "c73a241",
+   "date": "2026-11-15",
+   "subject": "Site data for the README/REPORT commit",
+   "body": ""
   }
  ],
- "tests": 82
+ "tests": 87
 };

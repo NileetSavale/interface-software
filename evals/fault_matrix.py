@@ -9,13 +9,18 @@ Both banks: the artifacts were recorded on bank A. On bank B (relabelled search 
 each flow first runs once with no override: it must succeed through fallbacks, report drift and propose an override
 for B. That proposal is then treated as approved, and every case runs again on B: the same contract must hold, and
 the happy path must run without drift.
+
+Bank C (B, plus the menu's "Member Inquiry" renamed "Member Lookup") has no override at all. Without a page map the
+happy path stops at once. With C's map, learned from one verified lookup run on C, every case runs again: replay
+gets past what no recorded strategy survives through the map's bounded fallback, including for the sub-account
+flow, which the map never saw. Each run gets a frozen copy of the map, so one run's learning can't steer the next.
 """
 import fnmatch
 import tempfile
 from collections import Counter
 from pathlib import Path
 
-from evals.common import HAPPY, artifact, label, mock_app, replay, save
+from evals.common import HAPPY, artifact, bank_c_map, label, mock_app, replay, save
 from interfaze.artifact.schema import Override
 
 TYPES = ["success", "business_outcome", "invalid_input", "needs_human", "failed"]
@@ -72,9 +77,19 @@ def run(n: int = 1, **_) -> dict:
               flush=True)
 
     with mock_app() as app:
-        for variant in ("a", "b"):
+        for variant in ("a", "b", "c"):
             app.variant(variant)
-            tenants = {}
+            tenants, bank_map = {}, None
+            if variant == "c":
+                bank_map, script, discover_with = bank_c_map()
+                learned, _ = discover_with(app.base_url, script, bank_map, Path(tempfile.mkdtemp()))
+                assert learned["status"] == "recorded", learned
+                for flow in ("lookup", "open_sub_account"):
+                    case = dict(flow=flow, case="no page map", fault=None, expect="failed/*")
+                    app.fault(None)
+                    result, seconds, _ = replay(app, artifact(flow, app), HAPPY[flow], tenant="c",
+                                                pending_dir=Path(tempfile.mkdtemp()))
+                    record(variant, case, result, seconds)
             if variant == "b":
                 # First contact with bank B: drift, and an override proposed from what the fallbacks found
                 for flow in ("lookup", "open_sub_account"):
@@ -88,18 +103,21 @@ def run(n: int = 1, **_) -> dict:
                         proposals[flow] = proposal.model_dump(by_alias=True, exclude_none=True)
                         tenants[flow] = proposal
             for case in cases():
+                if variant == "c" and case["expect"].startswith("success"):
+                    case = {**case, "expect": "success*"}  # the map's fallback is a recovery, reported beside success
                 subject = artifact(case["flow"], app)
                 if case["flow"] in tenants:  # the proposal, approved
                     subject = subject.model_copy(update={"overrides": {"b": tenants[case["flow"]]}})
                 for i in range(n):
                     app.fault(case["fault"])
                     result, seconds, _ = replay(app, subject, case["inputs"], tenant=variant,
-                                                pending_dir=Path(tempfile.mkdtemp()))
+                                                pending_dir=Path(tempfile.mkdtemp()),
+                                                page_map=bank_map.frozen() if bank_map else None)
                     record(variant, case, result, seconds, i)
         committed = app.confirmed()
     confusion = Counter((kind(r["expect"]), kind(r["actual"])) for r in rows)
     return {
-        "n_per_case": n, "cases": len(cases()), "variants": ["a", "b"], "runs": len(rows),
+        "n_per_case": n, "cases": len(cases()), "variants": ["a", "b", "c"], "runs": len(rows),
         "passed": sum(r["pass"] for r in rows), "proposed_overrides": proposals,
         # The commit point: nothing in this suite may ever open an account
         "sub_accounts_opened": committed,

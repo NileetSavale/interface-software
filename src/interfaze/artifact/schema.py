@@ -213,7 +213,7 @@ class Step(Model):
     )
     wait_for: WaitFor | None = None
     expect: Visible | None = Field(default=None, description="Postcondition. We never assume a click worked.")
-    recorded_by: Literal["model", "human", "author"] = "model"
+    recorded_by: Literal["model", "human", "author", "map"] = "model"
     needs_review: bool = False
 
     @model_validator(mode="after")

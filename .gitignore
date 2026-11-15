@@ -7,3 +7,5 @@ __pycache__/
 !.env.example
 # run output is generated; curated runs are copied into evidence/
 runs/
+# each bank's page map is runtime knowledge, like run output
+maps/

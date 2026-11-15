@@ -91,6 +91,16 @@ class MockApp:
         self.variant("a")
 
 
+def bank_c_map():
+    """Bank C's page map, learned from one verified run of the lookup flow on C (a scripted discovery, so no model):
+    the knowledge that C's menu says "Member Lookup". The caller's app must be playing bank C."""
+    from interfaze.pagemap import PageMap
+    from tests.test_pagemap import lookup_script, run_discovery
+    bank = PageMap(bank="c")
+    return bank, lookup_script(member_ref=r'cell "Member #"[^\n]*\n[^\n]*\n\s*- textbox', search=r'button "Find Member"',
+                               menu=r'link "Member Lookup"'), run_discovery
+
+
 def replay(app: MockApp, artifact, inputs: dict, replayer=Replayer, **kw):
     """One unattended replay with a throwaway audit log, so a wrong-record case can't trip the breaker for the next."""
     audit = Audit(Path(tempfile.mkdtemp()) / "audit.jsonl")

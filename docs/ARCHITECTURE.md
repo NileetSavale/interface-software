@@ -1,7 +1,7 @@
 # interfaze — Architecture
 
 Status: **built.** Decisions were locked in review on 2026-11-14 and built in passes; each "As built" section says what changed
-in the building. The page map (§7a) is designed, not built. The short version is `REPORT.md`.
+in the building. The short version is `REPORT.md`.
 Items marked ✅ are locked.
 
 > The model discovers. The artifact becomes a reusable capability. Deterministic replay is how the AI agent invokes
@@ -663,7 +663,7 @@ fieldset".
 
 ---
 
-## 7a. Page map: learned, per-bank app knowledge (built fully, by user decision)
+## 7a. Page map: learned, per-bank app knowledge (built, by user decision)
 
 A graph of an app's screens that grows with every verified run.
 - **Nodes** = screen states, identified by a **page fingerprint**: a hash of structure (roles, static labels,
@@ -721,6 +721,43 @@ A graph of an app's screens that grows with every verified run.
 **Residual risks (REPORT §6/§3):**
 - Fingerprint collisions between screens that mean different things (mitigated by static text in the fingerprint).
 - Map poisoning (see the write rules).
+
+### As built (Pass 2 item 7)
+`src/interfaze/pagemap.py`: one JSON file per bank, no server.
+- **Screens** are a hash of the structure-only view of the snapshot (the same scrubbing as wrong-record evidence),
+  with typed field values dropped. So two members' detail pages are one node, and filling a field doesn't make a new
+  one. Each node keeps its static labels, taken after the PII masker, so no name or number survives.
+- **Edges** keep the action, the surface-neutral target, a value only if it's a template (`{{inputs.x}}`,
+  `{{secrets.X}}`: a literal could be data), the intent, the risk, and the last 20 observations (source, time,
+  ok).
+  - **Weight:** good observations, weighted by source and halving every 30 days, over (1 + recent failures).
+  - **Trusted:** a weight of at least 0.4. One fresh verified discovery (0.5) qualifies; a person's one-off step
+    (0.2) only once it has been seen working twice.
+  - **Never stored:** irreversible edges.
+- **Write rules as locked.** Only a run whose checkpoint passed adds edges. A failed run only marks the edges it
+  used as failing.
+- **Discovery reads it** as "Known actions", numbered k1, k2… from the current screen onwards, in the order they were
+  done.
+  - A new `follow_known` tool runs several in one call: refs can't do that, because they go stale after every
+    action, while map targets are surface-neutral.
+  - Each edge must start from the screen it was learned on, and passes the same checks as the model's own actions:
+    policy, the credential page, the control token, the network gate.
+  - Each is recorded as a step with `recordedBy: "map"`.
+- **Replay reads a frozen copy** and records its version in `replay_started` and in every `MAP_FALLBACK`.
+  - **Fallback:** at most two trusted edges from the current screen, `read` only unless an operator is attached. The
+    route must end in the step's own action with the same value, and is chosen only if its end screen has been seen
+    showing the next step's control. That's then checked live; if it isn't there, the run fails as before.
+  - On a tenant, a one-edge fix is proposed as an override (`set target`).
+- **What building it showed: postconditions leak one bank's labels** (D23). The recorder proves sign-on worked by the
+  next step's control ("Member Inquiry" visible). Bank C renames that link, so sign-on "failed" before the fallback
+  ever ran, and the "already signed in?" check got the wrong answer after a re-sign-on. The map now answers both,
+  exactly: a postcondition or precondition holds if the screen showing is where this same action is known, from
+  trusted edges, to lead on this bank.
+- **Measured** in the fault matrix, bank C arm:
+  - Without a map, both flows stop at sign-on.
+  - With C's map, learned from one verified lookup run on C, every case holds. That includes the sub-account flow,
+    which the map never saw.
+  - The discovery suite compares map off and map on.
 
 ---
 

@@ -285,6 +285,7 @@ footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; }
     <button data-tour="replay">▶ Follow a replay</button>
     <button data-tour="handoff">▶ Follow a handoff</button>
     <button data-tour="tenant">▶ Follow a second bank</button>
+    <button data-tour="map">▶ Follow a bank's map</button>
     <button data-tour="safety">▶ Follow a hostile click</button>
     <div class="cap" id="tour-cap"></div>
   </div>
@@ -470,6 +471,7 @@ const N = {
   session:   { x: 580, y: 400, t: "Control token", s: "epoch · expiry", lane: "shared" },
   evidence:  { x: 760, y: 400, t: "Evidence & audit", s: "redacted at write", lane: "shared" },
   mock:      { x: 40,  y: 535, t: "Legacy core banking", s: "mock · frames", lane: "target" },
+  pagemap:   { x: 310, y: 535, t: "Page map", s: "per bank · learned", lane: "target" },
   operator:  { x: 580, y: 535, t: "Operator page", s: "take / hand back", lane: "target" },
   evals:     { x: 760, y: 535, t: "Eval harness", s: "5 suites · $ cap", lane: "target" },
 };
@@ -482,14 +484,15 @@ const EDGES = [
   ["discovery", "masker", "model sees placeholders"], ["replay", "evidence", "log + snapshots"], ["discovery", "evidence", "log"],
   ["ladder", "session", "pause for a person"], ["replay", "session", "epoch check"], ["session", "operator", "claim / hand back"],
   ["replay", "overrides", "drift → proposal"], ["overrides", "replay", "a bank's version"],
-  ["overrides", "artifact", "approved into"], ["surface", "mock", "browser"], ["evals", "mock", "faults · layouts"], ["evals", "replay", "N replays"],
+  ["overrides", "artifact", "approved into"], ["surface", "mock", "browser"],
+  ["pagemap", "discovery", "known actions"], ["replay", "pagemap", "learns · bounded fallback"], ["evals", "mock", "faults · layouts"], ["evals", "replay", "N replays"],
 ];
 const LANES = [
   { id: "learn", x: 20, y: 30, w: 335, h: 320, label: "Learn · with Claude", fill: "--lane-learn" },
   { id: "contract", x: 370, y: 30, w: 260, h: 320, label: "Contract", fill: "--lane-contract" },
   { id: "run", x: 650, y: 30, w: 345, h: 320, label: "Run · no LLM", fill: "--lane-run" },
   { id: "shared", x: 20, y: 370, w: 975, h: 115, label: "Shared runtime · both paths", fill: "--lane-shared" },
-  { id: "target", x: 20, y: 505, w: 975, h: 115, label: "Target, people & measurement", fill: "--lane-target" },
+  { id: "target", x: 20, y: 505, w: 975, h: 115, label: "Target, bank knowledge, people & measurement", fill: "--lane-target" },
 ];
 const INFO = {
   goal: { kind: "Input", what: "What a task is: a natural-language goal, typed inputs (patterns, enums, which input identifies a record), credentials by name only, probe inputs that should end in a business outcome, and the app's commit paths.", files: ["goals/lookup_member_balance.json", "goals/open_sub_account.json"], d: ["D18", "D20"] },
@@ -510,6 +513,7 @@ const INFO = {
   session: { kind: "Handoff", what: "Who may act right now is a token with a holder, an epoch and an expiry. The epoch rises on every transfer and is checked at the last moment before input is dispatched, so a click decided before a handoff can't land after it.", files: ["src/interfaze/session.py"], d: ["D9"] },
   evidence: { kind: "Audit trail", what: "One JSON line per event, snapshots and screenshots on failure, all redacted at the write boundary: known values first, then the PII detectors. Wrong-record incidents go to an audit log that drives the circuit breaker.", files: ["src/interfaze/evidence.py"], d: ["D19"] },
   mock: { kind: "Target", what: "A stand-in for a legacy back office: framesets, layout tables, unlabelled fields, two buttons with the same name, no test ids. Deterministic faults (500s, timeouts, dialogs, slow pages, a wrong record), seeded layout shuffles, and hostile pages for the safety eval.", files: ["apps/mock_core_banking/app.py"], d: [] },
+  pagemap: { kind: "Bank knowledge", what: "A graph of one bank's screens and actions, learned only from runs whose checkpoint passed. Screens are fingerprinted with every data value taken out, so two members' pages are one screen. Edges keep surface-neutral targets and template values only, weighted by source and decaying with age. One JSON file per bank, never shared across banks.", bullets: ["Discovery: known actions, several per turn with follow_known", "Replay: ≤2 trusted read edges when no strategy survives, from a pinned version", "Bank C: no override, whole fault matrix holds with C's map"], files: ["src/interfaze/pagemap.py"], d: ["D3", "D4", "D5", "D6", "D7", "D23"] },
   operator: { kind: "People", what: "A local page with the intervention (capability, step, reason), a live masked screenshot, and Take control / Hand back / Abort. The person works in the automation's own browser; what they do is captured, and automation resumes only after verifying the screen.", files: ["src/interfaze/operator.py", "src/interfaze/surface/human.js"], d: ["D9", "D11"] },
   evals: { kind: "Measurement", what: "Five suites: fault matrix, discovery reliability (real Claude, $ cap), replay stability, safety/adversarial, recorder robustness. Each on a private app, each number stamped with N, date and commit. This page reads their results.", files: ["evals/", "evals/report.md"], d: ["D14"] },
 };
@@ -518,6 +522,7 @@ const TOURS = {
   replay: [["invoke", "A calling agent invokes the capability with inputs and a deadline."], ["review", "Only approved artifacts run unattended."], ["replay", "No LLM: ranked strategies resolve each control on the live page."], ["identity", "Before reading the record, its identity is checked."], ["surface", "Waits race postconditions against named outcomes."], ["evidence", "Everything is logged, redacted at the write boundary."], ["result", "A typed result: success, an answer, or a failure that says where and why."]],
   handoff: [["replay", "An unknown screen appears mid-run."], ["session", "Automation pauses; the control token's epoch rises."], ["operator", "A person claims control on the operator page and works in the same browser."], ["session", "They hand back; automation verifies the screen before it continues."], ["result", "The caller got needs_human by its deadline, and collects the late result."]],
   tenant: [["mock", "Bank B runs the same product with its own templates: \"Find Member\", and an unlabelled field."], ["replay", "The artifact recorded on bank A replays on B. Name-based strategies miss."], ["surface", "Fallbacks find the controls: the anchor beside the field, the only button in its fieldset."], ["overrides", "Drift becomes a pending override for B, written from what the fallbacks found."], ["review", "A person approves it."], ["replay", "B now runs its own version: first strategies hit, no drift. Bank A is untouched."]],
+  map: [["replay", "One verified lookup run on bank C. The map learns its screens and actions, with no data."], ["pagemap", "C's menu says \"Member Lookup\": now the map knows."], ["replay", "A different capability, recorded on bank A, replays on C. No strategy finds the renamed link."], ["pagemap", "The map offers a trusted read route whose end screen shows the next step's control, from a pinned version."], ["result", "Success, with MAP_FALLBACK and the map version reported. The fix is proposed as an override for C."], ["discovery", "Next discovery on this bank: Claude runs the known actions in one call instead of one turn each."]],
   safety: [["mock", "A hostile page: a commit button labelled \"OK\", a link to another site."], ["surface", "The click happens; the browser starts a request."], ["policy", "The network gate drops it: off-origin, or a declared commit path."], ["result", "POLICY_VIOLATION at that step. Nothing was opened, nothing left the browser."]],
 };
 const svg = $("#svg"), NS = "http://www.w3.org/2000/svg";

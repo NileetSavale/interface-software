@@ -24,6 +24,8 @@ from interfaze.policy import refused
 from interfaze.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
 
 HUMAN_JS = (Path(__file__).parent / "human.js").read_text()
+FORM_KEY_JS = """el => { const form = el.form || el.closest('form'); if (!form) return null;
+  return el.ownerDocument.location.pathname + '#form' + Array.from(el.ownerDocument.forms).indexOf(form); }"""
 KEEP_MASKED_JS = """(() => { const [p, l] = %s;
   const mask = () => window.__ifz && window.__ifz.maskPII(p, l, true);
   document.addEventListener("DOMContentLoaded", mask); document.addEventListener("input", mask, true);
@@ -221,11 +223,7 @@ class WebSurface(Surface):
     async def form_of(self, ref: str) -> str | None:
         """Which form a control belongs to, as document path + the form's place among that document's forms; None
         outside a form."""
-        return await (await self._ref_handle(ref)).evaluate("""el => {
-            const form = el.form || el.closest('form');
-            if (!form) return null;
-            return el.ownerDocument.location.pathname + '#form' + Array.from(el.ownerDocument.forms).indexOf(form);
-        }""")
+        return await (await self._ref_handle(ref)).evaluate(FORM_KEY_JS)
 
     async def path_of(self, ref: str) -> str:
         """The URL path of the document the ref is in (its frame's, not the top page's)."""

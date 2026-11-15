@@ -91,11 +91,13 @@ policy stopped.
 
 def discovery(d: dict) -> str:
     rows = [[a["flow"], a["variant"], a["map"], a["n"], f"{a['recorded']}/{a['n']}", f"{a['replays_on_other_member']}/{a['n']}",
-             a["median_turns"], f"${a['median_cost_usd']:.3f}", a["nudged_runs"], a["escalated_runs"]] for a in d["arms"]]
+             a["median_turns"], a.get("median_known_actions", "–"), f"${a['median_cost_usd']:.3f}", a["nudged_runs"],
+             a["escalated_runs"]] for a in d["arms"]]
     return f"""## 2. Discovery reliability (Claude)
-{_stamp(d)} ${d['spent_usd']:.2f} spent of a ${d['budget_usd']:.2f} cap. Map-on and variant-B arms come with build items 6–7.
+{_stamp(d)} ${d['spent_usd']:.2f} spent of a ${d['budget_usd']:.2f} cap. Map on: seeded from one approved lookup replay on
+this bank (map version `{d.get('map_seed', '–')}`), a frozen copy per run.
 
-{_table(["flow", "variant", "map", "N", "recorded", "replays on another member", "median turns", "median cost", "nudged", "escalated"], rows)}
+{_table(["flow", "variant", "map", "N", "recorded", "replays on another member", "median turns", "known actions used", "median cost", "nudged", "escalated"], rows)}
 
 Recorded on member 12345, replayed on 34567. Cost includes the probes. With N this small, a difference of one run
 between arms is noise.

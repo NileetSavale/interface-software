@@ -37,7 +37,7 @@ The mock app holds only made-up members, so these are not real credentials. Arti
 Nothing below needs an API key except discovery itself.
 
 ```bash
-uv run pytest                              # 102 tests; discovery is driven by a scripted planner, not Claude
+uv run pytest                              # 107 tests; discovery is driven by a scripted planner, not Claude
 uv run python -m evals all                 # the four eval suites that need no LLM (~15 min)
 uv run python scripts/make_evidence.py     # rebuilds evidence/ (replays run fresh; no model)
 ```
@@ -126,6 +126,22 @@ uv run interfaze replay artifacts/core_banking.open_sub_account.json --input mem
 curl 127.0.0.1:4100/__confirmed            # {"count": 0}: it reached the review screen and stopped
 ```
 
+**8. A bank's page map.** Variant C is B with the menu's "Member Inquiry" renamed "Member Lookup", which no recorded
+strategy survives.
+
+```bash
+# Terminal 1: Ctrl-C, then
+uv run interfaze mock-app --variant c
+# Terminal 2:
+S=artifacts/core_banking.open_sub_account.json; IN="--input memberId=34567 --input accountType=Certificate --input nickname=College --input initialDeposit=1000.00"
+uv run interfaze replay $S $IN --tenant c                    # failed at sign-on: nothing finds the renamed link
+uv run interfaze discover goals/lookup_member_balance.json --input memberId=12345 --map maps/c.json --out /tmp/c
+                                                             # Claude learns bank C once; the map records it
+uv run interfaze replay $S $IN --tenant c --map maps/c.json  # success, with MAP_FALLBACK and the map version
+```
+
+The second discovery on a bank with a map runs the known actions several per turn (`follow_known`).
+
 Exit codes: 0 for success or a business outcome, 2 for invalid input, 3 for needs human, 1 for a failure.
 
 ## Layout
@@ -137,10 +153,11 @@ src/interfaze/
   replay/      executor.py (deterministic replay), result.py (the five result types)
   surface/     web.py + locate.js (Playwright over the accessibility tree), human.js (records a person's actions)
   policy.py    allowlist, risk classes, the network gate        pii.py       the masker the model sees through
+  pagemap.py   each bank's learned map of screens and actions
   session.py   the control token                                operator.py  the operator page
   evidence.py  run logs, redaction, audit and circuit breaker   runs.py      invoke with a deadline
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
 goals/        the two capabilities' goal specs          artifacts/  the discovered artifacts
 evals/        the five suites and their results         evidence/   curated runs
-tests/        102 tests                                 docs/       design, decisions, the site
+tests/        107 tests                                 docs/       design, decisions, the site
 ```

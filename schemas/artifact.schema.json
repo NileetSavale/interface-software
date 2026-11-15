@@ -1084,7 +1084,8 @@
           "enum": [
             "model",
             "human",
-            "author"
+            "author",
+            "map"
           ],
           "title": "Recordedby",
           "type": "string"

@@ -18,8 +18,8 @@ FastAPI.
   transcript.
 - **Artifact**: the contract, with an exported JSON Schema.
 - **Replay**: runs an approved artifact with no model.
-- **Shared by both**: the surface, the policy gate, the PII masker, a control token for handoff, and a redacted
-  evidence log.
+- **Shared by both**: the surface, the policy gate, the PII masker, a control token for handoff, a redacted
+  evidence log, and each bank's **page map**: a graph of screens and actions learned from verified runs (D3/D4).
 
 **Decisions and trade-offs**
 - **The accessibility tree, not screenshots and coordinates.** This is the perception model of Vercel Labs'
@@ -117,6 +117,16 @@ is kept only if:
 **Drift** is secondary here, because these UIs are stable. A fallback hit still succeeds and is reported as drift.
 On a tenant, it also proposes an override.
 
+**When no strategy survives, the bank's page map** can stand in, within strict bounds:
+- at most two trusted edges, learned from this bank's verified runs;
+- `read` only when nobody's attending;
+- the route must end in the step's own action, and the next step's control must then be there;
+- it reads a **frozen copy**, whose version is recorded, so the same map version gives the same steps;
+- it's reported as `MAP_FALLBACK`, and proposed as an override.
+
+The map can also confirm a postcondition, exactly: "this is the screen this action is known to lead to here"
+(D23).
+
 ## Heterogeneity & multi-tenant
 
 - **Surface seam.** Artifacts never contain selectors. A `Surface` (`observe`, `describe`, `resolve`, `act`,
@@ -138,8 +148,14 @@ On a tenant, it also proposes an override.
     first;
   - after approval (`interfaze override --tenant b --approve`), B runs with no drift, the whole contract holds on B,
     and A is untouched.
+- **When there's no override yet, the bank's own page map carries it.** Bank C is B with the menu's "Member
+  Inquiry" renamed "Member Lookup", which no recorded strategy survives.
+  - Without a map, both flows stop at sign-on: even sign-on was proved by that link.
+  - With C's map, learned from **one** verified lookup run on C, the whole fault matrix holds on C. That includes the
+    sub-account flow, which the map never saw.
+  - The map is per bank and never shared (D5): it's learned without review, while artifacts are curated.
 - **At scale**, drift events per tenant and step are the signal for when to approve an override and when to
-  re-record.
+  re-record. Weights in each bank's map show which paths still work there.
 
 ## Escalation & handoff
 
@@ -204,9 +220,6 @@ screen recording, with PII masked throughout.
 
 ## Cuts
 
-- **The page map** (D3/D4): a per-bank graph of screens and actions, for cheaper re-discovery and a bounded,
-  map-assisted replay fallback. It's designed (ARCHITECTURE §7a) but not built, and it's next, with its map on/off
-  discovery eval.
 - **Approval-gated commits** through the handoff channel, logging the approver and the token epoch. Designed, and
   deliberately not built.
 - **Capability catalog / tool interface** (D15). The contract is already a tool signature.

@@ -1,15 +1,16 @@
 {
   "suite": "fault_matrix",
-  "date": "2026-11-15T07:34:58+00:00",
-  "commit": "40be003",
+  "date": "2026-11-15T08:46:38+00:00",
+  "commit": "c73a241+dirty",
   "n_per_case": 1,
   "cases": 23,
   "variants": [
     "a",
-    "b"
+    "b",
+    "c"
   ],
-  "runs": 48,
-  "passed": 48,
+  "runs": 73,
+  "passed": 72,
   "proposed_overrides": {
     "lookup": {
       "appliesTo": ">=1.0.0 <2.0.0",
@@ -101,7 +102,7 @@
     },
     "business_outcome": {
       "success": 0,
-      "business_outcome": 12,
+      "business_outcome": 18,
       "invalid_input": 0,
       "needs_human": 0,
       "failed": 0
@@ -109,7 +110,7 @@
     "invalid_input": {
       "success": 0,
       "business_outcome": 0,
-      "invalid_input": 6,
+      "invalid_input": 9,
       "needs_human": 0,
       "failed": 0
     },
@@ -125,7 +126,7 @@
       "business_outcome": 0,
       "invalid_input": 0,
       "needs_human": 0,
-      "failed": 18
+      "failed": 29
     }
   },
   "rows": [
@@ -139,8 +140,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.37,
-      "run_id": "replay_20261115T073102Z_800602"
+      "seconds": 4.35,
+      "run_id": "replay_20261115T083127Z_b25bc4"
     },
     {
       "variant": "a",
@@ -152,8 +153,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.86,
-      "run_id": "replay_20261115T073107Z_2ef9f8"
+      "seconds": 3.77,
+      "run_id": "replay_20261115T083132Z_d46c32"
     },
     {
       "variant": "a",
@@ -165,8 +166,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.93,
-      "run_id": "replay_20261115T073111Z_26e60a"
+      "seconds": 3.78,
+      "run_id": "replay_20261115T083135Z_42addb"
     },
     {
       "variant": "a",
@@ -179,7 +180,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T073115Z_fd647e"
+      "run_id": "replay_20261115T083139Z_6b0451"
     },
     {
       "variant": "a",
@@ -191,8 +192,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.29,
-      "run_id": "replay_20261115T073115Z_43b12b"
+      "seconds": 4.38,
+      "run_id": "replay_20261115T083139Z_4e256d"
     },
     {
       "variant": "a",
@@ -204,8 +205,8 @@
       "actual": "success+recovered",
       "pass": true,
       "at_step": null,
-      "seconds": 5.22,
-      "run_id": "replay_20261115T073119Z_993ea5"
+      "seconds": 5.23,
+      "run_id": "replay_20261115T083144Z_62360c"
     },
     {
       "variant": "a",
@@ -217,8 +218,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 6.61,
-      "run_id": "replay_20261115T073124Z_1d741a"
+      "seconds": 6.58,
+      "run_id": "replay_20261115T083149Z_f76f49"
     },
     {
       "variant": "a",
@@ -230,8 +231,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 15.24,
-      "run_id": "replay_20261115T073131Z_26fc5e"
+      "seconds": 14.44,
+      "run_id": "replay_20261115T083156Z_15e6e7"
     },
     {
       "variant": "a",
@@ -243,8 +244,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.33,
-      "run_id": "replay_20261115T073146Z_5bfdeb"
+      "seconds": 4.4,
+      "run_id": "replay_20261115T083210Z_2882e1"
     },
     {
       "variant": "a",
@@ -256,8 +257,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 4.3,
-      "run_id": "replay_20261115T073150Z_d5de4d"
+      "seconds": 4.35,
+      "run_id": "replay_20261115T083214Z_605e42"
     },
     {
       "variant": "a",
@@ -269,8 +270,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.61,
-      "run_id": "replay_20261115T073155Z_7d8238"
+      "seconds": 4.73,
+      "run_id": "replay_20261115T083219Z_93afba"
     },
     {
       "variant": "a",
@@ -282,8 +283,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.71,
-      "run_id": "replay_20261115T073159Z_fc4313"
+      "seconds": 3.79,
+      "run_id": "replay_20261115T083223Z_820c5e"
     },
     {
       "variant": "a",
@@ -295,8 +296,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.72,
-      "run_id": "replay_20261115T073203Z_01dd29"
+      "seconds": 3.78,
+      "run_id": "replay_20261115T083227Z_1790e4"
     },
     {
       "variant": "a",
@@ -309,7 +310,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T073207Z_184749"
+      "run_id": "replay_20261115T083231Z_f2cbab"
     },
     {
       "variant": "a",
@@ -321,8 +322,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.39,
-      "run_id": "replay_20261115T073207Z_2c7704"
+      "seconds": 4.34,
+      "run_id": "replay_20261115T083231Z_9bdca6"
     },
     {
       "variant": "a",
@@ -334,8 +335,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.33,
-      "run_id": "replay_20261115T073211Z_dcc060"
+      "seconds": 4.4,
+      "run_id": "replay_20261115T083235Z_048c8e"
     },
     {
       "variant": "a",
@@ -347,8 +348,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 7.53,
-      "run_id": "replay_20261115T073216Z_878be2"
+      "seconds": 7.48,
+      "run_id": "replay_20261115T083240Z_7e1937"
     },
     {
       "variant": "a",
@@ -360,8 +361,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 15.34,
-      "run_id": "replay_20261115T073223Z_5c57ac"
+      "seconds": 14.53,
+      "run_id": "replay_20261115T083247Z_9027de"
     },
     {
       "variant": "a",
@@ -373,8 +374,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.38,
-      "run_id": "replay_20261115T073239Z_dc301f"
+      "seconds": 4.37,
+      "run_id": "replay_20261115T083302Z_300369"
     },
     {
       "variant": "a",
@@ -386,8 +387,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 4.28,
-      "run_id": "replay_20261115T073243Z_268be4"
+      "seconds": 4.36,
+      "run_id": "replay_20261115T083306Z_d0c056"
     },
     {
       "variant": "a",
@@ -399,8 +400,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.71,
-      "run_id": "replay_20261115T073247Z_e70983"
+      "seconds": 3.8,
+      "run_id": "replay_20261115T083311Z_7fa497"
     },
     {
       "variant": "a",
@@ -412,8 +413,8 @@
       "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
       "pass": true,
       "at_step": "continue_review",
-      "seconds": 4.62,
-      "run_id": "replay_20261115T073251Z_9140c4"
+      "seconds": 4.68,
+      "run_id": "replay_20261115T083315Z_96a9a0"
     },
     {
       "variant": "a",
@@ -426,7 +427,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T073256Z_57da3d"
+      "run_id": "replay_20261115T083319Z_7d8d36"
     },
     {
       "variant": "b",
@@ -438,8 +439,8 @@
       "actual": "success+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 4.16,
-      "run_id": "replay_20261115T073256Z_c15f83"
+      "seconds": 4.14,
+      "run_id": "replay_20261115T083319Z_b37fb9"
     },
     {
       "variant": "b",
@@ -451,8 +452,8 @@
       "actual": "success+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 5.04,
-      "run_id": "replay_20261115T073300Z_aedf08"
+      "seconds": 5.06,
+      "run_id": "replay_20261115T083323Z_fa0a1e"
     },
     {
       "variant": "b",
@@ -464,8 +465,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 3.79,
-      "run_id": "replay_20261115T073305Z_47bee8"
+      "seconds": 3.86,
+      "run_id": "replay_20261115T083328Z_094584"
     },
     {
       "variant": "b",
@@ -477,12 +478,142 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.81,
-      "run_id": "replay_20261115T073309Z_d08d5d"
+      "seconds": 3.75,
+      "run_id": "replay_20261115T083332Z_f0bb50"
     },
     {
       "variant": "b",
       "flow": "lookup",
+      "case": "restricted member",
+      "fault": null,
+      "expect": "business_outcome/PERMISSION_DENIED",
+      "run": 1,
+      "actual": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 3.8,
+      "run_id": "replay_20261115T083336Z_ae9a84"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "malformed member number",
+      "fault": null,
+      "expect": "invalid_input",
+      "run": 1,
+      "actual": "invalid_input",
+      "pass": true,
+      "at_step": null,
+      "seconds": 0.0,
+      "run_id": "replay_20261115T083340Z_1a7414"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "server error",
+      "fault": "server_error",
+      "expect": "failed/APP_ERROR",
+      "run": 1,
+      "actual": "failed/APP_ERROR",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 4.33,
+      "run_id": "replay_20261115T083340Z_f37d5c"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "session timeout",
+      "fault": "session_timeout",
+      "expect": "success+recovered",
+      "run": 1,
+      "actual": "success+recovered",
+      "pass": true,
+      "at_step": null,
+      "seconds": 5.26,
+      "run_id": "replay_20261115T083344Z_6fbbac"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "slow page",
+      "fault": "slow",
+      "expect": "success*",
+      "run": 1,
+      "actual": "success",
+      "pass": true,
+      "at_step": null,
+      "seconds": 6.55,
+      "run_id": "replay_20261115T083350Z_27a0e1"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "unknown notice page",
+      "fault": "interstitial",
+      "expect": "failed/TARGET_UNRESOLVED",
+      "run": 1,
+      "actual": "failed/TARGET_UNRESOLVED",
+      "pass": true,
+      "at_step": "read_name",
+      "seconds": 14.43,
+      "run_id": "replay_20261115T083356Z_26a6d1"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "unknown dialog",
+      "fault": "unknown_dialog",
+      "expect": "failed/UNEXPECTED_DIALOG",
+      "run": 1,
+      "actual": "failed/UNEXPECTED_DIALOG",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 4.36,
+      "run_id": "replay_20261115T083411Z_8b5185"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "app serves the wrong member",
+      "fault": "wrong_record",
+      "expect": "failed/WRONG_RECORD",
+      "run": 1,
+      "actual": "failed/WRONG_RECORD",
+      "pass": true,
+      "at_step": "read_name",
+      "seconds": 4.38,
+      "run_id": "replay_20261115T083415Z_fbab2a"
+    },
+    {
+      "variant": "b",
+      "flow": "open_sub_account",
+      "case": "happy path",
+      "fault": null,
+      "expect": "success",
+      "run": 1,
+      "actual": "success",
+      "pass": true,
+      "at_step": null,
+      "seconds": 4.67,
+      "run_id": "replay_20261115T083419Z_3d6d3f"
+    },
+    {
+      "variant": "b",
+      "flow": "open_sub_account",
+      "case": "member doesn't exist",
+      "fault": null,
+      "expect": "business_outcome/MEMBER_NOT_FOUND",
+      "run": 1,
+      "actual": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 3.78,
+      "run_id": "replay_20261115T083424Z_f994e5"
+    },
+    {
+      "variant": "b",
+      "flow": "open_sub_account",
       "case": "restricted member",
       "fault": null,
       "expect": "business_outcome/PERMISSION_DENIED",
@@ -491,11 +622,11 @@
       "pass": true,
       "at_step": "search_member",
       "seconds": 3.74,
-      "run_id": "replay_20261115T073312Z_f1684d"
+      "run_id": "replay_20261115T083428Z_89b905"
     },
     {
       "variant": "b",
-      "flow": "lookup",
+      "flow": "open_sub_account",
       "case": "malformed member number",
       "fault": null,
       "expect": "invalid_input",
@@ -504,150 +635,20 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T073316Z_4e5ced"
+      "run_id": "replay_20261115T083432Z_09d51b"
     },
     {
       "variant": "b",
-      "flow": "lookup",
+      "flow": "open_sub_account",
       "case": "server error",
       "fault": "server_error",
       "expect": "failed/APP_ERROR",
       "run": 1,
       "actual": "failed/APP_ERROR",
-      "pass": true,
-      "at_step": "search_member",
-      "seconds": 4.42,
-      "run_id": "replay_20261115T073316Z_f605bb"
-    },
-    {
-      "variant": "b",
-      "flow": "lookup",
-      "case": "session timeout",
-      "fault": "session_timeout",
-      "expect": "success+recovered",
-      "run": 1,
-      "actual": "success+recovered",
-      "pass": true,
-      "at_step": null,
-      "seconds": 5.15,
-      "run_id": "replay_20261115T073321Z_fc9225"
-    },
-    {
-      "variant": "b",
-      "flow": "lookup",
-      "case": "slow page",
-      "fault": "slow",
-      "expect": "success*",
-      "run": 1,
-      "actual": "success",
-      "pass": true,
-      "at_step": null,
-      "seconds": 6.6,
-      "run_id": "replay_20261115T073326Z_4bb5e1"
-    },
-    {
-      "variant": "b",
-      "flow": "lookup",
-      "case": "unknown notice page",
-      "fault": "interstitial",
-      "expect": "failed/TARGET_UNRESOLVED",
-      "run": 1,
-      "actual": "failed/TARGET_UNRESOLVED",
-      "pass": true,
-      "at_step": "read_name",
-      "seconds": 15.39,
-      "run_id": "replay_20261115T073332Z_338db2"
-    },
-    {
-      "variant": "b",
-      "flow": "lookup",
-      "case": "unknown dialog",
-      "fault": "unknown_dialog",
-      "expect": "failed/UNEXPECTED_DIALOG",
-      "run": 1,
-      "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
       "seconds": 4.34,
-      "run_id": "replay_20261115T073348Z_d2ae04"
-    },
-    {
-      "variant": "b",
-      "flow": "lookup",
-      "case": "app serves the wrong member",
-      "fault": "wrong_record",
-      "expect": "failed/WRONG_RECORD",
-      "run": 1,
-      "actual": "failed/WRONG_RECORD",
-      "pass": true,
-      "at_step": "read_name",
-      "seconds": 4.33,
-      "run_id": "replay_20261115T073352Z_0dba38"
-    },
-    {
-      "variant": "b",
-      "flow": "open_sub_account",
-      "case": "happy path",
-      "fault": null,
-      "expect": "success",
-      "run": 1,
-      "actual": "success",
-      "pass": true,
-      "at_step": null,
-      "seconds": 4.72,
-      "run_id": "replay_20261115T073357Z_0ac366"
-    },
-    {
-      "variant": "b",
-      "flow": "open_sub_account",
-      "case": "member doesn't exist",
-      "fault": null,
-      "expect": "business_outcome/MEMBER_NOT_FOUND",
-      "run": 1,
-      "actual": "business_outcome/MEMBER_NOT_FOUND",
-      "pass": true,
-      "at_step": "search_member",
-      "seconds": 3.84,
-      "run_id": "replay_20261115T073401Z_00003b"
-    },
-    {
-      "variant": "b",
-      "flow": "open_sub_account",
-      "case": "restricted member",
-      "fault": null,
-      "expect": "business_outcome/PERMISSION_DENIED",
-      "run": 1,
-      "actual": "business_outcome/PERMISSION_DENIED",
-      "pass": true,
-      "at_step": "search_member",
-      "seconds": 3.73,
-      "run_id": "replay_20261115T073405Z_1a3e00"
-    },
-    {
-      "variant": "b",
-      "flow": "open_sub_account",
-      "case": "malformed member number",
-      "fault": null,
-      "expect": "invalid_input",
-      "run": 1,
-      "actual": "invalid_input",
-      "pass": true,
-      "at_step": null,
-      "seconds": 0.0,
-      "run_id": "replay_20261115T073409Z_e1deb2"
-    },
-    {
-      "variant": "b",
-      "flow": "open_sub_account",
-      "case": "server error",
-      "fault": "server_error",
-      "expect": "failed/APP_ERROR",
-      "run": 1,
-      "actual": "failed/APP_ERROR",
-      "pass": true,
-      "at_step": "search_member",
-      "seconds": 4.29,
-      "run_id": "replay_20261115T073409Z_551be5"
+      "run_id": "replay_20261115T083432Z_19fcd9"
     },
     {
       "variant": "b",
@@ -659,8 +660,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.33,
-      "run_id": "replay_20261115T073413Z_369370"
+      "seconds": 4.29,
+      "run_id": "replay_20261115T083436Z_2470c0"
     },
     {
       "variant": "b",
@@ -672,8 +673,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 7.5,
-      "run_id": "replay_20261115T073418Z_b11179"
+      "seconds": 7.45,
+      "run_id": "replay_20261115T083440Z_99154e"
     },
     {
       "variant": "b",
@@ -685,8 +686,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 15.3,
-      "run_id": "replay_20261115T073425Z_9a9564"
+      "seconds": 15.4,
+      "run_id": "replay_20261115T083448Z_ee50b9"
     },
     {
       "variant": "b",
@@ -698,8 +699,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.32,
-      "run_id": "replay_20261115T073440Z_604b75"
+      "seconds": 4.34,
+      "run_id": "replay_20261115T083503Z_db5473"
     },
     {
       "variant": "b",
@@ -711,8 +712,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 4.38,
-      "run_id": "replay_20261115T073445Z_7e7c6d"
+      "seconds": 4.3,
+      "run_id": "replay_20261115T083508Z_7705d8"
     },
     {
       "variant": "b",
@@ -724,8 +725,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.77,
-      "run_id": "replay_20261115T073449Z_214fe2"
+      "seconds": 3.76,
+      "run_id": "replay_20261115T083512Z_a4616a"
     },
     {
       "variant": "b",
@@ -737,8 +738,8 @@
       "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
       "pass": true,
       "at_step": "continue_review",
-      "seconds": 4.65,
-      "run_id": "replay_20261115T073453Z_0c1f10"
+      "seconds": 4.67,
+      "run_id": "replay_20261115T083516Z_c4fbd9"
     },
     {
       "variant": "b",
@@ -751,7 +752,332 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T073458Z_35f65d"
+      "run_id": "replay_20261115T083520Z_479c2d"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "no page map",
+      "fault": null,
+      "expect": "failed/*",
+      "run": 1,
+      "actual": "failed/EXPECT_FAILED",
+      "pass": true,
+      "at_step": "sign",
+      "seconds": 13.52,
+      "run_id": "replay_20261115T083526Z_b02aab"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "no page map",
+      "fault": null,
+      "expect": "failed/*",
+      "run": 1,
+      "actual": "failed/EXPECT_FAILED",
+      "pass": true,
+      "at_step": "sign",
+      "seconds": 13.57,
+      "run_id": "replay_20261115T083540Z_6eda51"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "happy path",
+      "fault": null,
+      "expect": "success*",
+      "run": 1,
+      "actual": "success+recovered+drift",
+      "pass": true,
+      "at_step": null,
+      "seconds": 29.77,
+      "run_id": "replay_20261115T083553Z_b5a13b"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "member doesn't exist",
+      "fault": null,
+      "expect": "business_outcome/MEMBER_NOT_FOUND",
+      "run": 1,
+      "actual": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 29.16,
+      "run_id": "replay_20261115T083623Z_289386"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "restricted member",
+      "fault": null,
+      "expect": "business_outcome/PERMISSION_DENIED",
+      "run": 1,
+      "actual": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 29.2,
+      "run_id": "replay_20261115T083652Z_2a023a"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "malformed member number",
+      "fault": null,
+      "expect": "invalid_input",
+      "run": 1,
+      "actual": "invalid_input",
+      "pass": true,
+      "at_step": null,
+      "seconds": 0.0,
+      "run_id": "replay_20261115T083722Z_dd2ee6"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "server error",
+      "fault": "server_error",
+      "expect": "failed/APP_ERROR",
+      "run": 1,
+      "actual": "failed/APP_ERROR",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 29.7,
+      "run_id": "replay_20261115T083722Z_24bf3a"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "session timeout",
+      "fault": "session_timeout",
+      "expect": "success*",
+      "run": 1,
+      "actual": "failed/TARGET_UNRESOLVED",
+      "pass": false,
+      "at_step": "enter_user_id",
+      "seconds": 55.26,
+      "run_id": "replay_20261115T083751Z_ae3055"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "slow page",
+      "fault": "slow",
+      "expect": "success*",
+      "run": 1,
+      "actual": "success+recovered+drift",
+      "pass": true,
+      "at_step": null,
+      "seconds": 32.62,
+      "run_id": "replay_20261115T083847Z_2ccee8"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "unknown notice page",
+      "fault": "interstitial",
+      "expect": "failed/TARGET_UNRESOLVED",
+      "run": 1,
+      "actual": "failed/TARGET_UNRESOLVED",
+      "pass": true,
+      "at_step": "read_name",
+      "seconds": 40.89,
+      "run_id": "replay_20261115T083919Z_791bc2"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "unknown dialog",
+      "fault": "unknown_dialog",
+      "expect": "failed/UNEXPECTED_DIALOG",
+      "run": 1,
+      "actual": "failed/UNEXPECTED_DIALOG",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 28.92,
+      "run_id": "replay_20261115T084000Z_d9954f"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "app serves the wrong member",
+      "fault": "wrong_record",
+      "expect": "failed/WRONG_RECORD",
+      "run": 1,
+      "actual": "failed/WRONG_RECORD",
+      "pass": true,
+      "at_step": "read_name",
+      "seconds": 28.87,
+      "run_id": "replay_20261115T084029Z_3296ca"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "happy path",
+      "fault": null,
+      "expect": "success*",
+      "run": 1,
+      "actual": "success+recovered+drift",
+      "pass": true,
+      "at_step": null,
+      "seconds": 32.41,
+      "run_id": "replay_20261115T084058Z_c3f083"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "member doesn't exist",
+      "fault": null,
+      "expect": "business_outcome/MEMBER_NOT_FOUND",
+      "run": 1,
+      "actual": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 28.3,
+      "run_id": "replay_20261115T084130Z_110b13"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "restricted member",
+      "fault": null,
+      "expect": "business_outcome/PERMISSION_DENIED",
+      "run": 1,
+      "actual": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 28.32,
+      "run_id": "replay_20261115T084159Z_ffcee5"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "malformed member number",
+      "fault": null,
+      "expect": "invalid_input",
+      "run": 1,
+      "actual": "invalid_input",
+      "pass": true,
+      "at_step": null,
+      "seconds": 0.0,
+      "run_id": "replay_20261115T084227Z_f36ea4"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "server error",
+      "fault": "server_error",
+      "expect": "failed/APP_ERROR",
+      "run": 1,
+      "actual": "failed/APP_ERROR",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 28.89,
+      "run_id": "replay_20261115T084227Z_0736e8"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "session timeout",
+      "fault": "session_timeout",
+      "expect": "failed/SESSION_EXPIRED",
+      "run": 1,
+      "actual": "failed/SESSION_EXPIRED",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 29.01,
+      "run_id": "replay_20261115T084256Z_aa246f"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "slow page",
+      "fault": "slow",
+      "expect": "success*",
+      "run": 1,
+      "actual": "success+recovered+drift",
+      "pass": true,
+      "at_step": null,
+      "seconds": 35.27,
+      "run_id": "replay_20261115T084325Z_3fca09"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "unknown notice page",
+      "fault": "interstitial",
+      "expect": "failed/TARGET_UNRESOLVED",
+      "run": 1,
+      "actual": "failed/TARGET_UNRESOLVED",
+      "pass": true,
+      "at_step": "open_sub_account_form",
+      "seconds": 39.43,
+      "run_id": "replay_20261115T084400Z_0e0313"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "unknown dialog",
+      "fault": "unknown_dialog",
+      "expect": "failed/UNEXPECTED_DIALOG",
+      "run": 1,
+      "actual": "failed/UNEXPECTED_DIALOG",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 28.94,
+      "run_id": "replay_20261115T084440Z_938ceb"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "app serves the wrong member",
+      "fault": "wrong_record",
+      "expect": "failed/WRONG_RECORD",
+      "run": 1,
+      "actual": "failed/WRONG_RECORD",
+      "pass": true,
+      "at_step": "open_sub_account_form",
+      "seconds": 28.93,
+      "run_id": "replay_20261115T084509Z_5d60a6"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "number starting with 0",
+      "fault": null,
+      "expect": "business_outcome/INVALID_MEMBER_NUMBER",
+      "run": 1,
+      "actual": "business_outcome/INVALID_MEMBER_NUMBER",
+      "pass": true,
+      "at_step": "search_member",
+      "seconds": 28.36,
+      "run_id": "replay_20261115T084538Z_35d87b"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "deposit below minimum",
+      "fault": null,
+      "expect": "business_outcome/DEPOSIT_BELOW_MINIMUM",
+      "run": 1,
+      "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
+      "pass": true,
+      "at_step": "continue_review",
+      "seconds": 31.97,
+      "run_id": "replay_20261115T084606Z_72c6cb"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "nickname breaks the input rule",
+      "fault": null,
+      "expect": "invalid_input",
+      "run": 1,
+      "actual": "invalid_input",
+      "pass": true,
+      "at_step": null,
+      "seconds": 0.0,
+      "run_id": "replay_20261115T084638Z_03cbee"
     }
   ]
 }

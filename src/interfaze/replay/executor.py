@@ -14,12 +14,13 @@ from playwright.async_api import async_playwright
 
 from interfaze.artifact import overrides
 from interfaze.artifact.schema import (
-    Artifact, ClickThrough, IdentityMatches, InputSpec, OutcomeSeen, Outcome, OutputPresent, RunSubflow, Step,
-    TEMPLATE, Visible, WaitLonger,
+    Artifact, ClickThrough, IdentityMatches, InputSpec, OutcomeSeen, Outcome, OutputPresent, RunSubflow, SetOp, Step,
+    Target, TEMPLATE, Visible, WaitLonger,
 )
 from interfaze.artifact.templates import TemplateError, render
 from interfaze.evidence import Audit, RunLog, new_run_id, now, structure_only
 from interfaze.operator import _public
+from interfaze.pagemap import TRUSTED, PageMap, screen_of, target_name
 from interfaze.session import ControlLost, Intervention, Session
 from interfaze.policy import PolicyViolation, check_action, check_url
 from interfaze.replay.result import (
@@ -95,11 +96,17 @@ class Replayer:
     def __init__(self, artifact: Artifact, base_url: str, inputs: dict[str, str], *, headed: bool = False,
                  allow_draft: bool = False, env: dict[str, str] | None = None, run_id: str | None = None,
                  audit: Audit | None = None, operator_hub=None, pause_timeout_s: float = 600,
-                 tenant: str | None = None, pending_dir: Path | None = None, video_dir: Path | None = None):
+                 tenant: str | None = None, pending_dir: Path | None = None, video_dir: Path | None = None,
+                 page_map: PageMap | None = None):
         # The tenant's own version: the base with that tenant's approved override applied (§7). An override that
         # doesn't apply to this base version is refused at load (OverrideError), never skipped silently
         self.tenant = tenant
         self.video_dir = video_dir  # a screen recording of the run, with PII masked throughout
+        # The bank's page map (§7a). The fallback reads a frozen copy, so this run's steps depend only on the version
+        # it started with (recorded below); what the run learns goes into the live one afterwards
+        self.map_source = page_map
+        self.map = page_map.frozen() if page_map else None
+        self._transitions: list[dict] = []
         self.base = artifact
         artifact = overrides.apply(artifact, tenant) if tenant else artifact
         self.pending_dir = pending_dir or Path("artifacts") / artifact.capability.id / "overrides.pending"
@@ -135,7 +142,7 @@ class Replayer:
 
     async def run(self):
         self.log.event("replay_started", capability=self.artifact.capability.id, version=self.artifact.capability.version,
-                       inputs=sorted(self.inputs))
+                       inputs=sorted(self.inputs), tenant=self.tenant, page_map=self.map.version() if self.map else None)
         if errors := validate_inputs(self.artifact, self.inputs):
             return self._finish(InvalidInput(run_id=self.run_id, completed_at=now(), errors=errors))
         if self.artifact.status != "approved" and not self.allow_draft:
@@ -156,6 +163,8 @@ class Replayer:
                 self.surface = await WebSurface.open(context, on_human=self._on_human if self.hub else None,
                                                      policy=self.artifact.policy, masked_view=bool(self.video_dir))
                 result = await self._run_steps()
+                if self.map and self._transitions:
+                    await self._screen_before_act()  # where the last action led
             except _Stop as stop:
                 result = stop.result
             except ControlLost as e:
@@ -167,6 +176,12 @@ class Replayer:
                 if self.video_dir and self.surface:
                     await self.surface.page.context.close()  # writes the video file
                 await browser.close()
+        if self.map_source is not None and self._transitions:
+            # Only a run whose checkpoint passed adds knowledge; any other result lowers what it used (D7)
+            self.map_source.learn([t for t in self._transitions if "to" in t] if result.status == "success"
+                                  else self._transitions, "replay", verified=result.status == "success")
+            self.map_source.save()
+            self.log.event("map_learned", transitions=len(self._transitions), version=self.map_source.version())
         return self._finish(result)
 
     def _finish(self, result):
@@ -182,7 +197,8 @@ class Replayer:
             try:
                 if not steps_done:
                     for pre in self.artifact.preconditions:
-                        if pre.unless and await self.surface.wait_any([pre.unless], 2_000) is not None:
+                        if pre.unless and (await self.surface.wait_any([pre.unless], 2_000) is not None or (
+                                self.map and await self._map_confirms(self.artifact.subflows[pre.use][-1]))):
                             self.log.event("precondition_skipped", subflow=pre.use)
                             continue
                         await self._run_flow(self.artifact.subflows[pre.use], recovering=False)
@@ -245,6 +261,8 @@ class Replayer:
             index = await self.surface.wait_any([step.expect, *(o.detect for o in watched)], timeout)
             if index:
                 await self._handle(watched[index - 1], step, recovering, acted=True)
+            if index is None and self.map and await self._map_confirms(step):
+                index = 0  # the screen is where this action is known to lead on this bank
             if index is None:
                 await self._outcomes(step, "after", recovering)
                 if self.hub and not recovering:
@@ -265,6 +283,8 @@ class Replayer:
             if check_policy:
                 await self._check_policy(step, hit)
             mark = len(self.surface.blocked)
+            if self.map is not None:
+                await self._screen_before_act(step, target, action)
             try:
                 await self.surface.act(hit.handle, action, value, guard=lambda: self.session.check(epoch))
                 if refusals := self.surface.refusals_since(mark):
@@ -302,12 +322,118 @@ class Replayer:
         # Nothing found. A declared outcome (an error page, "no member found") explains that better than a miss.
         await self._outcomes(step, "after", recovering)
         ambiguous = any(code == "AMBIGUOUS_TARGET" for _, code in hit.attempts)
+        if self.map and not ambiguous and not recovering and step.action in ("click", "type", "select") \
+                and target is step.target:
+            await self._map_fallback(step)  # raises _Retry when it did the step's job; returns when it can't
         if self.hub and not recovering:
             await self._escalate(step, f"{'AMBIGUOUS_TARGET' if ambiguous else 'TARGET_UNRESOLVED'}: can't find the "
                                        f"control for '{step.intent}'", acted=False)
         raise self._fail(step.id, "AMBIGUOUS_TARGET" if ambiguous else "TARGET_UNRESOLVED",
                          f"exactly one match for: {', '.join(k for k, _ in hit.attempts)}",
                          "; ".join(f"{k}: {c}" for k, c in hit.attempts), evidence=await self._evidence(step.id))
+
+    async def _screen_before_act(self, step: Step | None = None, target=None, action: str | None = None):
+        """The page map's view of this run: each action from the screen it started on to the screen the next one
+        started on (where the page has settled, unlike just after a click)."""
+        here = screen_of((await self.surface.observe()).text)
+        if self._transitions and "to" not in self._transitions[-1]:
+            last = self._transitions[-1]
+            if step is not None and last["intent"] == step.intent and last["from"] == here.id:
+                self._transitions.pop()  # the same action retried after a stale element: one transition, not two
+            else:
+                last.update(to=here.id, to_labels=here.labels)
+        if step is not None:
+            self._transitions.append({"from": here.id, "from_labels": here.labels, "action": action,
+                                      "target": target.model_dump(by_alias=True, exclude_none=True),
+                                      "value": step.value, "intent": step.intent, "risk": step.risk})
+
+    async def _map_fallback(self, step: Step):
+        """No recorded strategy finds the control. The bank's map may know another way (§7a): at most two trusted
+        edges from this screen, read-only unless a person is attending, ending in the step's own action, and chosen
+        only if the screen it leads to has been seen showing the next step's control. Where the run goes is still
+        the artifact's call: if the next step's control isn't there afterwards, the run fails as before."""
+        here = screen_of((await self.surface.observe()).text)
+        risks = ("read", "reversible") if self.hub and self.artifact.policy.max_risk == "reversible" else ("read",)
+        expected = self._destination_labels()
+        routes = [r for r in self.map.paths(here.id, max_edges=2, min_weight=TRUSTED, risks=risks)
+                  if r[-1]["action"] == step.action and r[-1]["value"] == step.value
+                  and (not expected or expected & self.map.labels(r[-1]["to"]))]
+        if not routes:
+            self.log.event("map_fallback", step=step.id, result="no trusted route", version=self.map.version())
+            return
+        route = min(routes, key=lambda r: (len(r), -min(self.map.weight(e) for e in r)))
+        for edge in route:
+            target = Target.model_validate(edge["target"])
+            hit = await self.surface.resolve(target, 3_000)
+            if not isinstance(hit, Resolved):
+                raise self._fail(step.id, "TARGET_UNRESOLVED", "a trusted page-map route to the step's control",
+                                 f"map edge '{edge['intent']}' found nothing on this screen")
+            live = await hit.handle.evaluate(LIVE_NAME_JS)
+            role, _ = target_name(edge["target"])
+            try:
+                check_action(self.artifact.policy, edge["action"], role if edge["action"] == "click" else "", live)
+            except PolicyViolation as e:
+                raise self._fail(step.id, "POLICY_VIOLATION", "a read-only map route", str(e))
+            epoch, mark = self.session.epoch, len(self.surface.blocked)
+            value = self._render(step.id, edge["value"]) if edge["value"] else None
+            await self.surface.act(hit.handle, edge["action"], value, guard=lambda: self.session.check(epoch))
+            if refusals := self.surface.refusals_since(mark):
+                raise self._fail(step.id, "POLICY_VIOLATION", "a read-only map route", refusals[0])
+        if not await self._reached_destination():
+            raise self._fail(step.id, "TARGET_UNRESOLVED", "the map route to lead where the next step continues",
+                             "the next step's control isn't on the screen the route led to",
+                             evidence=await self._evidence(step.id))
+        route_text = " → ".join(f"{e['action']} {target_name(e['target'])[0]} '{target_name(e['target'])[1]}'"
+                                for e in route)
+        self.recovered.append(RecoveryEvent(code="MAP_FALLBACK", step_id=step.id, attempt=1,
+                                            action=f"page map: {route_text}", map_version=self.map.version()))
+        proposed = None
+        if self.tenant:
+            # The map's fix becomes a reviewed artifact change for this tenant, as drift does
+            proposed = str(overrides.write_pending(self.pending_dir / f"{self.tenant}.json", self.base, [
+                SetOp(step=step.id, path="target", value=route[-1]["target"])])) if len(route) == 1 else None
+        self.log.event("map_fallback", step=step.id, result="recovered", route=route_text, version=self.map.version(),
+                       proposed=proposed)
+        raise _Retry(step_done=True)
+
+    async def _map_confirms(self, step: Step) -> bool:
+        """A postcondition written against one bank's labels can fail on another bank that reached the right screen
+        (sign-on is proved by the next control, which bank C renames). The map may confirm it, but only exactly: the
+        screen now showing is where this same action is known, from trusted edges, to lead on this bank."""
+        if step.target is None:
+            return False
+        here = screen_of((await self.surface.observe()).text)
+        name = target_name(step.target.model_dump(by_alias=True, exclude_none=True))
+        known = [e for e in self.map.data["edges"].values() if e["action"] == step.action
+                 and target_name(e["target"]) == name and e["to"] == here.id and self.map.weight(e) >= TRUSTED]
+        if known:
+            self.recovered.append(RecoveryEvent(code="MAP_FALLBACK", step_id=step.id, attempt=1,
+                                                action="page map: confirmed the screen this action leads to",
+                                                map_version=self.map.version()))
+            self.log.event("map_fallback", step=step.id, result="postcondition confirmed", version=self.map.version())
+        return bool(known)
+
+    def _destination_labels(self) -> set[str]:
+        """Words the screen after this step should show: the next step's control (or, last, the success check)."""
+        nxt = self._next
+        targets = [nxt.target] if nxt and nxt.target else list(nxt.extract.values()) if nxt else []
+        words = set()
+        for t in targets:
+            for s in t.strategies:
+                for key in ("name", "label", "anchor_text", "text", "table_anchor"):
+                    if isinstance(getattr(s, key, None), str):
+                        words.add(getattr(s, key))
+        if not nxt:
+            words |= {c.text for c in self.artifact.success.checkpoint if isinstance(c, Visible) and isinstance(c.text, str)}
+        return words
+
+    async def _reached_destination(self) -> bool:
+        nxt = self._next
+        if nxt is None:
+            return all([await self.surface.wait_any([c], 3_000) is not None
+                        for c in self.artifact.success.checkpoint if isinstance(c, Visible)])
+        target = nxt.target or next(iter(nxt.extract.values()), None)
+        return target is None or isinstance(await self.surface.resolve(target, 3_000), Resolved)
 
     async def _propose_override(self, step: Step, target, hit: Resolved) -> str | None:
         """Drift on a tenant becomes a pending override for that tenant, for a person to approve (§4 drift). Without

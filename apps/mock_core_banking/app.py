@@ -11,6 +11,8 @@ Variant B, a second bank on the same vendor product (docs/ARCHITECTURE.md §7):
     VARIANT=b at start, or POST /__variant?name=b
 Same flows and messages, two template differences a real tenant would have: the member search button says
 "Find Member" instead of "Search", and the Member # field has no <LABEL>, only the text in the cell beside it.
+Variant C is B with the menu's "Member Inquiry" renamed "Member Lookup": a link no recorded strategy survives,
+which only the page map's fallback can get past.
 
 Layout mode, for the recorder-robustness eval (evals/robustness.py):
     POST /__layout?seed=7     DELETE /__layout
@@ -52,7 +54,7 @@ _sessions: set[str] = set()
 _fault = {"name": os.environ.get("FAULT") or None, "times": -1}  # times -1: every time
 _layout: dict = {"seed": None}
 _variant = {"name": os.environ.get("VARIANT", "a")}
-VARIANTS = {"a", "b"}
+VARIANTS = {"a", "b", "c"}
 
 
 @app.post("/__faults")
@@ -78,7 +80,11 @@ def set_variant(name: str):
 
 
 def b() -> bool:
-    return _variant["name"] == "b"
+    return _variant["name"] in ("b", "c")
+
+
+def c() -> bool:
+    return _variant["name"] == "c"
 
 
 @app.post("/__layout")
@@ -150,7 +156,7 @@ def frameset():
 def nav(request: Request):
     if not signed_in(request):
         return page('<TABLE WIDTH="100%" BGCOLOR="#003366"><TR><TD><FONT COLOR="#FFFFFF"><B>CU*Core</B></FONT></TD></TR></TABLE>')
-    links = shuffled([f'<TR><TD><A HREF="/inquiry" TARGET="main"{T("member_inquiry_link")}>Member Inquiry</A></TD></TR>',
+    links = shuffled([f'<TR><TD><A HREF="/inquiry" TARGET="main"{T("member_inquiry_link")}>{"Member Lookup" if c() else "Member Inquiry"}</A></TD></TR>',
                       '<TR><TD><A HREF="/signoff" TARGET="_top">Sign Off</A></TD></TR>'], "nav")
     return page(f"""<TABLE WIDTH="100%" CELLPADDING=4 BGCOLOR="#003366"><TR><TD><FONT COLOR="#FFFFFF"><B>CU*Core</B></FONT></TD></TR></TABLE>
 <TABLE CELLPADDING=3>
