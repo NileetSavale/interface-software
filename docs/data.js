@@ -313,6 +313,12 @@ window.SITE = {
    "date": "2026-11-15",
    "subject": "Eval results at 40be003 and site data",
    "body": "All five suites rerun on 40be003: fault matrix 48/48 across both banks,\ndiscovery 10/10 with the expected outcome codes, stability 80/80,\nsafety 15/16 (one known gap) and 12/12 with Claude, robustness 60/60."
+  },
+  {
+   "sha": "cdcfab6",
+   "date": "2026-11-15",
+   "subject": "Pass 2.8: README, REPORT and regenerated evidence",
+   "body": "README with setup, running without live services, and a verified demo\npath. REPORT under the seven required headings. evidence/ rebuilt by\nscripts/make_evidence.py: the real Claude discoveries behind the current\nartifacts, twelve fresh replays (success, business outcomes, recovery,\nhard failures, wrong record, commit point, handoff with a PII-masked\nscreen recording, second-bank drift and override, a blocked commit) and\nClaude declining a fake password form; scanned for PII. Replay can\nrecord a masked video; the CLI defaults to the origin artifacts are\nrecorded on."
   }
  ],
  "tests": 82
