@@ -1,0 +1,200 @@
+{
+  "suite": "discovery",
+  "date": "2026-11-15T06:36:48+00:00",
+  "commit": "4bbad13",
+  "n_per_arm": 5,
+  "budget_usd": 3.0,
+  "spent_usd": 0.3386,
+  "arms": [
+    {
+      "flow": "lookup",
+      "variant": "a",
+      "map": "off",
+      "n": 5,
+      "recorded": 5,
+      "replays_on_other_member": 5,
+      "median_turns": 5,
+      "median_cost_usd": 0.0187,
+      "total_cost_usd": 0.1214,
+      "nudged_runs": 0,
+      "escalated_runs": 0,
+      "runs": [
+        {
+          "run": 1,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 8,
+          "turns": 5,
+          "cost_usd": 0.0422,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 0,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned INVALID_MEMBER_NUMBER",
+            "already handled as PERMISSION_DENIED"
+          ],
+          "run_id": "disc_20261115T062645Z_1718a3"
+        },
+        {
+          "run": 2,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 8,
+          "turns": 4,
+          "cost_usd": 0.0171,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 0,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned INVALID_MEMBER_NUMBER",
+            "already handled as PERMISSION_DENIED"
+          ],
+          "run_id": "disc_20261115T062757Z_159d0f"
+        },
+        {
+          "run": 3,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 8,
+          "turns": 5,
+          "cost_usd": 0.0247,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 0,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned INVALID_MEMBER_NUMBER",
+            "already handled as PERMISSION_DENIED"
+          ],
+          "run_id": "disc_20261115T062908Z_9bdab8"
+        },
+        {
+          "run": 4,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 8,
+          "turns": 5,
+          "cost_usd": 0.0187,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 0,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned INVALID_MEMBER_NUMBER",
+            "already handled as PERMISSION_DENIED"
+          ],
+          "run_id": "disc_20261115T063020Z_a4e2c1"
+        },
+        {
+          "run": 5,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 8,
+          "turns": 5,
+          "cost_usd": 0.0187,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 0,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned INVALID_MEMBER_NUMBER",
+            "already handled as PERMISSION_DENIED"
+          ],
+          "run_id": "disc_20261115T063133Z_0e54d9"
+        }
+      ]
+    },
+    {
+      "flow": "open_sub_account",
+      "variant": "a",
+      "map": "off",
+      "n": 5,
+      "recorded": 5,
+      "replays_on_other_member": 5,
+      "median_turns": 7,
+      "median_cost_usd": 0.036,
+      "total_cost_usd": 0.2172,
+      "nudged_runs": 0,
+      "escalated_runs": 0,
+      "runs": [
+        {
+          "run": 1,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 7,
+          "cost_usd": 0.048,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 1,
+          "probes": [
+            "learned MINIMUM_DEPOSIT_NOT_MET"
+          ],
+          "run_id": "disc_20261115T063246Z_c10666"
+        },
+        {
+          "run": 2,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 7,
+          "cost_usd": 0.0357,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 1,
+          "probes": [
+            "learned MINIMUM_DEPOSIT_NOT_MET"
+          ],
+          "run_id": "disc_20261115T063334Z_71e212"
+        },
+        {
+          "run": 3,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 8,
+          "cost_usd": 0.0617,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 2,
+          "probes": [
+            "learned MINIMUM_DEPOSIT_NOT_MET"
+          ],
+          "run_id": "disc_20261115T063422Z_6d0342"
+        },
+        {
+          "run": 4,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 7,
+          "cost_usd": 0.036,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 1,
+          "probes": [
+            "learned DEPOSIT_BELOW_MINIMUM"
+          ],
+          "run_id": "disc_20261115T063510Z_cdb90a"
+        },
+        {
+          "run": 5,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 7,
+          "cost_usd": 0.0358,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 1,
+          "probes": [
+            "learned MINIMUM_DEPOSIT_NOT_MET"
+          ],
+          "run_id": "disc_20261115T063559Z_7584a4"
+        }
+      ]
+    }
+  ]
+}

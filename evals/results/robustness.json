@@ -1,0 +1,239 @@
+{
+  "suite": "robustness",
+  "date": "2026-11-15T06:40:49+00:00",
+  "commit": "4bbad13",
+  "seeds": 30,
+  "flows": [
+    {
+      "flow": "lookup",
+      "seeds": 30,
+      "results": {
+        "success": 30
+      },
+      "success_rate": 1.0,
+      "silent_wrong": 0,
+      "steps": [
+        {
+          "step": "open_member_inquiry",
+          "baseline": "member_inquiry_link",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "enter_member_number",
+          "baseline": "member_number",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "search_member",
+          "baseline": "member_search",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "read_name",
+          "baseline": "member_name_value",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:anchor": 30
+          }
+        },
+        {
+          "step": "read_savings_balance",
+          "baseline": "balance:Savings",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:tableCell": 30
+          }
+        },
+        {
+          "step": "enter_user_id",
+          "baseline": "user_id",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "enter_password",
+          "baseline": "password",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "sign",
+          "baseline": "sign_on",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        }
+      ]
+    },
+    {
+      "flow": "open_sub_account",
+      "seeds": 30,
+      "results": {
+        "success": 30
+      },
+      "success_rate": 1.0,
+      "silent_wrong": 0,
+      "steps": [
+        {
+          "step": "open_member_inquiry",
+          "baseline": "member_inquiry_link",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "enter_member_number",
+          "baseline": "member_number",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "search_member",
+          "baseline": "member_search",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "start_sub_account_opening",
+          "baseline": "open_sub_account_link",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "choose_account_type",
+          "baseline": "account_type",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:anchor": 30
+          }
+        },
+        {
+          "step": "enter_nickname",
+          "baseline": "nickname",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "enter_deposit",
+          "baseline": "deposit",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:anchor": 30
+          }
+        },
+        {
+          "step": "continue_review",
+          "baseline": "continue",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "enter_user_id",
+          "baseline": "user_id",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "enter_password",
+          "baseline": "password",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        },
+        {
+          "step": "sign",
+          "baseline": "sign_on",
+          "same": 30,
+          "WRONG": 0,
+          "unresolved": 0,
+          "not run": 0,
+          "ranks": {
+            "0:role": 30
+          }
+        }
+      ]
+    }
+  ]
+}

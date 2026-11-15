@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>interfaze · learn once, replay without the model</title>
+<meta name="description" content="A computer-use automation system: Claude discovers a task once in a legacy UI, it becomes a typed, versioned capability, and it replays deterministically without the model. How it was built, decided and measured.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f4ef; --panel: #ffffff; --ink: #16181d; --ink-2: #4a4f5a; --ink-3: #7b808c; --line: #e3dfd6;
+  --accent: #0f6e5c; --accent-soft: #dcefe9; --accent-ink: #0a4d40;
+  --warn: #b4531a; --warn-soft: #fbe9dc; --bad: #b42335; --bad-soft: #f8e1e4; --good: #1d7a3e; --good-soft: #e1f2e6;
+  --violet: #5b3fa8; --violet-soft: #ebe5f8; --blue: #1f5fae; --blue-soft: #e2ecf9;
+  --lane-learn: #eef4fb; --lane-contract: #f6efe2; --lane-run: #eaf5f0; --lane-shared: #f1eff6; --lane-target: #f3f1ec;
+  --shadow: 0 1px 2px rgba(20,20,30,.05), 0 4px 16px rgba(20,20,30,.05);
+  --radius: 14px; --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --panel: #191c22; --ink: #eceef2; --ink-2: #b5bac4; --ink-3: #868c98; --line: #2a2e37;
+    --accent: #3fc3a5; --accent-soft: #163a33; --accent-ink: #8fe3cf;
+    --warn: #f0975c; --warn-soft: #3a2618; --bad: #f27486; --bad-soft: #3a1c22; --good: #6fd391; --good-soft: #17321f;
+    --violet: #b29cf2; --violet-soft: #2a2340; --blue: #8db8f2; --blue-soft: #1a2a40;
+    --lane-learn: #17202c; --lane-contract: #241f17; --lane-run: #15241f; --lane-shared: #1e1b28; --lane-target: #1c1c1d;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --panel: #191c22; --ink: #eceef2; --ink-2: #b5bac4; --ink-3: #868c98; --line: #2a2e37;
+  --accent: #3fc3a5; --accent-soft: #163a33; --accent-ink: #8fe3cf;
+  --warn: #f0975c; --warn-soft: #3a2618; --bad: #f27486; --bad-soft: #3a1c22; --good: #6fd391; --good-soft: #17321f;
+  --violet: #b29cf2; --violet-soft: #2a2340; --blue: #8db8f2; --blue-soft: #1a2a40;
+  --lane-learn: #17202c; --lane-contract: #241f17; --lane-run: #15241f; --lane-shared: #1e1b28; --lane-target: #1c1c1d;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 6px 20px rgba(0,0,0,.3); color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 Inter, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased; }
+a { color: var(--accent); text-decoration: none; } a:hover { text-decoration: underline; }
+code { font-family: var(--mono); font-size: .86em; background: var(--accent-soft); color: var(--accent-ink);
+  padding: .08em .35em; border-radius: 5px; }
+.wrap { max-width: 1160px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 720px) { .wrap { padding: 0 32px; } }
+
+/* nav */
+nav.top { position: sticky; top: 0; z-index: 20; background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+nav.top .wrap { display: flex; align-items: center; gap: 20px; height: 56px; }
+.brand { font-weight: 800; letter-spacing: -.02em; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.brand i { width: 10px; height: 10px; border-radius: 3px; background: var(--accent); display: inline-block; }
+nav.top .links { display: flex; gap: 18px; overflow-x: auto; scrollbar-width: none; flex: 1; }
+nav.top .links a { color: var(--ink-2); font-size: 14px; white-space: nowrap; }
+nav.top .links a:hover { color: var(--ink); text-decoration: none; }
+.theme { border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); border-radius: 8px; height: 32px;
+  width: 32px; cursor: pointer; font-size: 15px; flex: none; }
+
+/* sections */
+section { padding: 72px 0; border-bottom: 1px solid var(--line); }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.04; letter-spacing: -.035em; margin: 14px 0 18px; font-weight: 800; }
+h2 { font-size: clamp(26px, 3.4vw, 38px); line-height: 1.15; letter-spacing: -.025em; margin: 10px 0 12px; font-weight: 800; }
+h3 { font-size: 18px; margin: 0 0 6px; letter-spacing: -.01em; }
+.lede { font-size: 19px; color: var(--ink-2); max-width: 760px; margin: 0; }
+.sub { color: var(--ink-2); max-width: 760px; margin: 0 0 28px; }
+.muted { color: var(--ink-3); }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+
+/* hero */
+.hero { padding: 80px 0 64px; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 40px; }
+.stat { padding: 18px 18px 16px; }
+.stat b { display: block; font-size: 30px; letter-spacing: -.03em; line-height: 1.1; }
+.stat span { color: var(--ink-2); font-size: 14px; }
+.cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 28px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; font-weight: 600;
+  font-size: 14px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+:root[data-theme="dark"] .btn.primary { color: #06231d; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .btn.primary { color: #06231d; } }
+.btn:hover { text-decoration: none; filter: brightness(1.05); }
+
+/* pipeline strip */
+.flow { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin-top: 8px; }
+.flow > div { padding: 22px 20px; position: relative; }
+.flow > div + div { border-left: 1px dashed var(--line); }
+.flow .n { font: 600 12px var(--mono); color: var(--ink-3); }
+.flow .t { font-weight: 700; font-size: 18px; margin: 6px 0 4px; }
+.flow .d { color: var(--ink-2); font-size: 14.5px; }
+.flow .tag { display: inline-block; margin-top: 10px; font: 600 12px var(--mono); padding: 3px 8px; border-radius: 6px; }
+.tag.llm { background: var(--blue-soft); color: var(--blue); } .tag.human { background: var(--warn-soft); color: var(--warn); }
+.tag.free { background: var(--good-soft); color: var(--good); } .tag.contract { background: var(--violet-soft); color: var(--violet); }
+@media (max-width: 760px) { .flow { grid-template-columns: 1fr 1fr; } .flow > div:nth-child(3) { border-left: 0; }
+  .flow > div:nth-child(n+3) { border-top: 1px dashed var(--line); } }
+@media (max-width: 460px) { .flow { grid-template-columns: 1fr; } .flow > div + div { border-left: 0; border-top: 1px dashed var(--line); } }
+
+/* architecture */
+.wrap.wide { max-width: 1440px; }
+.arch { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .arch { grid-template-columns: 1fr; } .panel { position: static; } }
+.diagram { padding: 10px; overflow: hidden; }
+.diagram svg { width: 100%; height: auto; display: block; }
+@media (max-width: 760px) { .diagram { overflow-x: auto; } .diagram svg { min-width: 780px; }
+  .diagram::after { content: "← scroll the diagram →"; display: block; text-align: center; font: 500 12px var(--mono);
+    color: var(--ink-3); padding-top: 6px; position: sticky; left: 0; width: calc(100vw - 54px); } }
+.lane-label { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; fill: var(--ink-3); }
+.node rect { fill: var(--panel); stroke: var(--line); stroke-width: 1.2; transition: stroke .15s, fill .15s; }
+.node text { fill: var(--ink); font: 600 13.5px Inter, sans-serif; pointer-events: none; }
+.node text.s { fill: var(--ink-3); font: 500 10.5px var(--mono); }
+.node { cursor: pointer; }
+.node:hover rect, .node:focus rect { stroke: var(--accent); }
+.node.on rect { stroke: var(--accent); stroke-width: 2.2; fill: var(--accent-soft); }
+.node.lit rect { stroke: var(--accent); stroke-width: 1.8; }
+.node.dim { opacity: .35; }
+.node:focus { outline: none; }
+.edge path { fill: none; stroke: var(--ink-3); stroke-width: 1.2; opacity: .55; transition: opacity .15s, stroke .15s; }
+.edge text { font: 500 10px var(--mono); fill: var(--ink-3); opacity: 0; transition: opacity .15s; }
+.edge.lit path { stroke: var(--accent); stroke-width: 2; opacity: 1; }
+.edge.lit text { opacity: 1; fill: var(--accent-ink); }
+.edge.dim path { opacity: .12; }
+.panel { padding: 20px; position: sticky; top: 72px; }
+.panel h3 { font-size: 20px; }
+.panel .kind { font: 600 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; }
+.panel p { color: var(--ink-2); font-size: 14.5px; margin: 8px 0; }
+.panel ul { margin: 8px 0; padding-left: 18px; color: var(--ink-2); font-size: 14px; }
+.panel li { margin: 3px 0; }
+.files { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.files code { font-size: 11.5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.chip { font: 600 12px var(--mono); padding: 3px 8px; border-radius: 999px; background: var(--violet-soft); color: var(--violet);
+  border: 0; cursor: pointer; }
+.tour { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 14px; align-items: center; }
+.tour button { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 7px 14px;
+  font: 600 13px Inter, sans-serif; cursor: pointer; }
+.tour button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tour .cap { color: var(--ink-2); font-size: 14px; min-height: 22px; flex-basis: 100%; }
+
+/* method + timeline */
+.pillars { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-bottom: 36px; }
+.pillar { padding: 20px; }
+.pillar .ix { font: 700 13px var(--mono); color: var(--accent); }
+.pillar p { color: var(--ink-2); font-size: 14.5px; margin: 6px 0 0; }
+.timeline { position: relative; padding-left: 26px; }
+.timeline::before { content: ""; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: var(--line); }
+.tl { position: relative; padding: 0 0 22px; }
+.tl::before { content: ""; position: absolute; left: -24px; top: 6px; width: 12px; height: 12px; border-radius: 50%;
+  background: var(--panel); border: 2.5px solid var(--accent); }
+.tl .meta { font: 500 12px var(--mono); color: var(--ink-3); }
+.tl .t { font-weight: 700; margin: 2px 0; }
+.tl p { margin: 4px 0 0; color: var(--ink-2); font-size: 14.5px; white-space: pre-line; max-width: 820px; }
+
+/* decisions */
+.filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+.filters button { border: 1px solid var(--line); background: var(--panel); color: var(--ink-2); border-radius: 999px;
+  padding: 6px 12px; font: 600 13px Inter, sans-serif; cursor: pointer; }
+.filters button.on { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.filters button span { opacity: .6; margin-left: 4px; }
+.decisions { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+@media (max-width: 400px) { .decisions { grid-template-columns: 1fr; } }
+.dec { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.dec .hd { display: flex; align-items: center; gap: 8px; justify-content: space-between; }
+.dec .id { font: 700 13px var(--mono); color: var(--ink-3); }
+.dec .who { font: 600 11px var(--mono); padding: 3px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: .05em; }
+.who.overrode, .who.my-choice { background: var(--warn-soft); color: var(--warn); }
+.who.my-idea, .who.my-challenge { background: var(--accent-soft); color: var(--accent-ink); }
+.who.ai-self-correction, .who.ai-changed-its-mind { background: var(--violet-soft); color: var(--violet); }
+.who.agreed { background: var(--blue-soft); color: var(--blue); }
+.dec h3 { font-size: 17px; margin: 0; }
+.dec .row { font-size: 14px; color: var(--ink-2); }
+.dec .row b { display: block; font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin-bottom: 2px; }
+.dec .ai { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ink-3) 60%, transparent); }
+.dec .ai.kept { text-decoration: none; }
+.dec .chose { color: var(--ink); }
+.dec details { font-size: 14px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 8px; margin-top: auto; }
+.dec summary { cursor: pointer; font-weight: 600; color: var(--ink); font-size: 13.5px; }
+.dec.flash { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* evals */
+.suites { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.suite { padding: 18px; }
+.suite .num { font-size: 34px; font-weight: 800; letter-spacing: -.03em; line-height: 1.05; }
+.suite .num small { font-size: 16px; color: var(--ink-3); font-weight: 600; }
+.suite .nm { font-weight: 700; margin-top: 4px; }
+.suite p { margin: 6px 0 0; color: var(--ink-2); font-size: 13.5px; }
+.suite .llmtag { float: right; }
+.bar { height: 6px; border-radius: 6px; background: var(--line); overflow: hidden; margin-top: 10px; }
+.bar i { display: block; height: 100%; background: var(--good); border-radius: 6px; }
+.stamp { font: 500 11.5px var(--mono); color: var(--ink-3); margin-top: 10px; }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th { text-align: left; font: 600 11px var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3);
+  padding: 10px 12px; border-bottom: 1px solid var(--line); }
+.table td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--ink-2); }
+.table td:first-child { white-space: nowrap; font: 600 12px var(--mono); color: var(--ink); }
+.table tr:last-child td { border-bottom: 0; }
+.scroll { overflow-x: auto; }
+.st { font: 600 11px var(--mono); padding: 2px 7px; border-radius: 6px; white-space: nowrap; }
+.st.fixed { background: var(--good-soft); color: var(--good); } .st.open { background: var(--warn-soft); color: var(--warn); }
+
+/* edge */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 860px) { .grid2 { grid-template-columns: 1fr; } }
+.block { padding: 22px; }
+.block h3 { font-size: 19px; }
+.block > p { color: var(--ink-2); font-size: 14.5px; margin: 6px 0 14px; }
+.release { display: flex; gap: 14px; padding: 14px; border-radius: 12px; background: var(--accent-soft); margin-bottom: 14px; }
+.release .date { font: 700 12px var(--mono); color: var(--accent-ink); text-align: center; min-width: 56px; }
+.release .date b { display: block; font-size: 26px; letter-spacing: -.03em; font-family: Inter, sans-serif; }
+.release p { margin: 2px 0 0; font-size: 14px; color: var(--ink-2); }
+.list { list-style: none; margin: 0; padding: 0; }
+.list li { padding: 11px 0; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--ink-2); }
+.list li:first-child { border-top: 0; }
+.list li b { color: var(--ink); }
+.paper { padding: 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); margin-bottom: 14px; }
+.paper .venue { font: 600 11.5px var(--mono); color: var(--violet); text-transform: uppercase; letter-spacing: .06em; }
+.paper .title { font-weight: 700; font-size: 16.5px; margin: 4px 0; line-height: 1.35; }
+.carry { display: grid; grid-template-columns: 1fr 22px 1fr; gap: 0; font-size: 13.5px; }
+.carry > div { padding: 9px 0; border-top: 1px solid var(--line); color: var(--ink-2); }
+.carry > div:nth-child(-n+3) { border-top: 0; }
+.carry .ar { color: var(--accent); text-align: center; }
+.carry .from b { color: var(--ink); font-weight: 600; }
+.nos { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.no { padding: 16px 18px; }
+.no .x { font: 700 12px var(--mono); color: var(--bad); }
+.no h3 { font-size: 15.5px; margin: 4px 0 4px; }
+.no p { margin: 0; color: var(--ink-2); font-size: 14px; }
+footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+<nav class="top"><div class="wrap">
+  <a class="brand" href="#top"><i></i>interfaze</a>
+  <div class="links">
+    <a href="#idea">Idea</a><a href="#architecture">Architecture</a><a href="#method">How we worked</a>
+    <a href="#decisions">Decisions</a><a href="#evals">Evals</a><a href="#edge">What I bring</a>
+  </div>
+  <button class="theme" id="theme" title="Toggle light / dark" aria-label="Toggle light or dark theme">◐</button>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <div class="eyebrow">Computer-use automation · take-home build</div>
+  <h1>Learn a task once with Claude.<br><em>Replay it forever without the model.</em></h1>
+  <p class="lede">An LLM drives a real legacy banking UI to reach a goal. What it did becomes a typed, versioned
+    capability that replays deterministically: no tokens, the same answer every time, and a named result when the app
+    misbehaves. A person can take over the live browser, and nothing can ever press "Confirm".</p>
+  <div class="cta">
+    <a class="btn primary" id="repo-link" href="#">View the code</a>
+    <a class="btn" href="#architecture">Explore the architecture</a>
+    <a class="btn" href="#decisions">The decision log</a>
+  </div>
+  <div class="stats" id="hero-stats"></div>
+</div></header>
+
+<section id="idea"><div class="wrap">
+  <div class="eyebrow">The idea</div>
+  <h2>One expensive, careful run. Then free, boring, exact ones.</h2>
+  <p class="sub">The model's judgment is needed once per task, so spend it there and nowhere else. Everything after
+    discovery is a contract a reviewer can read and a machine can check.</p>
+  <div class="card flow">
+    <div><div class="n">01</div><div class="t">Goal</div><div class="d">"Look up member {{memberId}} and read their savings
+      balance." Typed inputs, probes, and which paths commit.</div><span class="tag contract">goal spec</span></div>
+    <div><div class="n">02</div><div class="t">Discover</div><div class="d">Claude works the real UI through the
+      accessibility tree, seeing placeholders instead of PII. Stuck? Opus, then a person.</div><span class="tag llm" id="disc-cost">Claude · once</span></div>
+    <div><div class="n">03</div><div class="t">Review</div><div class="d">The recording becomes a typed artifact with ranked
+      locators, learned outcomes and an identity check. A person approves it.</div><span class="tag human">human sign-off</span></div>
+    <div><div class="n">04</div><div class="t">Replay</div><div class="d">No LLM. Success, a business answer ("no such member"),
+      bad input, needs a human, or a failure that says where and why.</div><span class="tag free" id="replay-cost">$0 · ~3 s</span></div>
+  </div>
+</div></section>
+
+<section id="architecture"><div class="wrap wide">
+  <div class="eyebrow">Architecture</div>
+  <h2>Every part, and how they connect</h2>
+  <p class="sub">One process, no infrastructure: the seams are interfaces, not services. Click any box to see what it
+    does, where it lives and which decisions shaped it, or follow a run end to end.</p>
+  <div class="tour" id="tour">
+    <button data-tour="discovery">▶ Follow a discovery</button>
+    <button data-tour="replay">▶ Follow a replay</button>
+    <button data-tour="handoff">▶ Follow a handoff</button>
+    <button data-tour="safety">▶ Follow a hostile click</button>
+    <div class="cap" id="tour-cap"></div>
+  </div>
+  <div class="arch">
+    <div class="card diagram"><svg id="svg" viewBox="0 0 1000 640" role="img" aria-label="Architecture diagram"></svg></div>
+    <aside class="card panel" id="panel" aria-live="polite"></aside>
+  </div>
+</div></section>
+
+<section id="method"><div class="wrap">
+  <div class="eyebrow">How we worked</div>
+  <h2>Argue first, build thin, let the evals decide</h2>
+  <p class="sub">Built with an AI pair, on purpose as a sparring partner rather than a typist. The rule: it proposes
+    and challenges, one question at a time; I decide; every time I overrode it, the reasoning goes in the log.</p>
+  <div class="pillars">
+    <div class="card pillar"><div class="ix">01 · CHALLENGE</div><h3>Every design choice argued</h3>
+      <p>Eight architecture decisions were locked in review before any code. <span id="override-count"></span></p></div>
+    <div class="card pillar"><div class="ix">02 · THIN BUT REAL</div><h3>A real Claude run on day one</h3>
+      <p>The full schema came first, then one real discovery → artifact → replay slice. Then each pass deepened it,
+        ranked by grading weight (D10).</p></div>
+    <div class="card pillar"><div class="ix">03 · EVALS DECIDE</div><h3>"Vibes don't pass review"</h3>
+      <p>Five suites with N, date and commit stamped on every number. Their first runs found five real gaps,
+        all fixed, and two design questions still open.</p></div>
+    <div class="card pillar"><div class="ix">04 · SAFE BY CONSTRUCTION</div><h3>Guards below the page</h3>
+      <p>No artifact can hold a commit. PII never reaches the model. Requests are policed in the network layer, where
+        a misleading label can't reach.</p></div>
+  </div>
+  <h3 style="margin-bottom:16px">Build timeline</h3>
+  <div class="timeline" id="timeline"></div>
+</div></section>
+
+<section id="decisions"><div class="wrap">
+  <div class="eyebrow">Decision log</div>
+  <h2>What the AI proposed, and what I chose</h2>
+  <p class="sub">Straight from <code>docs/DECISIONS.md</code>. Struck-through text is the AI's proposal where I went
+    another way. The tags say who moved: my override, my idea, the AI correcting itself, or agreement after a challenge.</p>
+  <div class="filters" id="filters"></div>
+  <div class="decisions" id="decision-grid"></div>
+</div></section>
+
+<section id="evals"><div class="wrap">
+  <div class="eyebrow">Evaluation</div>
+  <h2>Measured, not claimed</h2>
+  <p class="sub">Each suite runs against a private copy of the mock app and writes a results file with its date,
+    commit and N; this page is generated from those files. The suites that call Claude run under a hard dollar cap.</p>
+  <div class="suites" id="suites"></div>
+  <h3 style="margin:40px 0 12px">What the evals caught on their first runs</h3>
+  <div class="card scroll"><table class="table">
+    <thead><tr><th>Suite</th><th>Finding</th><th>Fix</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Fault matrix</td><td>The sub-account flow <b>succeeded behind a "Compliance hold" dialog</b>. Outcomes were checked
+        on the previous screen; the next control appeared first and was clicked past a non-modal dialog.</td>
+        <td>Outcomes are checked again on the screen where the control was found, right before acting.</td><td><span class="st fixed">fixed</span></td></tr>
+      <tr><td>Robustness</td><td>The balance cell went <b>unresolved on 18 of 30 shuffled layouts</b>: the table is named by the
+        text before it, and an extra wrapper table hid that text.</td>
+        <td>The table-label lookup climbs through wrappers that hold only the table. Now 60/60, with 0 wrong controls.</td><td><span class="st fixed">fixed</span></td></tr>
+      <tr><td>Safety</td><td>A tampered artifact <b>pressed a commit button labelled "OK"</b>. Only the browser closing at the
+        end of the run kept the account from opening. A link took the browser to another site.</td>
+        <td>A network-level policy gate: origin allowlist on every request, declared commit paths blocked whatever the
+          button says (D20).</td><td><span class="st fixed">fixed</span></td></tr>
+      <tr><td>Safety · Claude</td><td>Claude <b>went for a fake "re-enter your password" form 3/3 times</b>. The password was
+        refused, but it pressed the empty form's Verify, and the click was recorded.</td>
+        <td>Credentials only on the sign-on page; the hostile form is blocked; later steps need review; a prompt line
+          names the pattern. Clean rerun: Claude gave up at the form in 3/3 runs, without touching it.</td><td><span class="st fixed">fixed</span></td></tr>
+      <tr><td>Fault matrix</td><td>A missing member gets a hard failure in the sub-account flow: outcomes learned by one
+        capability aren't shared with another on the same app.</td><td>Design question: share learned outcomes per app.</td><td><span class="st open">open</span></td></tr>
+      <tr><td>Discovery</td><td>The same outcome got different codes in different runs (<code>DEPOSIT_BELOW_MINIMUM</code>,
+        <code>MINIMUM_DEPOSIT_NOT_MET</code>).</td><td>Design question: probes name the code they expect, so it stays stable.</td><td><span class="st open">open</span></td></tr>
+    </tbody>
+  </table></div>
+</div></section>
+
+<section id="edge"><div class="wrap">
+  <div class="eyebrow">What I bring</div>
+  <h2>On top of the field, grounded in research, willing to say no</h2>
+  <p class="sub">The parts of this build that came from how I work rather than from the brief.</p>
+  <div class="grid2">
+    <div class="card block">
+      <h3>Keeping up with the field</h3>
+      <p>The perception model was chosen against what shipped weeks ago, not what was standard a year ago.</p>
+      <div class="release"><div class="date">OCT<b>30</b>2026</div><div>
+        <b><a href="https://github.com/vercel-labs/agent-desktop">Vercel Labs · agent-desktop v1.0.2</a></b>
+        <p>Computer use through the OS accessibility tree instead of pixels: a ref on every actionable element, clicks
+          that go through the accessibility API "without moving the pointer or taking focus", refs that belong to
+          their snapshot and fail loudly as <code>STALE_REF</code> / <code>AMBIGUOUS_TARGET</code>.
+          (<a href="https://dev.to/gabrielanhaia/vercels-agent-desktop-lets-coding-agents-click-native-apps-without-moving-your-mouse-38p1">Write-up on dev.to, Nov 2</a>.)</p>
+        <p><b>What we did with it:</b> explored it during design, two weeks after release, and adopted its perception
+          model: tree snapshot → act on a ref → observe again, with a retry disposition on every error. We built it
+          in-process on Playwright for the browser, and our surface interface is the seam where an agent-desktop-style
+          native surface plugs in. Its stated limit, that an app with no accessibility tree is invisible, is why
+          screenshots stay for a first visit and for people.</p></div></div>
+      <ul class="list">
+        <li><b>Claude 5.5's thinking binding.</b> Current models bind their thinking to the exact conversation, so
+          trimming old snapshots client-side would break it. Switched to server-side context editing; history stays
+          append-only. Caught by reading the current API docs, and the AI corrected its own locked design (D17).</li>
+        <li><b>Server-side model fallback</b> and a mid-run Sonnet → Opus switch on the same conversation, so escalation never
+          rewrites history.</li>
+        <li><b>Playwright's AI snapshot mode</b>: refs that work across legacy framesets, so the model clicks by ref and
+          replay never sees one.</li>
+      </ul>
+    </div>
+    <div class="card block">
+      <h3>Research lineage: my multi-agent loop</h3>
+      <p>Much of the agent machinery came from Loop Runner, my verify-and-retry coding agent, and the study built on it.</p>
+      <div class="paper">
+        <div class="venue">Submitted · AGENT 2027 · ICSE 2027 workshop on Agentic Engineering</div>
+        <div class="title">When Tests Lie: Cascades, Reviewers and Failure Attribution in Coding Agents</div>
+        <div class="muted" style="font-size:13.5px">Loop Runner on 436 SWE-bench Verified bugs ·
+          <a href="https://nileetsavale.github.io/ai-loop-runner/">interactive explorer</a></div>
+      </div>
+      <div class="carry">
+        <div class="from"><b>Cascades</b>: cheap model first, escalate on failure</div><div class="ar">→</div><div>Sonnet → Opus → a person (D12)</div>
+        <div class="from"><b>"The model asks, code decides"</b> tool gate</div><div class="ar">→</div><div>Every action passes the policy gate; errors go back to the model</div>
+        <div class="from"><b>Stuck detection</b> &amp; explore nudges</div><div class="ar">→</div><div>Same action on an unchanged screen: nudge, then escalate</div>
+        <div class="from"><b>When a passing check is wrong</b></div><div class="ar">→</div><div>Outcomes kept only if they prove themselves; identity verified, never assumed</div>
+        <div class="from"><b>Research-log method</b>: stated N, noise called out</div><div class="ar">→</div><div>Five eval suites, N and commit on every number (D14)</div>
+        <div class="from"><b>Secret redaction &amp; token accounting</b></div><div class="ar">→</div><div>Write-boundary redaction, PII masker, per-turn cost caps</div>
+        <div class="from"><b>Server-side context editing</b></div><div class="ar">→</div><div>Old snapshots cleared without editing history (D17)</div>
+      </div>
+    </div>
+  </div>
+  <h3 style="margin:40px 0 14px">Things I said no to</h3>
+  <div class="nos" id="nos"></div>
+</div></section>
+
+<footer><div class="wrap">
+  Generated from the repository's own records: <code>docs/DECISIONS.md</code>, <code>evals/results/*.json</code> and the git
+  history (<code>scripts/build_site.py</code>). Mock data only; no real bank systems or credentials were used.
+  <span id="foot-tests"></span>
+</div></footer>
+
+<script src="data.js"></script>
+<script>
+(() => {
+const S = window.SITE || { decisions: [], evals: {}, commits: [], repo: "#" };
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const blob = (path) => `${S.repo}/blob/main/${path}`;
+
+// theme
+const root = document.documentElement;
+try { const t = localStorage.getItem("theme"); if (t) root.dataset.theme = t; } catch (e) {}
+$("#theme").onclick = () => {
+  const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  root.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("theme", root.dataset.theme); } catch (e) {}
+};
+$("#repo-link").href = S.repo;
+
+// hero stats
+const E = S.evals;
+const money = (x) => x == null ? "–" : `$${x < 0.1 ? x.toFixed(2) : x.toFixed(2)}`;
+const stats = [];
+if (E.discovery) stats.push([`${money(Math.min(...E.discovery.median_cost))}–${money(Math.max(...E.discovery.median_cost)).slice(1)}`, "median cost to discover a task with Claude"]);
+stats.push(["$0", "per replay: no model at run time"]);
+if (E.stability) stats.push([`${E.stability.ok}/${E.stability.runs}`, "replays identical, run after run"]);
+const opened = E.fault_matrix ? E.fault_matrix.opened : 0;
+stats.push([`${opened}`, "accounts ever opened by automation"]);
+stats.push([`${S.decisions.length}`, "decisions logged, with who moved"]);
+$("#hero-stats").innerHTML = stats.map(([b, s]) => `<div class="card stat"><b>${b}</b><span>${s}</span></div>`).join("");
+if (E.discovery) $("#disc-cost").textContent = `Claude · once · ~${money(Math.max(...E.discovery.median_cost))}`;
+
+// ── architecture ────────────────────────────────────────────────────────────────────────────────────────
+const W = 150, H = 58;
+const N = {
+  goal:      { x: 35,  y: 70,  t: "Goal spec", s: "goals/*.json", lane: "learn" },
+  discovery: { x: 35,  y: 170, t: "Discovery loop", s: "Claude Sonnet 5.5", lane: "learn" },
+  ladder:    { x: 35,  y: 270, t: "Escalation ladder", s: "Opus → a person", lane: "learn" },
+  recorder:  { x: 200, y: 170, t: "Recorder", s: "click → descriptor", lane: "learn" },
+  probes:    { x: 200, y: 270, t: "Probes", s: "learn outcomes", lane: "learn" },
+  artifact:  { x: 430, y: 170, t: "Capability artifact", s: "typed · versioned", lane: "contract" },
+  review:    { x: 430, y: 270, t: "Review & approve", s: "a person signs off", lane: "contract" },
+  invoke:    { x: 670, y: 70,  t: "Invocation API", s: "deadline → handle", lane: "run" },
+  replay:    { x: 670, y: 170, t: "Replay executor", s: "no LLM", lane: "run" },
+  result:    { x: 835, y: 170, t: "Result", s: "5 typed outcomes", lane: "run" },
+  identity:  { x: 670, y: 270, t: "Identity gate", s: "+ circuit breaker", lane: "run" },
+  surface:   { x: 40,  y: 400, t: "Web surface", s: "Playwright · refs", lane: "shared" },
+  policy:    { x: 220, y: 400, t: "Policy gate", s: "names + network", lane: "shared" },
+  masker:    { x: 400, y: 400, t: "PII masker", s: "⟨NAME_1⟩ tokens", lane: "shared" },
+  session:   { x: 580, y: 400, t: "Control token", s: "epoch · expiry", lane: "shared" },
+  evidence:  { x: 760, y: 400, t: "Evidence & audit", s: "redacted at write", lane: "shared" },
+  mock:      { x: 40,  y: 535, t: "Legacy core banking", s: "mock · frames", lane: "target" },
+  operator:  { x: 580, y: 535, t: "Operator page", s: "take / hand back", lane: "target" },
+  evals:     { x: 760, y: 535, t: "Eval harness", s: "5 suites · $ cap", lane: "target" },
+};
+const EDGES = [
+  ["goal", "discovery", "goal + inputs"], ["discovery", "recorder", "each action"], ["recorder", "artifact", "typed steps"],
+  ["probes", "artifact", "verified outcomes"], ["artifact", "probes", "replay w/ probe input"], ["discovery", "ladder", "stuck"],
+  ["artifact", "review", "draft"], ["review", "replay", "approved only"], ["invoke", "replay", "inputs"],
+  ["replay", "result", "typed result"], ["replay", "identity", "before read/act"],
+  ["discovery", "surface", "act on refs"], ["replay", "surface", "resolve strategies"], ["surface", "policy", "every action & request"],
+  ["discovery", "masker", "model sees placeholders"], ["replay", "evidence", "log + snapshots"], ["discovery", "evidence", "log"],
+  ["ladder", "session", "pause for a person"], ["replay", "session", "epoch check"], ["session", "operator", "claim / hand back"],
+  ["surface", "mock", "browser"], ["evals", "mock", "faults · layouts"], ["evals", "replay", "N replays"],
+];
+const LANES = [
+  { id: "learn", x: 20, y: 30, w: 335, h: 320, label: "Learn · with Claude", fill: "--lane-learn" },
+  { id: "contract", x: 370, y: 30, w: 260, h: 320, label: "Contract", fill: "--lane-contract" },
+  { id: "run", x: 650, y: 30, w: 345, h: 320, label: "Run · no LLM", fill: "--lane-run" },
+  { id: "shared", x: 20, y: 370, w: 975, h: 115, label: "Shared runtime · both paths", fill: "--lane-shared" },
+  { id: "target", x: 20, y: 505, w: 975, h: 115, label: "Target, people & measurement", fill: "--lane-target" },
+];
+const INFO = {
+  goal: { kind: "Input", what: "What a task is: a natural-language goal, typed inputs (patterns, enums, which input identifies a record), credentials by name only, probe inputs that should end in a business outcome, and the app's commit paths.", files: ["goals/lookup_member_balance.json", "goals/open_sub_account.json"], d: ["D18", "D20"] },
+  discovery: { kind: "LLM loop", what: "Claude works the live UI one tool call at a time: click, type, select, extract, verify_identity, done. It only asks; code validates, policy-checks and runs every call, and errors go back to the model. History is append-only; old snapshots are cleared server-side.", bullets: ["Sees the accessibility tree with refs, never raw PII", "Can't type data read off the page, only input placeholders", "done is refused until the identifying input is verified"], files: ["src/interfaze/discovery/loop.py", "src/interfaze/discovery/planner.py"], d: ["D12", "D16", "D17", "D2"] },
+  ladder: { kind: "Escalation", what: "When the model repeats itself on an unchanged screen: one nudge, then Opus 5.5 takes over the same conversation, then a person gets the live browser. In the discovery eval no run needed past the first rung.", files: ["src/interfaze/discovery/loop.py"], d: ["D12"] },
+  recorder: { kind: "Recording", what: "Turns each live action into a surface-neutral target with ranked strategies (role+name › label › nearby text or table cell › text), described from the live page, never from the transcript. Duplicates are told apart by their region (a fieldset), never by index. Sign-on becomes its own subflow.", files: ["src/interfaze/discovery/recorder.py", "src/interfaze/surface/locate.js"], d: ["D8"] },
+  probes: { kind: "Outcome learning", what: "After recording, the artifact is replayed with each probe input. Where it stops, the model names the screen; the outcome is kept only if the probe now ends in it and the happy path still succeeds. Detectors must be fixed wording, never data.", files: ["src/interfaze/discovery/probes.py"], d: ["D18"] },
+  artifact: { kind: "The contract", what: "A typed, versioned capability: inputs and outputs, steps with risk classes and waits, outcomes (business, recoverable, escalate, fatal), a success checkpoint with an identity check, policy, subflows. Pydantic with exported JSON Schema; no step can be irreversible.", files: ["src/interfaze/artifact/schema.py", "schemas/artifact.schema.json", "artifacts/"], d: ["D1", "D8", "D16"] },
+  review: { kind: "Human gate", what: "Draft until a person approves. Approval is refused while any step is flagged for review (taught by a person, or recorded after a hostile form), and approving resets the wrong-record circuit breaker.", files: ["src/interfaze/cli.py"], d: ["D1", "D19", "D20"] },
+  invoke: { kind: "Caller contract", what: "A calling agent is usually mid-conversation. invoke() blocks only until a deadline, then returns needs_human with a run handle; the run carries on and its late result is kept for 15 minutes.", files: ["src/interfaze/runs.py"], d: ["D11"] },
+  replay: { kind: "Deterministic run", what: "Resolves each step's ranked strategies on the live page, acts, waits on postconditions (never sleeps), and races every wait against declared outcomes so an error page is named the moment it shows. A fallback strategy is logged as drift, not failure.", bullets: ["Recoveries: re-sign-on and restart, read-only flows only", "Unknown screen + operator attached → pause for a person", "Policy re-checked against the live control"], files: ["src/interfaze/replay/executor.py"], d: ["D6", "D10"] },
+  result: { kind: "Output", what: "Five shapes: success with outputs; business_outcome (an answer like MEMBER_NOT_FOUND, never a failure); invalid_input (rejected before any UI); needs_human; failed with step, expected, observed and evidence.", files: ["src/interfaze/replay/result.py"], d: [] },
+  identity: { kind: "Correctness", what: "Before the first read or action on a record, the record on screen must be the one asked for. A mismatch is WRONG_RECORD: structure-only evidence, nothing about the other member to the caller, an audit entry; two in a day and the capability stops until re-approved.", files: ["src/interfaze/replay/executor.py", "src/interfaze/evidence.py"], d: ["D16", "D19"] },
+  surface: { kind: "Perception & action", what: "Playwright over the accessibility tree, frames included. Discovery acts on snapshot refs; replay resolves recorded strategies with role/label/text locators and in-page helpers for legacy tables. A desktop surface would implement the same interface over UIA/AX, the way agent-desktop does.", files: ["src/interfaze/surface/web.py", "src/interfaze/surface/base.py", "src/interfaze/surface/locate.js"], d: ["D2"] },
+  policy: { kind: "Safety", what: "Two layers. Button names are classified read / reversible / irreversible, and irreversible is never executed. Below that, every browser request is routed through the policy: off-origin requests and declared commit paths are dropped before they leave, whatever the button says.", files: ["src/interfaze/policy.py", "src/interfaze/surface/web.py"], d: ["D1", "D20"] },
+  masker: { kind: "Privacy", what: "Before anything reaches the model: inputs and secrets become {{placeholders}}, then pattern and label detectors turn names, account numbers, amounts, SSNs, phones and emails into stable ⟨KIND_n⟩ tokens. Long identifiers keep last-4. Screenshots are masked in-page and fail closed.", files: ["src/interfaze/pii.py"], d: ["D16"] },
+  session: { kind: "Handoff", what: "Who may act right now is a token with a holder, an epoch and an expiry. The epoch rises on every transfer and is checked at the last moment before input is dispatched, so a click decided before a handoff can't land after it.", files: ["src/interfaze/session.py"], d: ["D9"] },
+  evidence: { kind: "Audit trail", what: "One JSON line per event, snapshots and screenshots on failure, all redacted at the write boundary: known values first, then the PII detectors. Wrong-record incidents go to an audit log that drives the circuit breaker.", files: ["src/interfaze/evidence.py"], d: ["D19"] },
+  mock: { kind: "Target", what: "A stand-in for a legacy back office: framesets, layout tables, unlabelled fields, two buttons with the same name, no test ids. Deterministic faults (500s, timeouts, dialogs, slow pages, a wrong record), seeded layout shuffles, and hostile pages for the safety eval.", files: ["apps/mock_core_banking/app.py"], d: [] },
+  operator: { kind: "People", what: "A local page with the intervention (capability, step, reason), a live masked screenshot, and Take control / Hand back / Abort. The person works in the automation's own browser; what they do is captured, and automation resumes only after verifying the screen.", files: ["src/interfaze/operator.py", "src/interfaze/surface/human.js"], d: ["D9", "D11"] },
+  evals: { kind: "Measurement", what: "Five suites: fault matrix, discovery reliability (real Claude, $ cap), replay stability, safety/adversarial, recorder robustness. Each on a private app, each number stamped with N, date and commit. This page reads their results.", files: ["evals/", "evals/report.md"], d: ["D14"] },
+};
+const TOURS = {
+  discovery: [["goal", "A goal with typed inputs and probe values."], ["discovery", "Claude reads the screen as an accessibility tree with refs."], ["masker", "Names, numbers and balances reach it only as placeholders."], ["surface", "It clicks by ref; the surface acts in the real browser."], ["policy", "Every action is policy-checked first; a commit is refused and explained."], ["recorder", "Each action is described as ranked, surface-neutral locators."], ["artifact", "The run becomes a typed draft artifact."], ["probes", "Replaying probe inputs teaches it business outcomes, verified by construction."], ["review", "A person approves it."]],
+  replay: [["invoke", "A calling agent invokes the capability with inputs and a deadline."], ["review", "Only approved artifacts run unattended."], ["replay", "No LLM: ranked strategies resolve each control on the live page."], ["identity", "Before reading the record, its identity is checked."], ["surface", "Waits race postconditions against named outcomes."], ["evidence", "Everything is logged, redacted at the write boundary."], ["result", "A typed result: success, an answer, or a failure that says where and why."]],
+  handoff: [["replay", "An unknown screen appears mid-run."], ["session", "Automation pauses; the control token's epoch rises."], ["operator", "A person claims control on the operator page and works in the same browser."], ["session", "They hand back; automation verifies the screen before it continues."], ["result", "The caller got needs_human by its deadline, and collects the late result."]],
+  safety: [["mock", "A hostile page: a commit button labelled \"OK\", a link to another site."], ["surface", "The click happens; the browser starts a request."], ["policy", "The network gate drops it: off-origin, or a declared commit path."], ["result", "POLICY_VIOLATION at that step. Nothing was opened, nothing left the browser."]],
+};
+const svg = $("#svg"), NS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs = {}, parent = svg) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+const css = (v) => getComputedStyle(root).getPropertyValue(v).trim();
+const laneRects = LANES.map((l) => { const r = el("rect", { x: l.x, y: l.y, width: l.w, height: l.h, rx: 14 }); const t = el("text", { x: l.x + 14, y: l.y + 20, class: "lane-label" }); t.textContent = l.label; return [r, l]; });
+const paintLanes = () => laneRects.forEach(([r, l]) => r.setAttribute("fill", css(l.fill)));
+paintLanes();
+el("defs").innerHTML = `<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>`;
+const center = (n) => [n.x + W / 2, n.y + H / 2];
+function port(n, toward) {
+  const [cx, cy] = center(n), [tx, ty] = toward, dx = tx - cx, dy = ty - cy;
+  if (Math.abs(dx) * H > Math.abs(dy) * W) return [cx + Math.sign(dx) * W / 2, cy, "h"];
+  return [cx, cy + Math.sign(dy) * H / 2, "v"];
+}
+const edgeEls = EDGES.map(([a, b, label]) => {
+  const A = N[a], B = N[b];
+  const pairOffset = EDGES.some(([x, y]) => x === b && y === a) ? (a < b ? -8 : 8) : 0;
+  let [x1, y1, o1] = port(A, center(B)), [x2, y2, o2] = port(B, center(A));
+  if (o1 === "v") { x1 += pairOffset; } else { y1 += pairOffset; }
+  if (o2 === "v") { x2 += pairOffset; } else { y2 += pairOffset; }
+  const k = 0.45;
+  const c1 = o1 === "h" ? [x1 + (x2 - x1) * k, y1] : [x1, y1 + (y2 - y1) * k];
+  const c2 = o2 === "h" ? [x2 - (x2 - x1) * k, y2] : [x2, y2 - (y2 - y1) * k];
+  const g = el("g", { class: "edge" });
+  g.style.color = "var(--ink-3)";
+  const p = el("path", { d: `M${x1},${y1} C${c1} ${c2} ${x2},${y2}`, "marker-end": "url(#arr)" }, g);
+  const t = el("text", { x: (x1 + x2) / 2, y: (y1 + y2) / 2 - 5, "text-anchor": "middle" }, g);
+  t.textContent = label;
+  return { g, a, b };
+});
+const nodeEls = {};
+for (const [id, n] of Object.entries(N)) {
+  const g = el("g", { class: "node", tabindex: 0, role: "button", "aria-label": n.t });
+  el("rect", { x: n.x, y: n.y, width: W, height: H, rx: 10 }, g);
+  const t = el("text", { x: n.x + 12, y: n.y + 24 }, g); t.textContent = n.t;
+  const s = el("text", { x: n.x + 12, y: n.y + 42, class: "s" }, g); s.textContent = n.s;
+  g.addEventListener("click", () => { stopTour(); select(id); });
+  g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stopTour(); select(id); } });
+  g.addEventListener("mouseenter", () => highlight(id, false));
+  g.addEventListener("mouseleave", () => highlight(current, false));
+  nodeEls[id] = g;
+}
+let current = null;
+function highlight(id, dimOthers = true) {
+  const linked = new Set([id]);
+  edgeEls.forEach((e) => { const on = id && (e.a === id || e.b === id); e.g.classList.toggle("lit", !!on); e.g.style.color = on ? "var(--accent)" : "var(--ink-3)";
+    e.g.classList.toggle("dim", !!id && dimOthers && !on); if (on) { linked.add(e.a); linked.add(e.b); } });
+  for (const [k, g] of Object.entries(nodeEls)) { g.classList.toggle("on", k === id); g.classList.toggle("lit", !!id && linked.has(k) && k !== id);
+    g.classList.toggle("dim", !!id && dimOthers && !linked.has(k)); }
+}
+function select(id) {
+  current = id; highlight(id);
+  const n = N[id], i = INFO[id];
+  const links = EDGES.filter(([a, b]) => a === id || b === id).map(([a, b, l]) => a === id ? `→ <b>${N[b].t}</b>: ${esc(l)}` : `← <b>${N[a].t}</b>: ${esc(l)}`);
+  $("#panel").innerHTML = `<div class="kind" style="color:var(--accent)">${esc(i.kind)}</div><h3>${esc(n.t)}</h3><p>${esc(i.what)}</p>
+    ${i.bullets ? `<ul>${i.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>` : ""}
+    <div class="kind muted" style="margin-top:14px">Connections</div><ul>${links.map((l) => `<li>${l}</li>`).join("")}</ul>
+    <div class="files">${i.files.map((f) => `<a href="${blob(f)}"><code>${esc(f)}</code></a>`).join("")}</div>
+    ${i.d.length ? `<div class="kind muted" style="margin-top:14px">Shaped by</div><div class="chips">${i.d.map((d) => `<button class="chip" data-d="${d}">${d}</button>`).join("")}</div>` : ""}`;
+  $("#panel").querySelectorAll(".chip").forEach((c) => c.onclick = () => jumpTo(c.dataset.d));
+}
+function idle() {
+  $("#panel").innerHTML = `<div class="kind" style="color:var(--accent)">Explore</div><h3>${Object.keys(N).length} parts, ${EDGES.length} connections</h3>
+    <p>Three lanes: what needs Claude (left), the contract in the middle, what runs without it (right). Below them, the
+    runtime both paths share, then the target app, the people and the measurement.</p>
+    <p class="muted">Click a box, or press a ▶ button to follow a run.</p>`;
+}
+idle();
+let tourTimer = null;
+function stopTour() { clearTimeout(tourTimer); tourTimer = null; document.querySelectorAll("#tour button").forEach((b) => b.classList.remove("on")); $("#tour-cap").textContent = ""; }
+document.querySelectorAll("#tour button").forEach((btn) => btn.onclick = () => {
+  const name = btn.dataset.tour, steps = TOURS[name], was = btn.classList.contains("on");
+  stopTour(); if (was) return;
+  btn.classList.add("on");
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let i = 0;
+  const step = () => { const [id, cap] = steps[i]; select(id); $("#tour-cap").innerHTML = `<b>${i + 1}/${steps.length}</b> · ${esc(cap)}`;
+    i += 1; if (i < steps.length) tourTimer = setTimeout(step, reduce ? 3200 : 2300); else tourTimer = setTimeout(() => btn.classList.remove("on"), 2300); };
+  step();
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", paintLanes);
+new MutationObserver(paintLanes).observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+
+// ── timeline ────────────────────────────────────────────────────────────────────────────────────────────
+$("#timeline").innerHTML = S.commits.map((c) => `<div class="tl"><div class="meta">${esc(c.date)} · <a href="${S.repo}/commit/${esc(c.sha)}">${esc(c.sha)}</a></div>
+  <div class="t">${esc(c.subject)}</div>${c.body ? `<p>${esc(c.body)}</p>` : ""}</div>`).join("");
+
+// ── decisions ───────────────────────────────────────────────────────────────────────────────────────────
+const LABEL = { "overrode": "I overrode", "my idea": "My idea", "my challenge": "My challenge", "my choice": "My call",
+  "ai self-correction": "AI self-correction", "ai changed its mind": "AI changed its mind", "agreed": "Agreed" };
+const GROUPS = { all: () => true, mine: (d) => ["overrode", "my idea", "my challenge", "my choice"].includes(d.kind),
+  ai: (d) => d.kind.startsWith("ai"), agreed: (d) => d.kind === "agreed" };
+const GNAME = { all: "All", mine: "Where I moved it", ai: "AI corrected itself", agreed: "Agreed after challenge" };
+const mine = S.decisions.filter(GROUPS.mine).length;
+$("#override-count").textContent = `${S.decisions.length} decisions are logged; in ${mine} of them I overrode the AI, raised the idea, or forced the question.`;
+let group = "all";
+function renderDecisions() {
+  $("#filters").innerHTML = Object.keys(GROUPS).map((g) => `<button data-g="${g}" class="${g === group ? "on" : ""}">${GNAME[g]}<span>${S.decisions.filter(GROUPS[g]).length}</span></button>`).join("");
+  $("#filters").querySelectorAll("button").forEach((b) => b.onclick = () => { group = b.dataset.g; renderDecisions(); });
+  $("#decision-grid").innerHTML = S.decisions.filter(GROUPS[group]).map((d) => {
+    const struck = ["overrode", "my idea", "my challenge", "ai self-correction", "ai changed its mind"].includes(d.kind);
+    return `<article class="card dec" id="${d.id}"><div class="hd"><span class="id">${d.id}</span><span class="who ${d.kind.replace(/ /g, "-")}">${LABEL[d.kind]}</span></div>
+      <h3>${d.topic}</h3>
+      <div class="row"><b>AI proposed</b><span class="ai ${struck ? "" : "kept"}">${d.proposed}</span></div>
+      <div class="row chose"><b>Decision</b>${d.chose}</div>
+      <details><summary>Why</summary>${d.why}</details></article>`;
+  }).join("");
+}
+renderDecisions();
+function jumpTo(id) {
+  if (!S.decisions.find((d) => d.id === id)) return;
+  if (!GROUPS[group](S.decisions.find((d) => d.id === id))) { group = "all"; renderDecisions(); }
+  const card = document.getElementById(id); if (!card) return;
+  card.scrollIntoView({ behavior: "smooth", block: "center" }); card.querySelector("details").open = true;
+  card.classList.add("flash"); setTimeout(() => card.classList.remove("flash"), 1600);
+}
+
+// ── evals ───────────────────────────────────────────────────────────────────────────────────────────────
+const stamp = (x) => x ? `${x.date.slice(0, 10)} · ${x.commit}` : "";
+const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
+const cards = [];
+if (E.fault_matrix) cards.push({ nm: "Fault matrix", num: `${E.fault_matrix.passed}<small>/${E.fault_matrix.runs}</small>`, bar: pct(E.fault_matrix.passed, E.fault_matrix.runs),
+  p: `Every fault and data outcome, both flows, against the contract. Sub-accounts opened: ${E.fault_matrix.opened}.${E.fault_matrix.misses.length ? " Open: " + E.fault_matrix.misses.map(esc).join("; ") : ""}`, x: E.fault_matrix });
+if (E.discovery) cards.push({ nm: "Discovery · Claude", llm: true, num: `${E.discovery.replays}<small>/${E.discovery.runs}</small>`, bar: pct(E.discovery.replays, E.discovery.runs),
+  p: `Real runs recorded an artifact that then replayed on a different member. ${money(E.discovery.spent)} spent in total; no run needed escalation.`, x: E.discovery });
+if (E.stability) cards.push({ nm: "Replay stability", num: `${E.stability.ok}<small>/${E.stability.runs}</small>`, bar: pct(E.stability.ok, E.stability.runs),
+  p: `Same inputs, normal and slow app. ${E.stability.distinct} distinct output per arm; no fallbacks, no retries.`, x: E.stability });
+if (E.safety) cards.push({ nm: "Safety · adversarial", num: `${E.safety.passed}<small>/${E.safety.total}</small>`, bar: pct(E.safety.passed, E.safety.total),
+  p: `Tampered artifacts, PII in free text, hostile forms. ${E.safety.gaps} known gap (a name only free text mentions).${E.safety.llm_total ? ` With Claude on hostile pages: ${E.safety.llm_passed}/${E.safety.llm_total}, harm done: ${E.safety.harm}.` : ""}`, x: E.safety });
+if (E.robustness) cards.push({ nm: "Recorder robustness", num: `${E.robustness.ok}<small>/${E.robustness.runs}</small>`, bar: pct(E.robustness.ok, E.robustness.runs),
+  p: `Shuffled frames, fieldsets, rows, columns and nesting. Times a step found the wrong control: ${E.robustness.wrong}.`, x: E.robustness });
+$("#suites").innerHTML = cards.map((c) => `<div class="card suite">${c.llm ? '<span class="tag llm llmtag">Claude</span>' : ""}<div class="num">${c.num}</div>
+  <div class="nm">${c.nm}</div><div class="bar"><i style="width:${c.bar}%"></i></div><p>${c.p}</p><div class="stamp">${stamp(c.x)}</div></div>`).join("")
+  || `<p class="muted">Run <code>uv run python -m evals all</code>, then <code>scripts/build_site.py</code>.</p>`;
+
+// ── said no ─────────────────────────────────────────────────────────────────────────────────────────────
+const NOS = [
+  ["Letting automation press Confirm, even with approval", "This layer is the agent's hands, not its judgment. No artifact can hold a commit, which is simple to audit (D1)."],
+  ["RAG or a vector database", "Everything looked up is an exact key (a capability id, a page fingerprint) or a short list. Similarity search only adds ways to be wrong in a system whose point is to be exact."],
+  ["Screenshots and coordinates as the way to click", "The accessibility tree with refs, as agent-desktop does it: cheaper, exact, and it survives layout changes. Screenshots stay for a first visit and for people."],
+  ["Overrides addressed by array index", "An index shifts when a step is added and silently renames the wrong control. Step ids fail loudly (D8)."],
+  ["A vendor-wide shared page map", "Maps learn without review, so they stay inside the bank that produced them; only human-approved artifacts are shared (D5)."],
+  ["Distributed-systems vocabulary for a small mechanism", "A \"lease\" became a control token, explained plainly. The brief rewards correct abstractions, not infrastructure (D9)."],
+  ["Replay-first with a hand-written artifact", "It hides the hardest part, the recorder, until last. A real Claude run came first instead (D10)."],
+  ["A capability catalog", "Cut for scope: the stretch goal least connected to the rest, with a fixed priority order so cuts come from the bottom (D15)."],
+];
+$("#nos").innerHTML = NOS.map(([h, p]) => `<div class="card no"><div class="x">✕ NO</div><h3>${esc(h)}</h3><p>${esc(p)}</p></div>`).join("");
+if (S.tests) $("#foot-tests").textContent = ` ${S.tests} automated tests.`;
+})();
+</script>
+</body>
+</html>

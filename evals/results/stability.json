@@ -1,0 +1,64 @@
+{
+  "suite": "stability",
+  "date": "2026-11-15T06:36:24+00:00",
+  "commit": "4bbad13",
+  "n_per_arm": 20,
+  "arms": [
+    {
+      "flow": "lookup",
+      "condition": "normal",
+      "n": 20,
+      "success_rate": 1.0,
+      "results": {
+        "success": 20
+      },
+      "distinct_outputs": 1,
+      "p50_s": 3.82,
+      "p95_s": 3.94,
+      "max_s": 3.96,
+      "unsteady_steps": {}
+    },
+    {
+      "flow": "lookup",
+      "condition": "slow app (+3 s on the member page)",
+      "n": 20,
+      "success_rate": 1.0,
+      "results": {
+        "success": 20
+      },
+      "distinct_outputs": 1,
+      "p50_s": 6.64,
+      "p95_s": 6.79,
+      "max_s": 6.83,
+      "unsteady_steps": {}
+    },
+    {
+      "flow": "open_sub_account",
+      "condition": "normal",
+      "n": 20,
+      "success_rate": 1.0,
+      "results": {
+        "success": 20
+      },
+      "distinct_outputs": 1,
+      "p50_s": 4.66,
+      "p95_s": 4.76,
+      "max_s": 4.79,
+      "unsteady_steps": {}
+    },
+    {
+      "flow": "open_sub_account",
+      "condition": "slow app (+3 s on the member page)",
+      "n": 20,
+      "success_rate": 1.0,
+      "results": {
+        "success": 20
+      },
+      "distinct_outputs": 1,
+      "p50_s": 7.48,
+      "p95_s": 7.62,
+      "max_s": 7.68,
+      "unsteady_steps": {}
+    }
+  ]
+}
