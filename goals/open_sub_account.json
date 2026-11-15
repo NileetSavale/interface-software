@@ -16,6 +16,7 @@
   "commitPaths": ["/subaccount/confirm"],
   "maxRisk": "reversible",
   "probes": [
-    {"inputs": {"initialDeposit": "5.00"}, "why": "an opening deposit below the minimum"}
+    {"inputs": {"memberId": "99999"}, "why": "a member number that doesn't exist", "expect": "MEMBER_NOT_FOUND"},
+    {"inputs": {"initialDeposit": "5.00"}, "why": "an opening deposit below the minimum", "expect": "DEPOSIT_BELOW_MINIMUM"}
   ]
 }

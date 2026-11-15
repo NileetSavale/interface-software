@@ -260,3 +260,27 @@ def test_a_second_bank_drifts_proposes_an_override_and_runs_clean_once_approved(
     on_a = asyncio.run(Replayer(with_override, base_url, {"memberId": "34567"}, env=ENV, audit=audit, tenant="a",
                                 pending_dir=pending).run())
     assert isinstance(on_a, Success) and not on_a.drift
+
+
+def test_a_probe_with_an_expected_code_only_learns_that_code(base_url, discovered):
+    """The goal fixes the vocabulary: a caller branches on MEMBER_NOT_FOUND, so a discovery that names the same screen
+    NO_SUCH_MEMBER would break it. Any other code is refused; the expected one is learned and verified."""
+    from interfaze.discovery.probes import Prober
+    base = discovered[2]
+    unknown = base.model_copy(update={"outcomes": [o for o in base.outcomes if o.code != "MEMBER_NOT_FOUND"]})
+    spec = {"inputs": {"memberId": "88888"}, "why": "a member number that doesn't exist", "expect": "MEMBER_NOT_FOUND"}
+    answer = dict(kind="business", phrase="No members found", description="No member has this number.")
+
+    def probe(code):
+        planner = ScriptedPlanner([("name_outcome", call(code=code, **answer))])
+        prober = Prober(base_url, {"memberId": "12345"}, planner, "probe-test", env=ENV)
+        return asyncio.run(prober.probe(unknown, spec)), planner
+
+    (kept, report), planner = probe("NO_SUCH_MEMBER")
+    assert report.result == "proposal NO_SUCH_MEMBER rejected: the goal expects MEMBER_NOT_FOUND here"
+    assert kept is unknown
+    assert any("it is known as MEMBER_NOT_FOUND" in seen for seen in planner.seen)
+
+    (learned, report), _ = probe("MEMBER_NOT_FOUND")
+    assert report.learned == "MEMBER_NOT_FOUND"
+    assert "MEMBER_NOT_FOUND" in {o.code for o in learned.outcomes}

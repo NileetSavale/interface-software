@@ -28,19 +28,22 @@
       "inputs": {
         "memberId": "99999"
       },
-      "why": "a member number that doesn't exist"
+      "why": "a member number that doesn't exist",
+      "expect": "MEMBER_NOT_FOUND"
     },
     {
       "inputs": {
         "memberId": "01234"
       },
-      "why": "a member number the application rejects as malformed"
+      "why": "a member number the application rejects as malformed",
+      "expect": "INVALID_MEMBER_NUMBER"
     },
     {
       "inputs": {
         "memberId": "45678"
       },
-      "why": "a member the operator may not view"
+      "why": "a member the operator may not view",
+      "expect": "PERMISSION_DENIED"
     }
   ]
 }

@@ -216,6 +216,10 @@ Shaping choices (each one is defensible on its own):
    - the phrase becomes the detector, and the outcome is kept only if the probe now ends in it **and** the
      discovery inputs still succeed.
    The real run learned `MEMBER_NOT_FOUND` and `INVALID_MEMBER_NUMBER` this way for about one cent each.
+   - **The code is the goal author's, not the model's** (D22). Each probe says the code it expects
+     (`"expect": "MEMBER_NOT_FOUND"`), and the probe tool offers only that code: the model recognises the screen
+     or calls `not_an_outcome`. Left free, the same screen came back under different codes in different runs, and
+     a caller branches on the code. It also keeps codes the same across capabilities that share a screen.
 2. **A standard library adds the common ones** (`src/interfaze/artifact/library.py`): `APP_ERROR` (fatal),
    `PERMISSION_DENIED` (business), `UNEXPECTED_DIALOG` (escalate), `SLOW_LOAD` (wait), and `SESSION_EXPIRED`. For a
    read-only capability, `SESSION_EXPIRED` signs on again and restarts the steps. For one that changed something,
@@ -830,11 +834,11 @@ loop_runner's `research_log.md`: arms compared head-to-head, run counts stated, 
 | Suite | Finding | Fix |
 |---|---|---|
 | 1 | open_sub_account succeeded **behind** a "Compliance hold" dialog. The "before" check had run on the previous screen; the next control resolved once the page rendered and was clicked past the non-modal dialog | Outcomes are re-checked on the screen where the control resolved |
-| 1 | open_sub_account answers a missing member with `TARGET_UNRESOLVED`, not `MEMBER_NOT_FOUND`: probes are per capability, so lookup's learned outcome doesn't carry over | **Open**, see the question to the user |
+| 1 | open_sub_account answers a missing member with `TARGET_UNRESOLVED`, not `MEMBER_NOT_FOUND`: probes are per capability, so lookup's learned outcome doesn't carry over | The sub-account goal probes a missing member too, with the expected code (D22). Sharing learned outcomes across an app's capabilities stays a design option |
 | 5 | `read_savings_balance` unresolved on 18/30 layouts: the table is named by the text before it, and an extra wrapper table hid that text | `tableLabel` climbs through wrappers that hold only the table |
 | 4 | A tampered "OK" commit was pressed; a link left the origin; discovery typed the password into a fake form | D20: network gate with commit paths, credential page rule |
 | 3 | All stable, but ~2 s of every ~3 s run is the sign-on precondition waiting to rule out "already signed in" | Noted; racing the check against the sign-on form is the fix |
-| 2 | Outcome codes vary between discoveries of the same goal (`DEPOSIT_BELOW_MINIMUM`, `MINIMUM_DEPOSIT_NOT_MET`, …) | Noted: probes should name the code they expect, so the code is stable across versions |
+| 2 | Outcome codes vary between discoveries of the same goal (`DEPOSIT_BELOW_MINIMUM`, `MINIMUM_DEPOSIT_NOT_MET`, …) | Probes name the code they expect, and the probe tool only offers those codes (D22) |
 
 ---
 

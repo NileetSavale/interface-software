@@ -305,8 +305,8 @@ footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; }
       <p>The full schema came first, then one real discovery → artifact → replay slice. Then each pass deepened it,
         ranked by grading weight (D10).</p></div>
     <div class="card pillar"><div class="ix">03 · EVALS DECIDE</div><h3>"Vibes don't pass review"</h3>
-      <p>Five suites with N, date and commit stamped on every number. Their first runs found five real gaps,
-        all fixed, and two design questions still open.</p></div>
+      <p>Five suites with N, date and commit stamped on every number. Their first runs found real gaps in
+        replay, the recorder, safety and discovery; each one was fixed and re-measured.</p></div>
     <div class="card pillar"><div class="ix">04 · SAFE BY CONSTRUCTION</div><h3>Guards below the page</h3>
       <p>No artifact can hold a commit. PII never reaches the model. Requests are policed in the network layer, where
         a misleading label can't reach.</p></div>
@@ -349,9 +349,9 @@ footer { padding: 40px 0 60px; color: var(--ink-3); font-size: 14px; }
         <td>Credentials only on the sign-on page; the hostile form is blocked; later steps need review; a prompt line
           names the pattern. Clean rerun: Claude gave up at the form in 3/3 runs, without touching it.</td><td><span class="st fixed">fixed</span></td></tr>
       <tr><td>Fault matrix</td><td>A missing member gets a hard failure in the sub-account flow: outcomes learned by one
-        capability aren't shared with another on the same app.</td><td>Design question: share learned outcomes per app.</td><td><span class="st open">open</span></td></tr>
+        capability aren't shared with another on the same app.</td><td>The sub-account goal now probes a missing member too, under the same expected code (D22).</td><td><span class="st fixed">fixed</span></td></tr>
       <tr><td>Discovery</td><td>The same outcome got different codes in different runs (<code>DEPOSIT_BELOW_MINIMUM</code>,
-        <code>MINIMUM_DEPOSIT_NOT_MET</code>).</td><td>Design question: probes name the code they expect, so it stays stable.</td><td><span class="st open">open</span></td></tr>
+        <code>MINIMUM_DEPOSIT_NOT_MET</code>).</td><td>Each probe names the code it expects and the model can only pick it, or say none fits (D22).</td><td><span class="st fixed">fixed</span></td></tr>
     </tbody>
   </table></div>
 </div></section>

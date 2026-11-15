@@ -21,7 +21,7 @@ KIND = {
     "D7": "agreed", "D8": "ai self-correction", "D9": "overrode", "D10": "overrode", "D11": "my challenge",
     "D12": "my challenge", "D13": "overrode", "D14": "overrode", "D15": "agreed", "D16": "ai self-correction",
     "D17": "ai self-correction", "D18": "agreed", "D19": "ai self-correction", "D20": "my choice",
-    "D21": "ai proposal",
+    "D21": "ai proposal", "D22": "agreed",
 }
 
 

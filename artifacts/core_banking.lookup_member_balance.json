@@ -14,8 +14,8 @@
   },
   "status": "draft",
   "provenance": {
-    "discoveryRunId": "disc_20261115T070154Z_a311da",
-    "recordedAt": "2026-11-15T07:02:27+00:00",
+    "discoveryRunId": "disc_20261115T072331Z_7fc64b",
+    "recordedAt": "2026-11-15T07:23:45+00:00",
     "model": "claude-sonnet-5-5"
   },
   "inputs": {
@@ -119,10 +119,10 @@
       "detect": {
         "kind": "visible",
         "text": {
-          "matches": "(?i)No members found for"
+          "matches": "(?i)No members found"
         }
       },
-      "description": "The application searched for the member number and reported that no matching member exists. (learned from probe: a member number that doesn't exist)"
+      "description": "The member inquiry screen says no members were found for the number entered, so the member doesn't exist. (learned from probe: a member number that doesn't exist)"
     },
     {
       "code": "INVALID_MEMBER_NUMBER",
@@ -134,7 +134,7 @@
           "matches": "(?i)Invalid member number"
         }
       },
-      "description": "The application rejected the member number as malformed and showed an \"Invalid member number\" message with a link to start a new search. (learned from probe: a member number the application rejects as malformed)"
+      "description": "The application rejected the member number as malformed and showed an \"Invalid member number\" message with a New search link. (learned from probe: a member number the application rejects as malformed)"
     }
   ],
   "policy": {

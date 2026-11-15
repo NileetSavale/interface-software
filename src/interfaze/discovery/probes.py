@@ -4,6 +4,10 @@ The goal spec lists probe inputs ("a member number that doesn't exist"). After t
 with each probe, with no model in the loop. Where the replay stops, the model is shown that one screen and names what
 the app is saying: a code, a kind, and a short phrase from the message. The phrase becomes the outcome's detector.
 
+A probe can name the code it expects (`"expect": "MEMBER_NOT_FOUND"`, or a list). The model then has to use one of
+those codes, or say none fits: a caller branches on the code, so the same outcome must get the same code in every
+discovery, and in every capability whose screens show it. Without `expect` the model names it freely.
+
 A proposed outcome is kept only if it proves itself: the probe replayed again must now end in that outcome, and the
 discovery inputs must still succeed (a phrase that also shows on the happy path would break every run). A human still
 approves the artifact; probes save them writing regexes, they don't replace the review.
@@ -30,18 +34,28 @@ def _tool(name: str, description: str, /, **props) -> dict:
         "type": "object", "properties": props, "required": list(props), "additionalProperties": False}}
 
 
-PROBE_TOOLS = [
-    _tool("name_outcome", "The screen shows a definite answer from the application.",
-          code={"type": "string", "description": "UPPER_SNAKE_CASE, e.g. MEMBER_NOT_FOUND."},
+def probe_tools(expected: list[str] | None = None) -> list[dict]:
+    """With expected codes, `code` is limited to them: the goal author fixed the vocabulary, the model only picks."""
+    code = {"type": "string", "enum": expected,
+            "description": "The code this answer is known by. If none of these fits the screen, call not_an_outcome."} \
+        if expected else {"type": "string", "description": "UPPER_SNAKE_CASE, e.g. MEMBER_NOT_FOUND."}
+    return [_name_outcome(code), _NOT_AN_OUTCOME]
+
+
+def _name_outcome(code: dict) -> dict:
+    return _tool("name_outcome", "The screen shows a definite answer from the application.",
+          code=code,
           kind={"type": "string", "enum": ["business", "fatal", "escalate"],
                 "description": "business: a legitimate answer for the caller. fatal: the application failed. "
                                "escalate: a person needs to decide."},
           phrase={"type": "string", "description": "A short phrase copied exactly from the message, which would "
                   "appear every time this happens: no input values, numbers or names. E.g. 'No members found'."},
-          description={"type": "string", "description": "One sentence for the reviewer."}),
-    _tool("not_an_outcome", "The screen isn't a definite answer (the automation broke, or it's unclear).",
-          reason={"type": "string"}),
-]
+          description={"type": "string", "description": "One sentence for the reviewer."})
+
+
+_NOT_AN_OUTCOME = _tool("not_an_outcome", "The screen isn't a definite answer (the automation broke, it's unclear, "
+                                          "or no expected code fits).", reason={"type": "string"})
+PROBE_TOOLS = probe_tools()
 # Failures where the app showed a screen the artifact doesn't know: worth asking what it says. (A form that comes back
 # with an error passes every step and only fails the success checkpoint.)
 LEARNABLE = {"TARGET_UNRESOLVED", "AMBIGUOUS_TARGET", "EXPECT_FAILED", "TIMEOUT", "CHECKPOINT_FAILED"}
@@ -95,12 +109,15 @@ class Prober:
     async def probe(self, artifact: Artifact, spec: dict) -> tuple[Artifact, ProbeReport]:
         inputs = {**self.happy_inputs, **spec["inputs"]}
         report = ProbeReport(why=spec.get("why", ""), result="")
+        expected = [spec["expect"]] if isinstance(spec.get("expect"), str) else spec.get("expect")
         result = await self._replay(artifact, inputs, report)
         if isinstance(result, Success):
             report.result = "succeeded: nothing to learn"
             return artifact, report
         if isinstance(result, BusinessOutcome) or (isinstance(result, Failed) and result.outcome_code):
-            report.result = f"already handled as {getattr(result, 'code', None) or result.outcome_code}"
+            handled = getattr(result, "code", None) or result.outcome_code
+            mismatch = f" (expected {' or '.join(expected)})" if expected and handled not in expected else ""
+            report.result = f"already handled as {handled}{mismatch}"
             return artifact, report
         if not isinstance(result, Failed) or result.error_class not in LEARNABLE:
             report.result = f"{result.status}: {getattr(result, 'error_class', '')}".strip(": ")
@@ -120,9 +137,11 @@ class Prober:
             last = artifact.steps[-1]
             where = (f"Every step ran, the last being '{last.intent}', but the screen that came back isn't the success "
                      f"screen (expected {result.expected}). This screen is the application's response to that step.")
+        vocabulary = (f"\n\nIf the screen gives this answer, it is known as {' or '.join(expected)}; name it with that "
+                      f"code. If it gives some other answer, call not_an_outcome and say what it is.") if expected else ""
         prompt = (f"The capability '{artifact.capability.title}' was replayed with {given} set to {report.why}. "
-                  f"{where}\n\nCurrent screen:\n{screen}")
-        turn = await self.planner.turn(PROBE_SYSTEM, PROBE_TOOLS, [{"role": "user", "content": prompt}])
+                  f"{where}{vocabulary}\n\nCurrent screen:\n{screen}")
+        turn = await self.planner.turn(PROBE_SYSTEM, probe_tools(expected), [{"role": "user", "content": prompt}])
         report.cost_usd = turn.usage.cost(self.planner.model)
         call = next(iter(turn.tool_calls()), None)
         if not call or call["name"] != "name_outcome":
@@ -131,6 +150,9 @@ class Prober:
 
         args = call["input"]
         code = args["code"]
+        if expected and code not in expected:
+            report.result = f"proposal {code} rejected: the goal expects {' or '.join(expected)} here"
+            return artifact, report
         if problem := phrase_problem(args["phrase"], screen):
             report.result = f"proposal {code} rejected: {problem}"
             return artifact, report
