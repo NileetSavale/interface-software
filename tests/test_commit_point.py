@@ -6,13 +6,13 @@ from pathlib import Path
 import httpx
 import pytest
 
-from interfaze.artifact.io import load_artifact
-from interfaze.artifact.schema import Step
-from interfaze.discovery.loop import discover
-from interfaze.discovery.planner import ScriptedPlanner
-from interfaze.evidence import Audit
-from interfaze.replay.executor import Replayer
-from interfaze.replay.result import Failed, Success
+from interface.artifact.io import load_artifact
+from interface.artifact.schema import Step
+from interface.discovery.loop import discover
+from interface.discovery.planner import ScriptedPlanner
+from interface.evidence import Audit
+from interface.replay.executor import Replayer
+from interface.replay.result import Failed, Success
 from tests.conftest import ENV
 from tests.test_end_to_end import SCRIPT, call, ref
 

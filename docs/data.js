@@ -310,7 +310,7 @@ window.SITE = {
    "sha": "d1351ea",
    "date": "2026-11-15",
    "subject": "Pass 2.6: second bank (variant B), tenant overrides from drift",
-   "body": "Mock app variant B relabels the member search button and drops the\nMember # label. A new onlyInRegion fallback (D21) finds a relabelled\ncontrol by its place in a labelled region, never by guessing. Replay on\na tenant reports drift and writes a pending override for that tenant;\n`interfaze override --approve` merges it after review, and overrides\napply at load by step id within their semver range. The fault matrix\ngains a bank-B arm. Both artifacts re-recorded on bank A with Claude."
+   "body": "Mock app variant B relabels the member search button and drops the\nMember # label. A new onlyInRegion fallback (D21) finds a relabelled\ncontrol by its place in a labelled region, never by guessing. Replay on\na tenant reports drift and writes a pending override for that tenant;\n`interface override --approve` merges it after review, and overrides\napply at load by step id within their semver range. The fault matrix\ngains a bank-B arm. Both artifacts re-recorded on bank A with Claude."
   },
   {
    "sha": "40be003",

@@ -1,12 +1,12 @@
-"""interfaze: discover a capability with Claude, review and approve it, replay it without the model.
+"""interface: discover a capability with Claude, review and approve it, replay it without the model.
 
-    interfaze mock-app
-    interfaze discover goals/lookup_member_balance.json --input memberId=12345
-    interfaze approve artifacts/core_banking.lookup_member_balance.json
-    interfaze replay artifacts/core_banking.lookup_member_balance.json --input memberId=12345
-    interfaze replay artifacts/core_banking.lookup_member_balance.json --tenant b --base-url http://localhost:4101 ...
-    interfaze override artifacts/core_banking.lookup_member_balance.json --tenant b            (show the pending one)
-    interfaze override artifacts/core_banking.lookup_member_balance.json --tenant b --approve
+    interface mock-app
+    interface discover goals/lookup_member_balance.json --input memberId=12345
+    interface approve artifacts/core_banking.lookup_member_balance.json
+    interface replay artifacts/core_banking.lookup_member_balance.json --input memberId=12345
+    interface replay artifacts/core_banking.lookup_member_balance.json --tenant b --base-url http://localhost:4101 ...
+    interface override artifacts/core_banking.lookup_member_balance.json --tenant b            (show the pending one)
+    interface override artifacts/core_banking.lookup_member_balance.json --tenant b --approve
 """
 import argparse
 import asyncio
@@ -15,7 +15,7 @@ import os
 import sys
 from pathlib import Path
 
-from interfaze.artifact.io import dump_artifact, load_artifact
+from interface.artifact.io import dump_artifact, load_artifact
 
 DEFAULT_BASE_URL = "http://127.0.0.1:4100"  # the origin the artifacts were recorded on; the allowlist is exact
 # Exit codes a caller can branch on without parsing: a business outcome is an answer, not an error
@@ -37,7 +37,7 @@ def show(result) -> None:
 
 
 async def start_operator_page(port: int):
-    from interfaze.operator import OperatorHub
+    from interface.operator import OperatorHub
     hub = OperatorHub()
     await hub.start(port)
     hub.on_publish = lambda i: print(f"\n>>> needs a person ({i.reason})\n>>> open {hub.url(i.id, port)}, take control,"
@@ -50,7 +50,7 @@ def bank_map(path: str | None):
     """A bank's page map (§7a), created on first use; it learns from the verified runs that use it."""
     if not path:
         return None
-    from interfaze.pagemap import PageMap
+    from interface.pagemap import PageMap
     return PageMap(Path(path), bank=Path(path).stem)
 
 
@@ -60,7 +60,7 @@ def pending_path(artifact_path: str, capability: str, tenant: str) -> Path:
 
 
 def cmd_replay(args) -> int:
-    from interfaze.replay.executor import Replayer
+    from interface.replay.executor import Replayer
     artifact = load_artifact(args.artifact)
     inputs = parse_inputs(args.input)
     tenant = {"tenant": args.tenant, "pending_dir": pending_path(args.artifact, artifact.capability.id, args.tenant).parent} \
@@ -74,7 +74,7 @@ def cmd_replay(args) -> int:
 
     async def attended():
         # What a calling agent sees: an answer by the deadline (maybe needs_human), then the late result
-        from interfaze.runs import Runs
+        from interface.runs import Runs
         hub = await start_operator_page(args.operator_port)
         runs = Runs(operator_hub=hub)
         result = await runs.invoke(artifact, args.base_url, inputs, deadline_s=args.deadline, headed=True,
@@ -101,7 +101,7 @@ def cmd_approve(args) -> int:
     artifact = artifact.model_copy(update={"status": "approved"})
     Path(args.artifact).write_text(dump_artifact(artifact))
     # Approving is the person's sign-off that any wrong-record incidents were looked at: it closes the breaker
-    from interfaze.evidence import Audit
+    from interface.evidence import Audit
     Audit().record("breaker_reset", f"{artifact.capability.id}@{artifact.capability.version}", by="approve")
     print(f"{artifact.capability.id}@{artifact.capability.version} approved for unattended replay")
     return 0
@@ -110,8 +110,8 @@ def cmd_approve(args) -> int:
 def cmd_override(args) -> int:
     """Show a tenant's pending override (proposed by drift), or approve it into the artifact. Approving checks it
     applies cleanly first; it's the reviewer's sign-off that the corrected names are the right controls."""
-    from interfaze.artifact.overrides import OverrideError, apply
-    from interfaze.artifact.schema import Override
+    from interface.artifact.overrides import OverrideError, apply
+    from interface.artifact.schema import Override
     artifact = load_artifact(args.artifact)
     path = pending_path(args.artifact, artifact.capability.id, args.tenant)
     if not path.exists():
@@ -140,7 +140,7 @@ def cmd_override(args) -> int:
 
 
 def cmd_discover(args) -> int:
-    from interfaze.discovery.loop import discover
+    from interface.discovery.loop import discover
     goal = json.loads(Path(args.goal).read_text())
 
     async def run():
@@ -179,7 +179,7 @@ def load_dotenv(path: Path = Path(".env")):
 
 def main(argv: list[str] | None = None) -> int:
     load_dotenv()
-    parser = argparse.ArgumentParser(prog="interfaze")
+    parser = argparse.ArgumentParser(prog="interface")
     sub = parser.add_subparsers(dest="command", required=True)
 
     p = sub.add_parser("replay", help="run an artifact without the model")

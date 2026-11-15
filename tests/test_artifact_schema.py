@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from interfaze.artifact.io import dump_artifact, load_artifact, strip_comments
-from interfaze.artifact.schema import Artifact
+from interface.artifact.io import dump_artifact, load_artifact, strip_comments
+from interface.artifact.schema import Artifact
 
 EXAMPLE = Path(__file__).parent.parent / "docs" / "artifact-example.lookup_member_balance.jsonc"
 

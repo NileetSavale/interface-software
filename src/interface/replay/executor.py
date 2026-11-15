@@ -12,22 +12,22 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright
 
-from interfaze.artifact import overrides
-from interfaze.artifact.schema import (
+from interface.artifact import overrides
+from interface.artifact.schema import (
     Artifact, ClickThrough, IdentityMatches, InputSpec, OutcomeSeen, Outcome, OutputPresent, RunSubflow, SetOp, Step,
     Target, TEMPLATE, Visible, WaitLonger,
 )
-from interfaze.artifact.templates import TemplateError, render
-from interfaze.evidence import Audit, RunLog, new_run_id, now, structure_only
-from interfaze.operator import _public
-from interfaze.pagemap import TRUSTED, PageMap, screen_of, target_name
-from interfaze.session import ControlLost, Intervention, Session
-from interfaze.policy import PolicyViolation, check_action, check_url
-from interfaze.replay.result import (
+from interface.artifact.templates import TemplateError, render
+from interface.evidence import Audit, RunLog, new_run_id, now, structure_only
+from interface.operator import _public
+from interface.pagemap import TRUSTED, PageMap, screen_of, target_name
+from interface.session import ControlLost, Intervention, Session
+from interface.policy import PolicyViolation, check_action, check_url
+from interface.replay.result import (
     BusinessOutcome, DriftEvent, EvidenceRef, Failed, FailureClass, InputError, InvalidInput, RecoveryEvent, Success,
 )
-from interfaze.surface.base import Resolved, SurfaceError
-from interfaze.surface.web import WebSurface
+from interface.surface.base import Resolved, SurfaceError
+from interface.surface.web import WebSurface
 
 DEFAULT_TIMEOUT_MS = 10_000
 # A control's accessible name, for proposing an override. Never an input's value: that's what the user typed.

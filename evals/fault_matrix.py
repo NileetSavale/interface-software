@@ -21,7 +21,7 @@ from collections import Counter
 from pathlib import Path
 
 from evals.common import HAPPY, artifact, bank_c_map, label, mock_app, replay, save
-from interfaze.artifact.schema import Override
+from interface.artifact.schema import Override
 
 TYPES = ["success", "business_outcome", "invalid_input", "needs_human", "failed"]
 

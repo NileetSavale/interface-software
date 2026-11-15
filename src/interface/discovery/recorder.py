@@ -6,8 +6,8 @@ nothing the model saw or said ends up in the artifact (§2: the artifact is deco
 import re
 from datetime import datetime, timezone
 
-from interfaze.artifact.library import SIGN_ON, standard_outcomes
-from interfaze.artifact.schema import (
+from interface.artifact.library import SIGN_ON, standard_outcomes
+from interface.artifact.schema import (
     App, Artifact, Capability, Extractor, IdentityMatches, InputSpec, LabelStrategy, OutputPresent, OutputSpec, Policy,
     Precondition, Provenance, RoleStrategy, Step, Success, Target, TextStrategy, Visible,
 )

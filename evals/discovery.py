@@ -20,8 +20,8 @@ import tempfile
 from pathlib import Path
 
 from evals.common import ENV, HAPPY, ROOT, artifact, events, label, mock_app, replay, save
-from interfaze.artifact.io import load_artifact
-from interfaze.pagemap import PageMap
+from interface.artifact.io import load_artifact
+from interface.pagemap import PageMap
 
 GOALS = {"lookup": ROOT / "goals" / "lookup_member_balance.json",
          "open_sub_account": ROOT / "goals" / "open_sub_account.json"}
@@ -46,7 +46,7 @@ class Budget:
 
 
 def discover_once(app, goal: dict, inputs: dict, budget: Budget, fault: str | None = None, **kw) -> dict:
-    from interfaze.discovery.loop import discover
+    from interface.discovery.loop import discover
     app.fault(fault, -1 if fault else 1)
     out_dir = Path(tempfile.mkdtemp())
     outcome = asyncio.run(discover(goal, app.base_url, inputs, out_dir=out_dir, budget_usd=budget.cap(), env=ENV, **kw))

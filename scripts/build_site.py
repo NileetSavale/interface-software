@@ -13,7 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "evals" / "results"
-FALLBACK_REPO = "https://github.com/nileetsavale/interfaze"
+FALLBACK_REPO = "https://github.com/NileetSavale/interface-software"
 
 # Who moved each decision, read from the log's own wording; shown as filters on the page
 KIND = {

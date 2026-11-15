@@ -15,7 +15,7 @@ No LLM.
 from collections import Counter, defaultdict
 
 from evals.common import HAPPY, artifact, label, mock_app, replay, save
-from interfaze.replay.executor import Replayer
+from interface.replay.executor import Replayer
 
 TRUTH_JS = "el => el.closest('[data-truth]')?.getAttribute('data-truth') ?? null"
 

@@ -6,12 +6,12 @@ import asyncio
 import httpx
 import pytest
 
-from interfaze.artifact.io import load_artifact
-from interfaze.evidence import Audit, RunLog
-from interfaze.operator import OperatorHub
-from interfaze.replay.executor import Replayer
-from interfaze.replay.result import Failed, Success
-from interfaze.session import ControlError, ControlLost, Session
+from interface.artifact.io import load_artifact
+from interface.evidence import Audit, RunLog
+from interface.operator import OperatorHub
+from interface.replay.executor import Replayer
+from interface.replay.result import Failed, Success
+from interface.session import ControlError, ControlLost, Session
 from tests.conftest import ENV, free_port
 
 EXAMPLE = "docs/artifact-example.lookup_member_balance.jsonc"
@@ -127,7 +127,7 @@ def test_an_action_decided_before_a_handoff_is_dropped(tmp_path):
     session = Session(RunLog("test_control", root=tmp_path))
     decided_in = session.epoch
     session.check(decided_in)  # holds control: fine
-    from interfaze.session import Intervention
+    from interface.session import Intervention
     session.pause(Intervention(id="i", run_id="r", subject="s", step_id="x", intent="y", reason="z", since="", snapshot=""))
     session.claim("alice")
     with pytest.raises(ControlLost):
@@ -142,8 +142,8 @@ def test_an_action_decided_before_a_handoff_is_dropped(tmp_path):
 
 
 def test_discovery_ladder_ends_with_a_person_teaching_the_step(base_url, tmp_path):
-    from interfaze.discovery.loop import discover
-    from interfaze.discovery.planner import ScriptedPlanner
+    from interface.discovery.loop import discover
+    from interface.discovery.planner import ScriptedPlanner
     from tests.test_end_to_end import GOAL, SCRIPT, call, ref
 
     script = [*SCRIPT[:6],  # sign on, open inquiry, search; the notice page appears
@@ -190,8 +190,8 @@ def test_discovery_ladder_ends_with_a_person_teaching_the_step(base_url, tmp_pat
 
 
 def test_invoke_returns_needs_human_at_the_deadline_and_the_run_finishes_later(base_url, tmp_path):
-    from interfaze.replay.result import NeedsHuman
-    from interfaze.runs import Runs
+    from interface.replay.result import NeedsHuman
+    from interface.runs import Runs
     artifact = artifact_without(base_url)
 
     async def run():

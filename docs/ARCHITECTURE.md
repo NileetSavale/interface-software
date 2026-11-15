@@ -1,4 +1,4 @@
-# interfaze — Architecture
+# interface — Architecture
 
 Status: **built.** Decisions were locked in review on 2026-11-14 and built in passes; each "As built" section says what changed
 in the building. The short version is `REPORT.md`.
@@ -155,7 +155,7 @@ headed browser. agent-desktop is the reference for a future `DesktopSurface`.
 See `docs/artifact-example.lookup_member_balance.jsonc` for a full annotated example. Summary:
 
 ```
-Artifact                                   (src/interfaze/artifact/schema.py; JSON Schema in schemas/)
+Artifact                                   (src/interface/artifact/schema.py; JSON Schema in schemas/)
 ├─ schemaVersion   "1"                      ← version of THIS schema (migrations)
 ├─ capability      { id, version (semver), title, description }      ← what an agent calls
 ├─ app             { product, versionRange, surface: web|desktop }   ← vendor product, not tenant
@@ -208,7 +208,7 @@ Shaping choices (each one is defensible on its own):
   readability.
 
 ### ✅ Locked: where outcomes come from (updated in Pass 2 by D18)
-1. **Probes learn the flow-specific ones** (`src/interfaze/discovery/probes.py`). The goal spec lists probe inputs
+1. **Probes learn the flow-specific ones** (`src/interface/discovery/probes.py`). The goal spec lists probe inputs
    with a reason (`99999`: "a member number that doesn't exist"). After recording:
    - the artifact is replayed with each probe, with no model;
    - where it stops, the model sees that one screen (inputs masked) and names it: code, kind, and a short phrase
@@ -221,7 +221,7 @@ Shaping choices (each one is defensible on its own):
      (`"expect": "MEMBER_NOT_FOUND"`), and the probe tool offers only that code: the model recognises the screen
      or calls `not_an_outcome`. Left free, the same screen came back under different codes in different runs, and
      a caller branches on the code. It also keeps codes the same across capabilities that share a screen.
-2. **A standard library adds the common ones** (`src/interfaze/artifact/library.py`): `APP_ERROR` (fatal),
+2. **A standard library adds the common ones** (`src/interface/artifact/library.py`): `APP_ERROR` (fatal),
    `PERMISSION_DENIED` (business), `UNEXPECTED_DIALOG` (escalate), `SLOW_LOAD` (wait), and `SESSION_EXPIRED`. For a
    read-only capability, `SESSION_EXPIRED` signs on again and restarts the steps. For one that changed something,
    it escalates, because steps that changed state must not run twice.
@@ -456,9 +456,9 @@ full handoff in `evidence/`.
 
 ### As built (Pass 2 item 2)
 - **Code:**
-  - `src/interfaze/session.py`: Session, ControlToken, Intervention.
-  - `src/interfaze/operator.py`: OperatorHub and the page on :4200.
-  - `src/interfaze/runs.py`: invoke / get_result / wait.
+  - `src/interface/session.py`: Session, ControlToken, Intervention.
+  - `src/interface/operator.py`: OperatorHub and the page on :4200.
+  - `src/interface/runs.py`: invoke / get_result / wait.
   - `surface/human.js`: the listener for human actions.
   - CLI: `replay --attended --deadline N` and `discover --attended`.
 - **The epoch is checked at dispatch, not before.**
@@ -484,7 +484,7 @@ full handoff in `evidence/`.
   - In discovery they become steps with `recordedBy: human, needsReview: true`.
   - A typed value is kept only if it equals an input or a secret, and then as its placeholder. Otherwise the step
     isn't recorded at all.
-  - `interfaze approve` refuses an artifact that still has `needsReview` steps.
+  - `interface approve` refuses an artifact that still has `needsReview` steps.
   - The usual fix for a taught click-through is an outcome, not a step, so a reviewer has to decide which.
 - **The discovery ladder: nudge → `claude-opus-5-5` → a person.** The switch to Opus keeps the same messages,
   system prompt and tools, so it isn't a history edit. The API ignores the thinking blocks the new model can't
@@ -549,7 +549,7 @@ full handoff in `evidence/`.
   the model if any region can't be classified.
 
 ### As built (Pass 2 item 3)
-- **Code:** `src/interfaze/pii.py` (Masker, PATTERNS, LABELS); `locate.js` `maskPII`; `WebSurface.screenshot`.
+- **Code:** `src/interface/pii.py` (Masker, PATTERNS, LABELS); `locate.js` `maskPII`; `WebSurface.screenshot`.
 - **The model's view.** Each snapshot goes through two stages before it's sent:
   1. Inputs and secrets become their `{{placeholders}}`.
   2. The Masker replaces the rest:
@@ -631,7 +631,7 @@ typed the password into a fake "re-enter your password" form. Three guards now s
   signal ("tenant X: step `submit-search` now resolves at rank 3 in 40% of runs") → re-record or add override.
 
 ### As built (Pass 2 item 6)
-**Variant B** is a second bank on the same vendor product (`interfaze mock-app --variant b`, or `/__variant` in
+**Variant B** is a second bank on the same vendor product (`interface mock-app --variant b`, or `/__variant` in
 tests). It has two template differences a real tenant would have:
 - the member search button says "Find Member" instead of "Search";
 - the Member # field has no `<label>`, only the text in the cell beside it.
@@ -644,13 +644,13 @@ fieldset".
 - If the region ever holds two such controls, it fails. It never picks one.
 - The policy re-check on the live control and the network gate still apply, so a fallback can't land on a commit.
 
-**Drift → pending override → approval** (`src/interfaze/artifact/overrides.py`):
+**Drift → pending override → approval** (`src/interface/artifact/overrides.py`):
 1. A replay on a tenant (`--tenant b`) whose control is only found by a fallback still succeeds, and reports drift.
 2. It writes a pending override for that tenant to `artifacts/<capability>/overrides.pending/<tenant>.json`.
    - If the control kept a usable name (a relabel), role+name stays first, with the new name.
    - Otherwise (a lost `<label>`), the strategy that worked moves to the front.
    - The name proposed is the control's accessible name, never an input's value, and never a name with digits.
-3. `interfaze override <artifact> --tenant b` shows it; `--approve` checks it applies cleanly and merges it.
+3. `interface override <artifact> --tenant b` shows it; `--approve` checks it applies cleanly and merges it.
    Nothing applies itself.
 4. At load, `Replayer(tenant=…)` runs the base with that tenant's approved override. Ops name steps by id. A
    missing step, a path that picks no item, or a base version outside `appliesTo` is refused loudly.
@@ -723,7 +723,7 @@ A graph of an app's screens that grows with every verified run.
 - Map poisoning (see the write rules).
 
 ### As built (Pass 2 item 7)
-`src/interfaze/pagemap.py`: one JSON file per bank, no server.
+`src/interface/pagemap.py`: one JSON file per bank, no server.
 - **Screens** are a hash of the structure-only view of the snapshot (the same scrubbing as wrong-record evidence),
   with typed field values dropped. So two members' detail pages are one node, and filling a field doesn't make a new
   one. Each node keeps its static labels, taken after the PII masker, so no name or number survives.

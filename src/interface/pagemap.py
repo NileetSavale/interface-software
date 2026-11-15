@@ -26,8 +26,8 @@ from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
 
-from interfaze.evidence import structure_only
-from interfaze.pii import Masker
+from interface.evidence import structure_only
+from interface.pii import Masker
 
 SOURCE_WEIGHT = {"replay": 1.0, "reviewed_discovery": 0.7, "discovery": 0.5, "human": 0.2}
 HALF_LIFE_S = 30 * 24 * 3600

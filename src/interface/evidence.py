@@ -2,7 +2,7 @@
 
 Everything passes through redact() on the way to disk, which is the only place run data leaves memory: first the
 values known to be sensitive (sensitive inputs, secrets, extracted outputs) become their placeholders, then the PII
-detectors (interfaze.pii) mask whatever else looks like an account number, an amount, an SSN… Snapshots also get the
+detectors (interface.pii) mask whatever else looks like an account number, an amount, an SSN… Snapshots also get the
 label detectors, which need the page's structure: the cell after "Name:" is a name.
 """
 import json
@@ -12,7 +12,7 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from interfaze.pii import Masker
+from interface.pii import Masker
 
 RUNS = Path("runs")
 

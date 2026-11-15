@@ -1,7 +1,7 @@
 from pydantic import TypeAdapter, ValidationError
 import pytest
 
-from interfaze.replay.result import BusinessOutcome, Failed, ReplayResult, Success
+from interface.replay.result import BusinessOutcome, Failed, ReplayResult, Success
 
 parse = TypeAdapter(ReplayResult).validate_python
 BASE = {"runId": "run_1", "completedAt": "2026-11-14T00:00:00Z"}

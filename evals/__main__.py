@@ -12,7 +12,7 @@ import importlib
 import sys
 
 from evals.common import save
-from interfaze.cli import load_dotenv
+from interface.cli import load_dotenv
 
 SUITES = {"fault-matrix": "fault_matrix", "stability": "stability", "robustness": "robustness",
           "safety": "safety", "discovery": "discovery"}

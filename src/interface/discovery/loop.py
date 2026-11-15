@@ -11,19 +11,19 @@ from urllib.parse import urlsplit
 from playwright.async_api import async_playwright
 from pydantic import ValidationError
 
-from interfaze.artifact.io import dump_artifact, load_artifact
-from interfaze.artifact.schema import Policy, Target, Visible
-from interfaze.artifact.templates import TemplateError, render
-from interfaze.discovery.planner import ClaudePlanner, Planner
-from interfaze.discovery.probes import Prober
-from interfaze.discovery.recorder import Recorder
-from interfaze.evidence import RunLog, new_run_id, now
-from interfaze.pagemap import PageMap, Screen, screen_of, target_name
-from interfaze.pii import Masker
-from interfaze.policy import PolicyViolation, check_action, check_url, classify
-from interfaze.session import Intervention, Session
-from interfaze.surface.base import Resolved, SurfaceError
-from interfaze.surface.web import FORM_KEY_JS, WebSurface
+from interface.artifact.io import dump_artifact, load_artifact
+from interface.artifact.schema import Policy, Target, Visible
+from interface.artifact.templates import TemplateError, render
+from interface.discovery.planner import ClaudePlanner, Planner
+from interface.discovery.probes import Prober
+from interface.discovery.recorder import Recorder
+from interface.evidence import RunLog, new_run_id, now
+from interface.pagemap import PageMap, Screen, screen_of, target_name
+from interface.pii import Masker
+from interface.policy import PolicyViolation, check_action, check_url, classify
+from interface.session import Intervention, Session
+from interface.surface.base import Resolved, SurfaceError
+from interface.surface.web import FORM_KEY_JS, WebSurface
 
 SYSTEM = """You operate a bank's back-office web application for an automation system. You see the screen as an \
 accessibility snapshot: one line per element, frames labelled by name, and a ref such as [ref=f2e11] on each element. \

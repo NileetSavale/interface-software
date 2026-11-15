@@ -15,7 +15,7 @@ import time
 from dataclasses import dataclass, field
 from typing import Literal
 
-from interfaze.evidence import RunLog
+from interface.evidence import RunLog
 
 State = Literal["automation", "paused_for_human", "human", "resuming", "aborted"]
 AUTOMATION = "automation"

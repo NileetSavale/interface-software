@@ -7,8 +7,8 @@ from pathlib import Path
 
 from pydantic import TypeAdapter
 
-from interfaze.artifact.schema import Artifact
-from interfaze.replay.result import ReplayResult
+from interface.artifact.schema import Artifact
+from interface.replay.result import ReplayResult
 
 OUT = Path(__file__).parent.parent / "schemas"
 

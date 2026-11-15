@@ -3,8 +3,8 @@ import re
 
 import pytest
 
-from interfaze.discovery.probes import detector, phrase_problem
-from interfaze.surface.web import py_pattern
+from interface.discovery.probes import detector, phrase_problem
+from interface.surface.web import py_pattern
 
 SCREEN = '- cell "No members found for \\"{{inputs.memberId}}\\"." [ref=f5e6]'
 
@@ -31,7 +31,7 @@ def test_detector_matches_the_message_for_any_input():
 
 
 def test_structure_only_keeps_labels_and_drops_data():
-    from interfaze.evidence import structure_only
+    from interface.evidence import structure_only
     snapshot = """- 'cell "Member #:" [ref=f5e9]'
 - cell "Rafael Ortiz" [ref=f5e10]
 - 'cell "O#Brien" [ref=f5e11]'
@@ -46,7 +46,7 @@ def test_structure_only_keeps_labels_and_drops_data():
 
 
 def test_masker_keeps_records_apart_without_their_data():
-    from interfaze.pii import Masker
+    from interface.pii import Masker
     m = Masker()
     snapshot = """- table [ref=e1]:
   - rowgroup [ref=e2]:

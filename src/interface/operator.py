@@ -15,7 +15,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import HTMLResponse, Response
 
-from interfaze.session import ControlError, Intervention, Session
+from interface.session import ControlError, Intervention, Session
 
 OPERATOR_PORT = 4200
 

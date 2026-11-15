@@ -4,7 +4,7 @@ States almost every legacy back office has, so no discovery run has to meet them
 added to every recorded artifact as drafts; the reviewer keeps, edits or deletes them before approving. Business
 outcomes specific to one flow (no such member) come from discovery and review, not from here.
 """
-from interfaze.artifact.schema import Outcome, Recovery, Regex, RunSubflow, Visible, WaitLonger
+from interface.artifact.schema import Outcome, Recovery, Regex, RunSubflow, Visible, WaitLonger
 
 SIGN_ON = "sign_on"
 

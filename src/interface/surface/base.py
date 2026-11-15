@@ -14,7 +14,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from interfaze.artifact.schema import Action, Model, Target, Visible
+from interface.artifact.schema import Action, Model, Target, Visible
 
 ErrorCode = Literal[
     "STALE_REF",           # the ref belongs to an older snapshot; observe again

@@ -15,13 +15,13 @@ from typing import Literal
 
 from playwright.async_api import BrowserContext, ElementHandle, Error as PlaywrightError, Frame, Locator, Page
 
-from interfaze.artifact.schema import (
+from interface.artifact.schema import (
     Action, AnchorStrategy, LabelStrategy, OnlyInRegionStrategy, Policy, Regex, RegionScope, RoleStrategy, Strategy, TableCellStrategy, Target, TextMatch,
     TextStrategy, Visible,
 )
-from interfaze.pii import LABELS, PATTERNS
-from interfaze.policy import refused
-from interfaze.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
+from interface.pii import LABELS, PATTERNS
+from interface.policy import refused
+from interface.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
 
 HUMAN_JS = (Path(__file__).parent / "human.js").read_text()
 FORM_KEY_JS = """el => { const form = el.form || el.closest('form'); if (!form) return null;

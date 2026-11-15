@@ -11,7 +11,7 @@ import json
 import re
 from pathlib import Path
 
-from interfaze.artifact.schema import Artifact, Override, SetOp
+from interface.artifact.schema import Artifact, Override, SetOp
 
 _COMPARATOR = re.compile(r"(>=|<=|>|<|=|\^|~)?\s*v?(\d+(?:\.\d+){0,2}|\*|x)")
 

@@ -11,10 +11,10 @@ background and its late result is kept for TTL_S, then dropped. In-memory, singl
 import asyncio
 import time
 
-from interfaze.artifact.schema import Artifact
-from interfaze.evidence import now
-from interfaze.replay.executor import Replayer
-from interfaze.replay.result import NeedsHuman, RunPending
+from interface.artifact.schema import Artifact
+from interface.evidence import now
+from interface.replay.executor import Replayer
+from interface.replay.result import NeedsHuman, RunPending
 
 TTL_S = 15 * 60
 

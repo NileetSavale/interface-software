@@ -3,7 +3,7 @@ annotated example in docs/ is validated by the same code."""
 import json
 from pathlib import Path
 
-from interfaze.artifact.schema import Artifact
+from interface.artifact.schema import Artifact
 
 
 def strip_comments(text: str) -> str:

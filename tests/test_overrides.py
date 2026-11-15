@@ -3,9 +3,9 @@ import json
 
 import pytest
 
-from interfaze.artifact.io import load_artifact
-from interfaze.artifact.overrides import OverrideError, apply, propose, satisfies, write_pending
-from interfaze.artifact.schema import Override, SetOp, Target
+from interface.artifact.io import load_artifact
+from interface.artifact.overrides import OverrideError, apply, propose, satisfies, write_pending
+from interface.artifact.schema import Override, SetOp, Target
 
 EXAMPLE = load_artifact("artifacts/core_banking.lookup_member_balance.json")
 

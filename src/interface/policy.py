@@ -8,7 +8,7 @@ import re
 from typing import Literal
 from urllib.parse import urlsplit
 
-from interfaze.artifact.schema import Policy
+from interface.artifact.schema import Policy
 
 Risk = Literal["read", "reversible", "irreversible"]
 

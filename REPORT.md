@@ -1,4 +1,4 @@
-# interfaze — design write-up
+# interface — design write-up
 
 Claude discovers a task once against a live legacy UI, and the run becomes a typed, versioned capability. Once a
 person approves it, it replays without the model: the same inputs give the same steps and the same typed result,
@@ -37,7 +37,7 @@ FastAPI.
 
 ## Artifact schema
 
-`src/interfaze/artifact/schema.py`; the real artifacts are in `artifacts/`.
+`src/interface/artifact/schema.py`; the real artifacts are in `artifacts/`.
 
 - **The contract**:
   - `capability`: id, semver, title, description;
@@ -146,7 +146,7 @@ The map can also confirm a postcondition, exactly: "this is the screen this acti
   - it **succeeds**: the anchor and `onlyInRegion` fallbacks find both controls;
   - it reports drift and **writes a pending override for B**, either the new name or the working strategy moved
     first;
-  - after approval (`interfaze override --tenant b --approve`), B runs with no drift, the whole contract holds on B,
+  - after approval (`interface override --tenant b --approve`), B runs with no drift, the whole contract holds on B,
     and A is untouched.
 - **When there's no override yet, the bank's own page map carries it.** Bank C is B with the menu's "Member
   Inquiry" renamed "Member Lookup", which no recorded strategy survives.

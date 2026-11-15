@@ -4,7 +4,7 @@ import asyncio
 import httpx
 from playwright.async_api import async_playwright
 
-from interfaze.surface.web import WebSurface
+from interface.surface.web import WebSurface
 from tests.conftest import ENV
 
 

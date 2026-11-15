@@ -1,7 +1,7 @@
 import pytest
 
-from interfaze.artifact.schema import Policy
-from interfaze.policy import PolicyViolation, check_action, check_url, classify
+from interface.artifact.schema import Policy
+from interface.policy import PolicyViolation, check_action, check_url, classify
 
 POLICY = Policy(allowed_origins=["http://localhost:4100"])
 
@@ -38,7 +38,7 @@ def test_url_allowlist():
 
 
 def test_network_gate_refuses_commit_paths_and_other_origins():
-    from interfaze.policy import refused
+    from interface.policy import refused
     policy = Policy(allowed_origins=["http://localhost:4100"], commit_paths=["/subaccount/confirm"])
     assert "commits a change" in refused(policy, "http://localhost:4100/subaccount/confirm", document=True)
     assert "origin" in refused(policy, "http://verify-member.example.net/start", document=True)

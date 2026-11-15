@@ -1,7 +1,7 @@
 """Filling {{inputs.x}} and {{secrets.X}} at act time. Values never go back into the artifact or the logs."""
 import os
 
-from interfaze.artifact.schema import TEMPLATE
+from interface.artifact.schema import TEMPLATE
 
 
 class TemplateError(ValueError):

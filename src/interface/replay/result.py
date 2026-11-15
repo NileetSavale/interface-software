@@ -8,7 +8,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field
 
-from interfaze.artifact.schema import Model
+from interface.artifact.schema import Model
 
 FailureClass = Literal[
     "TARGET_UNRESOLVED",    # no ranked strategy found the control (unattended; attended goes to needs_human)

@@ -7,12 +7,12 @@ from pathlib import Path
 import httpx
 import pytest
 
-from interfaze.artifact.io import load_artifact
-from interfaze.discovery.loop import discover
-from interfaze.discovery.planner import ScriptedPlanner
-from interfaze.evidence import RUNS, Audit
-from interfaze.replay.executor import Replayer
-from interfaze.replay.result import BusinessOutcome, Failed, InvalidInput, Success
+from interface.artifact.io import load_artifact
+from interface.discovery.loop import discover
+from interface.discovery.planner import ScriptedPlanner
+from interface.evidence import RUNS, Audit
+from interface.replay.executor import Replayer
+from interface.replay.result import BusinessOutcome, Failed, InvalidInput, Success
 
 from tests.conftest import ENV
 GOAL = {
@@ -227,8 +227,8 @@ def test_a_second_bank_drifts_proposes_an_override_and_runs_clean_once_approved(
     """Recorded on bank A; bank B says "Find Member" and has no <label> on Member #. Replay still succeeds on B
     through fallbacks, reports drift, and proposes an override for B. Once a person approves it, B runs on its
     first strategies again, and A is unaffected (§7, locked demo in §9)."""
-    from interfaze.artifact.overrides import apply
-    from interfaze.artifact.schema import Override
+    from interface.artifact.overrides import apply
+    from interface.artifact.schema import Override
     approved = discovered[2].model_copy(update={"status": "approved"})
     search = next(s for s in approved.steps if s.id == "submit_member_search")
     assert [s.kind for s in search.target.strategies][-1] == "onlyInRegion"
@@ -265,7 +265,7 @@ def test_a_second_bank_drifts_proposes_an_override_and_runs_clean_once_approved(
 def test_a_probe_with_an_expected_code_only_learns_that_code(base_url, discovered):
     """The goal fixes the vocabulary: a caller branches on MEMBER_NOT_FOUND, so a discovery that names the same screen
     NO_SUCH_MEMBER would break it. Any other code is refused; the expected one is learned and verified."""
-    from interfaze.discovery.probes import Prober
+    from interface.discovery.probes import Prober
     base = discovered[2]
     unknown = base.model_copy(update={"outcomes": [o for o in base.outcomes if o.code != "MEMBER_NOT_FOUND"]})
     spec = {"inputs": {"memberId": "88888"}, "why": "a member number that doesn't exist", "expect": "MEMBER_NOT_FOUND"}

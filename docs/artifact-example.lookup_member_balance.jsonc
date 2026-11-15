@@ -1,7 +1,7 @@
 // Example artifact, annotated: what discovery should emit for
 //   goal: "look up member 12345 and read their current savings balance"
 // The comments explain each choice. tests/test_artifact_schema.py validates this exact file against the Pydantic
-// schema (src/interfaze/artifact/schema.py), so the documentation can't drift from the code.
+// schema (src/interface/artifact/schema.py), so the documentation can't drift from the code.
 {
   "schemaVersion": "1",
 

@@ -1,4 +1,4 @@
-# interfaze
+# interface
 
 **Learn a task once with Claude. Replay it without the model.**
 
@@ -49,7 +49,7 @@ Replay never calls a model, so every `replay` command below works without a key.
 Terminal 1, the target app (a mock legacy core-banking system):
 
 ```bash
-uv run interfaze mock-app                  # http://127.0.0.1:4100
+uv run interface mock-app                  # http://127.0.0.1:4100
 ```
 
 Terminal 2:
@@ -57,20 +57,20 @@ Terminal 2:
 **1. Discover with Claude.** About 30–90 s and $0.02–0.07, including probes that teach it the business outcomes.
 
 ```bash
-uv run interfaze discover goals/lookup_member_balance.json --input memberId=12345
+uv run interface discover goals/lookup_member_balance.json --input memberId=12345
 # → artifacts/core_banking.lookup_member_balance.json (status: draft); the log is under runs/disc_…/
 ```
 
 **2. Review and approve.** Unattended replay runs approved artifacts only.
 
 ```bash
-uv run interfaze approve artifacts/core_banking.lookup_member_balance.json
+uv run interface approve artifacts/core_banking.lookup_member_balance.json
 ```
 
 **3. Replay without the model, for another member.**
 
 ```bash
-uv run interfaze replay artifacts/core_banking.lookup_member_balance.json --input memberId=34567
+uv run interface replay artifacts/core_banking.lookup_member_balance.json --input memberId=34567
 # → {"status": "success", "outputs": {"memberName": "Mei Chen", "savingsBalance": "2500.00"}, …}
 ```
 
@@ -78,12 +78,12 @@ uv run interfaze replay artifacts/core_banking.lookup_member_balance.json --inpu
 
 ```bash
 A=artifacts/core_banking.lookup_member_balance.json
-uv run interfaze replay $A --input memberId=99999   # business_outcome MEMBER_NOT_FOUND (an answer, not a crash)
-uv run interfaze replay $A --input memberId=1234    # invalid_input, rejected before the browser does anything
+uv run interface replay $A --input memberId=99999   # business_outcome MEMBER_NOT_FOUND (an answer, not a crash)
+uv run interface replay $A --input memberId=1234    # invalid_input, rejected before the browser does anything
 curl -X POST '127.0.0.1:4100/__faults?name=server_error'
-uv run interfaze replay $A --input memberId=34567   # failed APP_ERROR at the step, with a masked screenshot
+uv run interface replay $A --input memberId=34567   # failed APP_ERROR at the step, with a masked screenshot
 curl -X POST '127.0.0.1:4100/__faults?name=session_timeout'
-uv run interfaze replay $A --input memberId=34567   # success, with a SESSION_EXPIRED recovery reported
+uv run interface replay $A --input memberId=34567   # success, with a SESSION_EXPIRED recovery reported
 ```
 
 The other faults are `slow`, `unknown_dialog`, `interstitial` and `wrong_record`.
@@ -92,7 +92,7 @@ The other faults are `slow`, `unknown_dialog`, `interstitial` and `wrong_record`
 
 ```bash
 curl -X POST '127.0.0.1:4100/__faults?name=interstitial'
-uv run interfaze replay $A --input memberId=34567 --attended
+uv run interface replay $A --input memberId=34567 --attended
 ```
 
 1. A browser window opens.
@@ -107,21 +107,21 @@ The caller got `needs_human` at the 30 s deadline, and the late result is collec
 
 ```bash
 # Terminal 1: Ctrl-C, then
-uv run interfaze mock-app --variant b
+uv run interface mock-app --variant b
 # Terminal 2:
-uv run interfaze replay $A --input memberId=34567 --tenant b          # success + drift; proposes an override for b
-uv run interfaze override $A --tenant b                                # review the proposal
-uv run interfaze override $A --tenant b --approve                      # approve it into the artifact
-uv run interfaze replay $A --input memberId=34567 --tenant b          # success, no drift
+uv run interface replay $A --input memberId=34567 --tenant b          # success + drift; proposes an override for b
+uv run interface override $A --tenant b                                # review the proposal
+uv run interface override $A --tenant b --approve                      # approve it into the artifact
+uv run interface replay $A --input memberId=34567 --tenant b          # success, no drift
 ```
 
 **7. A flow that changes data, stopping at the commit point.**
 
 ```bash
-uv run interfaze discover goals/open_sub_account.json --input memberId=12345 \
+uv run interface discover goals/open_sub_account.json --input memberId=12345 \
   --input accountType="Holiday Club" --input nickname="Trip fund" --input initialDeposit=300.00
-uv run interfaze approve artifacts/core_banking.open_sub_account.json
-uv run interfaze replay artifacts/core_banking.open_sub_account.json --input memberId=34567 \
+uv run interface approve artifacts/core_banking.open_sub_account.json
+uv run interface replay artifacts/core_banking.open_sub_account.json --input memberId=34567 \
   --input accountType=Certificate --input nickname=College --input initialDeposit=1000.00
 curl 127.0.0.1:4100/__confirmed            # {"count": 0}: it reached the review screen and stopped
 ```
@@ -131,13 +131,13 @@ strategy survives.
 
 ```bash
 # Terminal 1: Ctrl-C, then
-uv run interfaze mock-app --variant c
+uv run interface mock-app --variant c
 # Terminal 2:
 S=artifacts/core_banking.open_sub_account.json; IN="--input memberId=34567 --input accountType=Certificate --input nickname=College --input initialDeposit=1000.00"
-uv run interfaze replay $S $IN --tenant c                    # failed at sign-on: nothing finds the renamed link
-uv run interfaze discover goals/lookup_member_balance.json --input memberId=12345 --map maps/c.json --out /tmp/c
+uv run interface replay $S $IN --tenant c                    # failed at sign-on: nothing finds the renamed link
+uv run interface discover goals/lookup_member_balance.json --input memberId=12345 --map maps/c.json --out /tmp/c
                                                              # Claude learns bank C once; the map records it
-uv run interfaze replay $S $IN --tenant c --map maps/c.json  # success, with MAP_FALLBACK and the map version
+uv run interface replay $S $IN --tenant c --map maps/c.json  # success, with MAP_FALLBACK and the map version
 ```
 
 The second discovery on a bank with a map runs the known actions several per turn (`follow_known`).
@@ -147,7 +147,7 @@ Exit codes: 0 for success or a business outcome, 2 for invalid input, 3 for need
 ## Layout
 
 ```
-src/interfaze/
+src/interface/
   discovery/   loop.py (the agent loop and escalation ladder), planner.py (Claude), recorder.py, probes.py
   artifact/    schema.py (the contract), overrides.py (tenants), library.py (standard outcomes)
   replay/      executor.py (deterministic replay), result.py (the five result types)

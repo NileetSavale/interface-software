@@ -15,11 +15,11 @@ approves the artifact; probes save them writing regexes, they don't replace the 
 import re
 from dataclasses import dataclass, field
 
-from interfaze.artifact.schema import Artifact, Outcome, Regex, Visible
-from interfaze.discovery.planner import Planner
-from interfaze.pii import Masker
-from interfaze.replay.executor import Replayer
-from interfaze.replay.result import BusinessOutcome, Failed, Success
+from interface.artifact.schema import Artifact, Outcome, Regex, Visible
+from interface.discovery.planner import Planner
+from interface.pii import Masker
+from interface.replay.executor import Replayer
+from interface.replay.result import BusinessOutcome, Failed, Success
 
 PROBE_SYSTEM = """You review how a recorded automation behaves when given an input that should make the application \
 answer differently. You see the screen where the replay stopped as an accessibility snapshot. Decide whether the \

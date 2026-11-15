@@ -22,11 +22,11 @@ sys.path.insert(0, str(ROOT))
 
 from evals.common import ARTIFACTS, ENV, HAPPY, artifact, bank_c_map, label, mock_app  # noqa: E402
 from evals.safety import click, tampered  # noqa: E402
-from interfaze.artifact.io import load_artifact  # noqa: E402
-from interfaze.artifact.schema import Override  # noqa: E402
-from interfaze.evidence import RUNS, Audit  # noqa: E402
-from interfaze.operator import OperatorHub  # noqa: E402
-from interfaze.replay.executor import Replayer  # noqa: E402
+from interface.artifact.io import load_artifact  # noqa: E402
+from interface.artifact.schema import Override  # noqa: E402
+from interface.evidence import RUNS, Audit  # noqa: E402
+from interface.operator import OperatorHub  # noqa: E402
+from interface.replay.executor import Replayer  # noqa: E402
 
 OUT = ROOT / "evidence"
 # Values that must never appear in evidence: the mock's members, balances, member numbers, and the demo credentials

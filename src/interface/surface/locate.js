@@ -112,7 +112,7 @@
     return null;
   }
 
-  // Blacks out PII before a screenshot is saved, by the same detectors the text masking uses (interfaze.pii, passed
+  // Blacks out PII before a screenshot is saved, by the same detectors the text masking uses (interface.pii, passed
   // in): values matching a pattern, the cell after a sensitive label, every cell of a sensitive column, and every
   // filled text field. on=false restores the page. Returns the texts it masked, so a test can check them.
   function maskPII(patterns, labels, on) {

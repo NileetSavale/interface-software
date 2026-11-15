@@ -16,10 +16,10 @@ from pathlib import Path
 import httpx
 
 from evals.common import ENV, HAPPY, artifact, label, mock_app, replay, save
-from interfaze.artifact.schema import Step
-from interfaze.evidence import RUNS
-from interfaze.pii import Masker
-from interfaze.replay.executor import Replayer
+from interface.artifact.schema import Step
+from interface.evidence import RUNS
+from interface.pii import Masker
+from interface.replay.executor import Replayer
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -129,8 +129,8 @@ def deterministic() -> list[dict]:
 
 def scripted_discovery() -> list[dict]:
     """The discovery guards, driven by a script that does the wrong thing on purpose."""
-    from interfaze.discovery.loop import discover
-    from interfaze.discovery.planner import ScriptedPlanner
+    from interface.discovery.loop import discover
+    from interface.discovery.planner import ScriptedPlanner
     from tests.test_end_to_end import GOAL, SCRIPT, call, ref
     rows = []
     with mock_app() as app:

@@ -19,9 +19,9 @@ from pathlib import Path
 import httpx
 import uvicorn
 
-from interfaze.artifact.io import load_artifact
-from interfaze.evidence import RUNS, Audit
-from interfaze.replay.executor import Replayer
+from interface.artifact.io import load_artifact
+from interface.evidence import RUNS, Audit
+from interface.replay.executor import Replayer
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "evals" / "results"
@@ -94,7 +94,7 @@ class MockApp:
 def bank_c_map():
     """Bank C's page map, learned from one verified run of the lookup flow on C (a scripted discovery, so no model):
     the knowledge that C's menu says "Member Lookup". The caller's app must be playing bank C."""
-    from interfaze.pagemap import PageMap
+    from interface.pagemap import PageMap
     from tests.test_pagemap import lookup_script, run_discovery
     bank = PageMap(bank="c")
     return bank, lookup_script(member_ref=r'cell "Member #"[^\n]*\n[^\n]*\n\s*- textbox', search=r'button "Find Member"',

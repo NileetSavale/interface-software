@@ -7,12 +7,12 @@ import re
 import httpx
 import pytest
 
-from interfaze.discovery.loop import discover
-from interfaze.discovery.planner import ScriptedPlanner
-from interfaze.evidence import Audit
-from interfaze.pagemap import PageMap, screen_of
-from interfaze.replay.executor import Replayer
-from interfaze.replay.result import Failed, Success
+from interface.discovery.loop import discover
+from interface.discovery.planner import ScriptedPlanner
+from interface.evidence import Audit
+from interface.pagemap import PageMap, screen_of
+from interface.replay.executor import Replayer
+from interface.replay.result import Failed, Success
 from tests.conftest import ENV
 from tests.test_end_to_end import GOAL, SCRIPT, call, discovered, ref  # noqa: F401  (discovered is a fixture)
 
@@ -72,7 +72,7 @@ def test_discovery_learns_the_map_and_a_second_discovery_runs_known_actions_in_o
     assert turns_second < turns_first - 4
 
     # What follow_known recorded is an ordinary artifact: it replays for another member
-    from interfaze.artifact.io import load_artifact
+    from interface.artifact.io import load_artifact
     artifact = load_artifact(second["artifact"]).model_copy(update={"status": "approved"})
     assert {s.recorded_by for s in artifact.all_steps()} >= {"map"}
     result = asyncio.run(Replayer(artifact, base_url, {"memberId": "34567"}, env=ENV,
