@@ -1,7 +1,7 @@
 {
   "suite": "fault_matrix",
-  "date": "2026-11-15T08:46:38+00:00",
-  "commit": "c73a241+dirty",
+  "date": "2026-11-15T17:54:30+00:00",
+  "commit": "0dd358f",
   "n_per_case": 1,
   "cases": 23,
   "variants": [
@@ -10,7 +10,7 @@
     "c"
   ],
   "runs": 73,
-  "passed": 72,
+  "passed": 73,
   "proposed_overrides": {
     "lookup": {
       "appliesTo": ">=1.0.0 <2.0.0",
@@ -94,7 +94,7 @@
   "sub_accounts_opened": 0,
   "confusion": {
     "success": {
-      "success": 8,
+      "success": 17,
       "business_outcome": 0,
       "invalid_input": 0,
       "needs_human": 0,
@@ -140,8 +140,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.35,
-      "run_id": "replay_20261115T083127Z_b25bc4"
+      "seconds": 4.26,
+      "run_id": "replay_20261115T173910Z_aacda6"
     },
     {
       "variant": "a",
@@ -153,8 +153,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.77,
-      "run_id": "replay_20261115T083132Z_d46c32"
+      "seconds": 3.74,
+      "run_id": "replay_20261115T173915Z_1af626"
     },
     {
       "variant": "a",
@@ -166,8 +166,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.78,
-      "run_id": "replay_20261115T083135Z_42addb"
+      "seconds": 3.72,
+      "run_id": "replay_20261115T173918Z_320246"
     },
     {
       "variant": "a",
@@ -180,7 +180,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T083139Z_6b0451"
+      "run_id": "replay_20261115T173922Z_4ceb14"
     },
     {
       "variant": "a",
@@ -192,8 +192,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.38,
-      "run_id": "replay_20261115T083139Z_4e256d"
+      "seconds": 4.22,
+      "run_id": "replay_20261115T173922Z_4aa214"
     },
     {
       "variant": "a",
@@ -205,8 +205,8 @@
       "actual": "success+recovered",
       "pass": true,
       "at_step": null,
-      "seconds": 5.23,
-      "run_id": "replay_20261115T083144Z_62360c"
+      "seconds": 5.19,
+      "run_id": "replay_20261115T173926Z_cf6d97"
     },
     {
       "variant": "a",
@@ -218,8 +218,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 6.58,
-      "run_id": "replay_20261115T083149Z_f76f49"
+      "seconds": 6.55,
+      "run_id": "replay_20261115T173932Z_7e8be8"
     },
     {
       "variant": "a",
@@ -231,8 +231,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 14.44,
-      "run_id": "replay_20261115T083156Z_15e6e7"
+      "seconds": 15.47,
+      "run_id": "replay_20261115T173938Z_d17156"
     },
     {
       "variant": "a",
@@ -244,8 +244,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.4,
-      "run_id": "replay_20261115T083210Z_2882e1"
+      "seconds": 4.35,
+      "run_id": "replay_20261115T173954Z_4c26b8"
     },
     {
       "variant": "a",
@@ -257,8 +257,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 4.35,
-      "run_id": "replay_20261115T083214Z_605e42"
+      "seconds": 4.33,
+      "run_id": "replay_20261115T173958Z_f51fc6"
     },
     {
       "variant": "a",
@@ -270,8 +270,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.73,
-      "run_id": "replay_20261115T083219Z_93afba"
+      "seconds": 4.66,
+      "run_id": "replay_20261115T174002Z_7c5f9f"
     },
     {
       "variant": "a",
@@ -283,8 +283,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.79,
-      "run_id": "replay_20261115T083223Z_820c5e"
+      "seconds": 3.72,
+      "run_id": "replay_20261115T174007Z_a43ffc"
     },
     {
       "variant": "a",
@@ -296,8 +296,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.78,
-      "run_id": "replay_20261115T083227Z_1790e4"
+      "seconds": 3.73,
+      "run_id": "replay_20261115T174011Z_46a71c"
     },
     {
       "variant": "a",
@@ -310,7 +310,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T083231Z_f2cbab"
+      "run_id": "replay_20261115T174015Z_009e39"
     },
     {
       "variant": "a",
@@ -322,8 +322,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.34,
-      "run_id": "replay_20261115T083231Z_9bdca6"
+      "seconds": 4.3,
+      "run_id": "replay_20261115T174015Z_67c1a2"
     },
     {
       "variant": "a",
@@ -335,8 +335,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.4,
-      "run_id": "replay_20261115T083235Z_048c8e"
+      "seconds": 4.34,
+      "run_id": "replay_20261115T174019Z_c5ef89"
     },
     {
       "variant": "a",
@@ -348,8 +348,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 7.48,
-      "run_id": "replay_20261115T083240Z_7e1937"
+      "seconds": 7.4,
+      "run_id": "replay_20261115T174023Z_c77119"
     },
     {
       "variant": "a",
@@ -361,8 +361,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 14.53,
-      "run_id": "replay_20261115T083247Z_9027de"
+      "seconds": 15.43,
+      "run_id": "replay_20261115T174031Z_225d32"
     },
     {
       "variant": "a",
@@ -374,8 +374,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.37,
-      "run_id": "replay_20261115T083302Z_300369"
+      "seconds": 4.36,
+      "run_id": "replay_20261115T174046Z_96b63c"
     },
     {
       "variant": "a",
@@ -387,8 +387,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 4.36,
-      "run_id": "replay_20261115T083306Z_d0c056"
+      "seconds": 4.32,
+      "run_id": "replay_20261115T174050Z_86754e"
     },
     {
       "variant": "a",
@@ -400,8 +400,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.8,
-      "run_id": "replay_20261115T083311Z_7fa497"
+      "seconds": 3.76,
+      "run_id": "replay_20261115T174055Z_d2c305"
     },
     {
       "variant": "a",
@@ -413,8 +413,8 @@
       "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
       "pass": true,
       "at_step": "continue_review",
-      "seconds": 4.68,
-      "run_id": "replay_20261115T083315Z_96a9a0"
+      "seconds": 4.69,
+      "run_id": "replay_20261115T174059Z_e46f20"
     },
     {
       "variant": "a",
@@ -427,7 +427,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T083319Z_7d8d36"
+      "run_id": "replay_20261115T174103Z_01c038"
     },
     {
       "variant": "b",
@@ -439,8 +439,8 @@
       "actual": "success+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 4.14,
-      "run_id": "replay_20261115T083319Z_b37fb9"
+      "seconds": 4.15,
+      "run_id": "replay_20261115T174103Z_63cd72"
     },
     {
       "variant": "b",
@@ -452,8 +452,8 @@
       "actual": "success+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 5.06,
-      "run_id": "replay_20261115T083323Z_fa0a1e"
+      "seconds": 4.99,
+      "run_id": "replay_20261115T174107Z_cde2b5"
     },
     {
       "variant": "b",
@@ -465,8 +465,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 3.86,
-      "run_id": "replay_20261115T083328Z_094584"
+      "seconds": 3.8,
+      "run_id": "replay_20261115T174112Z_10b31f"
     },
     {
       "variant": "b",
@@ -479,7 +479,7 @@
       "pass": true,
       "at_step": "search_member",
       "seconds": 3.75,
-      "run_id": "replay_20261115T083332Z_f0bb50"
+      "run_id": "replay_20261115T174116Z_2fe3e3"
     },
     {
       "variant": "b",
@@ -491,8 +491,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.8,
-      "run_id": "replay_20261115T083336Z_ae9a84"
+      "seconds": 3.76,
+      "run_id": "replay_20261115T174120Z_fb7c66"
     },
     {
       "variant": "b",
@@ -505,7 +505,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T083340Z_1a7414"
+      "run_id": "replay_20261115T174124Z_36d78a"
     },
     {
       "variant": "b",
@@ -517,8 +517,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.33,
-      "run_id": "replay_20261115T083340Z_f37d5c"
+      "seconds": 4.31,
+      "run_id": "replay_20261115T174124Z_d518f0"
     },
     {
       "variant": "b",
@@ -531,7 +531,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 5.26,
-      "run_id": "replay_20261115T083344Z_6fbbac"
+      "run_id": "replay_20261115T174128Z_24bab7"
     },
     {
       "variant": "b",
@@ -543,8 +543,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 6.55,
-      "run_id": "replay_20261115T083350Z_27a0e1"
+      "seconds": 6.54,
+      "run_id": "replay_20261115T174133Z_10d1c3"
     },
     {
       "variant": "b",
@@ -556,8 +556,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 14.43,
-      "run_id": "replay_20261115T083356Z_26a6d1"
+      "seconds": 15.39,
+      "run_id": "replay_20261115T174140Z_e27649"
     },
     {
       "variant": "b",
@@ -569,8 +569,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.36,
-      "run_id": "replay_20261115T083411Z_8b5185"
+      "seconds": 4.33,
+      "run_id": "replay_20261115T174155Z_d33785"
     },
     {
       "variant": "b",
@@ -582,8 +582,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 4.38,
-      "run_id": "replay_20261115T083415Z_fbab2a"
+      "seconds": 4.33,
+      "run_id": "replay_20261115T174200Z_c7b2f0"
     },
     {
       "variant": "b",
@@ -596,7 +596,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 4.67,
-      "run_id": "replay_20261115T083419Z_3d6d3f"
+      "run_id": "replay_20261115T174204Z_030c97"
     },
     {
       "variant": "b",
@@ -608,8 +608,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.78,
-      "run_id": "replay_20261115T083424Z_f994e5"
+      "seconds": 3.76,
+      "run_id": "replay_20261115T174209Z_2aeb68"
     },
     {
       "variant": "b",
@@ -621,8 +621,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.74,
-      "run_id": "replay_20261115T083428Z_89b905"
+      "seconds": 3.75,
+      "run_id": "replay_20261115T174213Z_d0b45c"
     },
     {
       "variant": "b",
@@ -635,7 +635,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T083432Z_09d51b"
+      "run_id": "replay_20261115T174216Z_6c650c"
     },
     {
       "variant": "b",
@@ -647,8 +647,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.34,
-      "run_id": "replay_20261115T083432Z_19fcd9"
+      "seconds": 4.3,
+      "run_id": "replay_20261115T174216Z_e72845"
     },
     {
       "variant": "b",
@@ -660,8 +660,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.29,
-      "run_id": "replay_20261115T083436Z_2470c0"
+      "seconds": 4.33,
+      "run_id": "replay_20261115T174221Z_37538b"
     },
     {
       "variant": "b",
@@ -673,8 +673,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 7.45,
-      "run_id": "replay_20261115T083440Z_99154e"
+      "seconds": 7.37,
+      "run_id": "replay_20261115T174225Z_f5a3d5"
     },
     {
       "variant": "b",
@@ -686,8 +686,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 15.4,
-      "run_id": "replay_20261115T083448Z_ee50b9"
+      "seconds": 15.43,
+      "run_id": "replay_20261115T174232Z_552850"
     },
     {
       "variant": "b",
@@ -699,8 +699,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.34,
-      "run_id": "replay_20261115T083503Z_db5473"
+      "seconds": 4.31,
+      "run_id": "replay_20261115T174248Z_1bf939"
     },
     {
       "variant": "b",
@@ -712,8 +712,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 4.3,
-      "run_id": "replay_20261115T083508Z_7705d8"
+      "seconds": 4.35,
+      "run_id": "replay_20261115T174252Z_dc9f32"
     },
     {
       "variant": "b",
@@ -725,8 +725,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.76,
-      "run_id": "replay_20261115T083512Z_a4616a"
+      "seconds": 3.74,
+      "run_id": "replay_20261115T174257Z_fdd05d"
     },
     {
       "variant": "b",
@@ -739,7 +739,7 @@
       "pass": true,
       "at_step": "continue_review",
       "seconds": 4.67,
-      "run_id": "replay_20261115T083516Z_c4fbd9"
+      "run_id": "replay_20261115T174300Z_15bc15"
     },
     {
       "variant": "b",
@@ -752,7 +752,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T083520Z_479c2d"
+      "run_id": "replay_20261115T174305Z_33ae57"
     },
     {
       "variant": "c",
@@ -764,8 +764,8 @@
       "actual": "failed/EXPECT_FAILED",
       "pass": true,
       "at_step": "sign",
-      "seconds": 13.52,
-      "run_id": "replay_20261115T083526Z_b02aab"
+      "seconds": 13.5,
+      "run_id": "replay_20261115T174311Z_e68ef9"
     },
     {
       "variant": "c",
@@ -777,8 +777,8 @@
       "actual": "failed/EXPECT_FAILED",
       "pass": true,
       "at_step": "sign",
-      "seconds": 13.57,
-      "run_id": "replay_20261115T083540Z_6eda51"
+      "seconds": 13.67,
+      "run_id": "replay_20261115T174325Z_9f57ac"
     },
     {
       "variant": "c",
@@ -790,8 +790,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 29.77,
-      "run_id": "replay_20261115T083553Z_b5a13b"
+      "seconds": 29.32,
+      "run_id": "replay_20261115T174338Z_fd11a0"
     },
     {
       "variant": "c",
@@ -803,8 +803,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.16,
-      "run_id": "replay_20261115T083623Z_289386"
+      "seconds": 28.58,
+      "run_id": "replay_20261115T174408Z_baea80"
     },
     {
       "variant": "c",
@@ -816,8 +816,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.2,
-      "run_id": "replay_20261115T083652Z_2a023a"
+      "seconds": 28.86,
+      "run_id": "replay_20261115T174436Z_dddf95"
     },
     {
       "variant": "c",
@@ -830,7 +830,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T083722Z_dd2ee6"
+      "run_id": "replay_20261115T174505Z_20d291"
     },
     {
       "variant": "c",
@@ -842,8 +842,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.7,
-      "run_id": "replay_20261115T083722Z_24bf3a"
+      "seconds": 29.32,
+      "run_id": "replay_20261115T174505Z_54a437"
     },
     {
       "variant": "c",
@@ -852,11 +852,11 @@
       "fault": "session_timeout",
       "expect": "success*",
       "run": 1,
-      "actual": "failed/TARGET_UNRESOLVED",
-      "pass": false,
-      "at_step": "enter_user_id",
-      "seconds": 55.26,
-      "run_id": "replay_20261115T083751Z_ae3055"
+      "actual": "success+recovered+drift",
+      "pass": true,
+      "at_step": null,
+      "seconds": 58.9,
+      "run_id": "replay_20261115T174534Z_5ed3a7"
     },
     {
       "variant": "c",
@@ -868,8 +868,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 32.62,
-      "run_id": "replay_20261115T083847Z_2ccee8"
+      "seconds": 31.96,
+      "run_id": "replay_20261115T174633Z_53b870"
     },
     {
       "variant": "c",
@@ -881,8 +881,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 40.89,
-      "run_id": "replay_20261115T083919Z_791bc2"
+      "seconds": 39.3,
+      "run_id": "replay_20261115T174705Z_5a468b"
     },
     {
       "variant": "c",
@@ -894,8 +894,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.92,
-      "run_id": "replay_20261115T084000Z_d9954f"
+      "seconds": 29.37,
+      "run_id": "replay_20261115T174745Z_805ff2"
     },
     {
       "variant": "c",
@@ -907,8 +907,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 28.87,
-      "run_id": "replay_20261115T084029Z_3296ca"
+      "seconds": 29.23,
+      "run_id": "replay_20261115T174814Z_ed829e"
     },
     {
       "variant": "c",
@@ -920,8 +920,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 32.41,
-      "run_id": "replay_20261115T084058Z_c3f083"
+      "seconds": 33.94,
+      "run_id": "replay_20261115T174843Z_d196dc"
     },
     {
       "variant": "c",
@@ -933,8 +933,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.3,
-      "run_id": "replay_20261115T084130Z_110b13"
+      "seconds": 28.84,
+      "run_id": "replay_20261115T174917Z_f66f97"
     },
     {
       "variant": "c",
@@ -946,8 +946,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.32,
-      "run_id": "replay_20261115T084159Z_ffcee5"
+      "seconds": 28.68,
+      "run_id": "replay_20261115T174946Z_38a6ef"
     },
     {
       "variant": "c",
@@ -960,7 +960,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T084227Z_f36ea4"
+      "run_id": "replay_20261115T175015Z_b8c62e"
     },
     {
       "variant": "c",
@@ -972,8 +972,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.89,
-      "run_id": "replay_20261115T084227Z_0736e8"
+      "seconds": 30.26,
+      "run_id": "replay_20261115T175015Z_77477e"
     },
     {
       "variant": "c",
@@ -985,8 +985,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.01,
-      "run_id": "replay_20261115T084256Z_aa246f"
+      "seconds": 29.41,
+      "run_id": "replay_20261115T175045Z_e9c856"
     },
     {
       "variant": "c",
@@ -998,8 +998,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 35.27,
-      "run_id": "replay_20261115T084325Z_3fca09"
+      "seconds": 35.63,
+      "run_id": "replay_20261115T175114Z_da5237"
     },
     {
       "variant": "c",
@@ -1011,8 +1011,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 39.43,
-      "run_id": "replay_20261115T084400Z_0e0313"
+      "seconds": 39.89,
+      "run_id": "replay_20261115T175150Z_55f1e6"
     },
     {
       "variant": "c",
@@ -1024,8 +1024,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.94,
-      "run_id": "replay_20261115T084440Z_938ceb"
+      "seconds": 29.3,
+      "run_id": "replay_20261115T175230Z_bf921b"
     },
     {
       "variant": "c",
@@ -1037,8 +1037,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 28.93,
-      "run_id": "replay_20261115T084509Z_5d60a6"
+      "seconds": 29.41,
+      "run_id": "replay_20261115T175259Z_d762d3"
     },
     {
       "variant": "c",
@@ -1050,8 +1050,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.36,
-      "run_id": "replay_20261115T084538Z_35d87b"
+      "seconds": 28.72,
+      "run_id": "replay_20261115T175329Z_dca992"
     },
     {
       "variant": "c",
@@ -1063,8 +1063,8 @@
       "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
       "pass": true,
       "at_step": "continue_review",
-      "seconds": 31.97,
-      "run_id": "replay_20261115T084606Z_72c6cb"
+      "seconds": 32.29,
+      "run_id": "replay_20261115T175358Z_8fefcd"
     },
     {
       "variant": "c",
@@ -1077,7 +1077,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261115T084638Z_03cbee"
+      "run_id": "replay_20261115T175430Z_2c6279"
     }
   ]
 }

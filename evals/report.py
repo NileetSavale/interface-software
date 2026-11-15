@@ -22,8 +22,8 @@ def _table(header: list[str], rows: list[list]) -> str:
 
 
 def fault_matrix(d: dict) -> str:
-    cases = _table(["flow", "case", "fault", "expected", "actual", ""],
-                   [[r["flow"], r["case"], r["fault"] or "–", f"`{r['expect']}`", f"`{r['actual']}`",
+    cases = _table(["bank", "flow", "case", "fault", "expected", "actual", ""],
+                   [[r["variant"].upper(), r["flow"], r["case"], r["fault"] or "–", f"`{r['expect']}`", f"`{r['actual']}`",
                      "✅" if r["pass"] else "❌"] for r in d["rows"]])
     confusion = _table(["expected ↓ / actual →", *TYPES],
                        [[e, *(d["confusion"][e][a] or "·" for a in TYPES)] for e in TYPES if any(d["confusion"][e].values())])

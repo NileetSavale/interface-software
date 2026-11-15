@@ -92,6 +92,9 @@ class ClaudePlanner:
         return Turn(content=_echoable(response.content), stop_reason=response.stop_reason, usage=usage,
                     model=response.model)
 
+    async def close(self):
+        await self.client.close()  # inside the event loop, or its connections are torn down after the loop has closed
+
 
 def _echoable(content: list) -> list:
     """After a mid-output fallback, the blocks before the last fallback marker belong to the declined attempt:

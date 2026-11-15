@@ -1,0 +1,24 @@
+- generic [active] [ref=f6e1]:
+  - iframe "nav" [ref=f6e2]:
+    - generic [ref=f7e2]:
+      - table [ref=f7e3]:
+        - rowgroup [ref=f7e4]:
+          - row [ref=f7e5]:
+            - cell "CU*Core" [ref=f7e6]
+      - table [ref=f7e8]:
+        - rowgroup [ref=f7e9]:
+          - row [ref=f7e10]:
+            - cell "Teller Functions" [ref=f7e11]
+          - row [ref=f7e12]:
+            - cell [ref=f7e13]:
+              - link "Member Lookup" [ref=f7e14] [cursor=pointer]:
+                - /url: /inquiry
+          - row [ref=f7e15]:
+            - cell [ref=f7e16]:
+              - link "Sign Off" [ref=f7e17] [cursor=pointer]:
+                - /url: /signoff
+  - iframe "main" [ref=f6e3]:
+    - table [ref=f8e3]:
+      - rowgroup [ref=f8e4]:
+        - row [ref=f8e5]:
+          - cell "Select a teller function from the menu." [ref=f8e6]

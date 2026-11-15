@@ -10,9 +10,9 @@ mid-run, and nothing automated can ever press "Confirm".
 
 - **Design write-up:** [`REPORT.md`](REPORT.md). Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). All
   decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md).
-- **Evidence of real runs:** [`evidence/`](evidence/README.md): the real Claude discoveries, and 13 replays covering
-  success, business outcomes, recovery, hard failures, a handoff with a screen recording, a second bank, and a
-  blocked commit.
+- **Evidence of real runs:** [`evidence/`](evidence/README.md): four real Claude discoveries, and 14 replays covering
+  success, business outcomes, recovery, hard failures, a handoff with a screen recording, a second bank, a blocked
+  commit, and a third bank run without and with its page map.
 - **Measured:** [`evals/report.md`](evals/report.md): five suites, N and commit stated.
 - **Visual tour:** <https://nileetsavale.github.io/interface-software/>: interactive architecture, decisions, numbers.
 

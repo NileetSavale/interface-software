@@ -1,0 +1,21 @@
+{
+  "runId": "replay_20261115T181255Z_551978",
+  "completedAt": "2026-11-15T18:13:08+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "sign",
+  "errorClass": "EXPECT_FAILED",
+  "expected": "visible(frame=['nav'], role='link', name='Member Inquiry')",
+  "observed": "not on screen",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261115T181255Z_551978/sign.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261115T181255Z_551978/sign.png"
+    }
+  ]
+}

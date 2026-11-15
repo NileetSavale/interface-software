@@ -1,15 +1,15 @@
-{"t": 0.0, "at": "2026-11-15T07:52:59+00:00", "event": "replay_started", "capability": "core_banking.open_sub_account", "version": "1.0.0", "inputs": ["accountType", "initialDeposit", "memberId", "nickname"]}
-{"t": 0.241, "at": "2026-11-15T07:53:00+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.295, "at": "2026-11-15T07:53:02+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.359, "at": "2026-11-15T07:53:02+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.401, "at": "2026-11-15T07:53:02+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.815, "at": "2026-11-15T07:53:02+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.256, "at": "2026-11-15T07:53:03+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.295, "at": "2026-11-15T07:53:03+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.689, "at": "2026-11-15T07:53:03+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 4.105, "at": "2026-11-15T07:53:03+00:00", "event": "acted", "step": "open_sub_account_form", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 4.168, "at": "2026-11-15T07:53:03+00:00", "event": "acted", "step": "choose_account_type", "action": "select", "value": "{{inputs.accountType}}", "rank": 0, "strategy": "anchor"}
-{"t": 4.191, "at": "2026-11-15T07:53:03+00:00", "event": "acted", "step": "enter_nickname", "action": "type", "value": "{{inputs.nickname}}", "rank": 0, "strategy": "role"}
-{"t": 4.213, "at": "2026-11-15T07:53:04+00:00", "event": "acted", "step": "enter_deposit", "action": "type", "value": "{{inputs.initialDeposit}}", "rank": 0, "strategy": "anchor"}
-{"t": 4.602, "at": "2026-11-15T07:53:04+00:00", "event": "acted", "step": "continue_review", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 5.615, "at": "2026-11-15T07:53:05+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261115T075259Z_9f156f", "completedAt": "2026-11-15T07:53:05+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "press_ok", "errorClass": "POLICY_VIOLATION", "expected": "a read action", "observed": "blocked by policy: /subaccount/confirm commits a change (irreversible). Automation can reach a commit point but never press it; stop here.", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261115T075259Z_9f156f/press_ok.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261115T075259Z_9f156f/press_ok.png"}]}}
+{"t": 0.0, "at": "2026-11-15T18:12:43+00:00", "event": "replay_started", "capability": "core_banking.open_sub_account", "version": "1.0.0", "inputs": ["accountType", "initialDeposit", "memberId", "nickname"], "tenant": null, "page_map": null}
+{"t": 0.25, "at": "2026-11-15T18:12:43+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.336, "at": "2026-11-15T18:12:45+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.403, "at": "2026-11-15T18:12:45+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.449, "at": "2026-11-15T18:12:45+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.847, "at": "2026-11-15T18:12:46+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.273, "at": "2026-11-15T18:12:46+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.335, "at": "2026-11-15T18:12:46+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.721, "at": "2026-11-15T18:12:47+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.142, "at": "2026-11-15T18:12:47+00:00", "event": "acted", "step": "open_sub_account_form", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.185, "at": "2026-11-15T18:12:47+00:00", "event": "acted", "step": "choose_account_type", "action": "select", "value": "{{inputs.accountType}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.209, "at": "2026-11-15T18:12:47+00:00", "event": "acted", "step": "enter_nickname", "action": "type", "value": "{{inputs.nickname}}", "rank": 0, "strategy": "role"}
+{"t": 4.233, "at": "2026-11-15T18:12:47+00:00", "event": "acted", "step": "enter_deposit", "action": "type", "value": "{{inputs.initialDeposit}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.636, "at": "2026-11-15T18:12:48+00:00", "event": "acted", "step": "continue_review", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 5.631, "at": "2026-11-15T18:12:49+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261115T181243Z_1b4a3a", "completedAt": "2026-11-15T18:12:49+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "press_ok", "errorClass": "POLICY_VIOLATION", "expected": "a read action", "observed": "blocked by policy: /subaccount/confirm commits a change (irreversible). Automation can reach a commit point but never press it; stop here.", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261115T181243Z_1b4a3a/press_ok.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261115T181243Z_1b4a3a/press_ok.png"}]}}

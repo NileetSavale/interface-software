@@ -1,0 +1,279 @@
+{
+ "bank": "c",
+ "nodes": {
+  "d91e3785a3f8": {
+   "labels": [
+    "CU*Core",
+    "Operator Sign On",
+    "Password",
+    "Sign On",
+    "User ID",
+    "main",
+    "nav"
+   ],
+   "seen": 5
+  },
+  "8f6411c0d268": {
+   "labels": [
+    "CU*Core",
+    "Member Lookup",
+    "Select a teller function from the menu.",
+    "Sign Off",
+    "Teller Functions",
+    "main",
+    "nav"
+   ],
+   "seen": 2
+  },
+  "42b75111cfd8": {
+   "labels": [
+    "CU*Core",
+    "Find Member",
+    "Last name",
+    "Member #",
+    "Member Inquiry",
+    "Member Lookup",
+    "Quick Find",
+    "Search",
+    "Sign Off",
+    "Teller Functions",
+    "main",
+    "nav"
+   ],
+   "seen": 4
+  },
+  "8a49f9c469fa": {
+   "labels": [
+    "Account",
+    "Account Summary",
+    "Action",
+    "Balance",
+    "CU*Core",
+    "Checking",
+    "Member #:",
+    "Member Detail",
+    "Member Lookup",
+    "Name:",
+    "New search",
+    "Open Sub-Account",
+    "Savings",
+    "Sign Off",
+    "Teller Functions",
+    "Type",
+    "View",
+    "main",
+    "nav"
+   ],
+   "seen": 1
+  }
+ },
+ "edges": {
+  "e9fee9412970": {
+   "key": "e9fee9412970",
+   "from": "d91e3785a3f8",
+   "to": "d91e3785a3f8",
+   "action": "type",
+   "target": {
+    "frame": [
+     "main"
+    ],
+    "strategies": [
+     {
+      "kind": "role",
+      "role": "textbox",
+      "name": "User ID"
+     },
+     {
+      "kind": "label",
+      "label": "User ID"
+     },
+     {
+      "kind": "anchor",
+      "anchorText": "User ID",
+      "relation": "right-of",
+      "role": "textbox"
+     }
+    ]
+   },
+   "value": "{{secrets.APP_USER}}",
+   "intent": "enter operator user id",
+   "risk": "read",
+   "order": 0,
+   "seen": [
+    {
+     "source": "discovery",
+     "at": 1794766375.1305711,
+     "ok": true
+    }
+   ]
+  },
+  "695487182b7c": {
+   "key": "695487182b7c",
+   "from": "d91e3785a3f8",
+   "to": "d91e3785a3f8",
+   "action": "type",
+   "target": {
+    "frame": [
+     "main"
+    ],
+    "strategies": [
+     {
+      "kind": "role",
+      "role": "textbox",
+      "name": "Password"
+     },
+     {
+      "kind": "label",
+      "label": "Password"
+     },
+     {
+      "kind": "anchor",
+      "anchorText": "Password",
+      "relation": "right-of",
+      "role": "textbox"
+     }
+    ]
+   },
+   "value": "{{secrets.APP_PASSWORD}}",
+   "intent": "enter operator password",
+   "risk": "read",
+   "order": 1,
+   "seen": [
+    {
+     "source": "discovery",
+     "at": 1794766375.1305711,
+     "ok": true
+    }
+   ]
+  },
+  "238d869baddc": {
+   "key": "238d869baddc",
+   "from": "d91e3785a3f8",
+   "to": "8f6411c0d268",
+   "action": "click",
+   "target": {
+    "frame": [
+     "main"
+    ],
+    "strategies": [
+     {
+      "kind": "role",
+      "role": "button",
+      "name": "Sign On"
+     },
+     {
+      "kind": "text",
+      "text": "Sign On"
+     }
+    ]
+   },
+   "value": null,
+   "intent": "sign on",
+   "risk": "read",
+   "order": 2,
+   "seen": [
+    {
+     "source": "discovery",
+     "at": 1794766375.1305711,
+     "ok": true
+    }
+   ]
+  },
+  "801ad6c852d1": {
+   "key": "801ad6c852d1",
+   "from": "8f6411c0d268",
+   "to": "42b75111cfd8",
+   "action": "click",
+   "target": {
+    "frame": [
+     "nav"
+    ],
+    "strategies": [
+     {
+      "kind": "role",
+      "role": "link",
+      "name": "Member Lookup"
+     },
+     {
+      "kind": "text",
+      "text": "Member Lookup"
+     }
+    ]
+   },
+   "value": null,
+   "intent": "open member inquiry",
+   "risk": "read",
+   "order": 3,
+   "seen": [
+    {
+     "source": "discovery",
+     "at": 1794766375.1305711,
+     "ok": true
+    }
+   ]
+  },
+  "de777187a5b9": {
+   "key": "de777187a5b9",
+   "from": "42b75111cfd8",
+   "to": "42b75111cfd8",
+   "action": "type",
+   "target": {
+    "frame": [
+     "main"
+    ],
+    "strategies": [
+     {
+      "kind": "anchor",
+      "anchorText": "Member #",
+      "relation": "right-of",
+      "role": "textbox"
+     }
+    ]
+   },
+   "value": "{{inputs.memberId}}",
+   "intent": "enter the member number",
+   "risk": "read",
+   "order": 4,
+   "seen": [
+    {
+     "source": "discovery",
+     "at": 1794766375.1305711,
+     "ok": true
+    }
+   ]
+  },
+  "4a21e2bc9cdd": {
+   "key": "4a21e2bc9cdd",
+   "from": "42b75111cfd8",
+   "to": "8a49f9c469fa",
+   "action": "click",
+   "target": {
+    "frame": [
+     "main"
+    ],
+    "strategies": [
+     {
+      "kind": "role",
+      "role": "button",
+      "name": "Find Member"
+     },
+     {
+      "kind": "text",
+      "text": "Find Member"
+     }
+    ]
+   },
+   "value": null,
+   "intent": "submit the member search",
+   "risk": "read",
+   "order": 5,
+   "seen": [
+    {
+     "source": "discovery",
+     "at": 1794766375.1305711,
+     "ok": true
+    }
+   ]
+  }
+ }
+}

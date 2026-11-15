@@ -499,10 +499,15 @@ async def discover(goal: dict, base_url: str, inputs: dict[str, str], *, model: 
                    pause_timeout_s: float = 600, page_map: PageMap | None = None) -> dict:
     goal = {**goal, "_headed": headed}
     check_url(_entry_policy(base_url), base_url + goal.get("entryPath", "/"))
-    run = Discovery(goal, base_url, inputs, planner or ClaudePlanner(model), max_steps=max_steps,
+    owned = ClaudePlanner(model) if planner is None else None
+    run = Discovery(goal, base_url, inputs, planner or owned, max_steps=max_steps,
                     budget_usd=budget_usd, out_dir=out_dir, env=env, escalation_model=escalation_model,
                     operator_hub=operator_hub, pause_timeout_s=pause_timeout_s, page_map=page_map)
-    return await run.run()
+    try:
+        return await run.run()
+    finally:
+        if owned:
+            await owned.close()
 
 
 def _entry_policy(base_url: str) -> Policy:

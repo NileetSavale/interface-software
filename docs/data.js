@@ -189,29 +189,27 @@ window.SITE = {
  ],
  "evals": {
   "fault_matrix": {
-   "passed": 72,
+   "passed": 73,
    "runs": 73,
    "opened": 0,
-   "date": "2026-11-15T08:46:38+00:00",
-   "commit": "c73a241+dirty",
-   "misses": [
-    "bank C lookup: session timeout \u2192 failed/TARGET_UNRESOLVED"
-   ]
+   "date": "2026-11-15T17:54:30+00:00",
+   "commit": "0dd358f",
+   "misses": []
   },
   "stability": {
    "ok": 80,
    "runs": 80,
    "distinct": 1,
-   "p50": 3.82,
-   "date": "2026-11-15T07:42:31+00:00",
-   "commit": "40be003"
+   "p50": 3.81,
+   "date": "2026-11-15T18:02:02+00:00",
+   "commit": "0dd358f"
   },
   "robustness": {
    "ok": 60,
    "runs": 60,
    "wrong": 0,
-   "date": "2026-11-15T07:46:56+00:00",
-   "commit": "40be003"
+   "date": "2026-11-15T18:06:27+00:00",
+   "commit": "0dd358f"
   },
   "safety": {
    "passed": 15,
@@ -219,28 +217,39 @@ window.SITE = {
    "gaps": 1,
    "llm_passed": 12,
    "llm_total": 12,
-   "llm_spent": 0.4013,
+   "llm_spent": 0.4059,
    "harm": 0,
-   "date": "2026-11-15T07:35:06+00:00",
-   "commit": "40be003"
+   "date": "2026-11-15T17:43:21+00:00",
+   "commit": "0dd358f"
   },
   "discovery": {
-   "recorded": 10,
-   "runs": 10,
-   "replays": 10,
+   "recorded": 20,
+   "runs": 20,
+   "replays": 20,
    "median_cost": [
-    0.0189,
-    0.0545
+    0.0173,
+    0.0113,
+    0.0281,
+    0.0263
    ],
-   "spent": 0.3737,
+   "spent": 0.4967,
    "arms": [
     {
      "flow": "lookup",
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 5,
-     "median_cost_usd": 0.0189,
+     "median_turns": 4,
+     "median_cost_usd": 0.0173,
+     "escalated_runs": 0
+    },
+    {
+     "flow": "lookup",
+     "n": 5,
+     "recorded": 5,
+     "replays_on_other_member": 5,
+     "median_turns": 3,
+     "median_cost_usd": 0.0113,
      "escalated_runs": 0
     },
     {
@@ -248,13 +257,22 @@ window.SITE = {
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 8,
-     "median_cost_usd": 0.0545,
+     "median_turns": 7,
+     "median_cost_usd": 0.0281,
+     "escalated_runs": 0
+    },
+    {
+     "flow": "open_sub_account",
+     "n": 5,
+     "recorded": 5,
+     "replays_on_other_member": 5,
+     "median_turns": 5,
+     "median_cost_usd": 0.0263,
      "escalated_runs": 0
     }
    ],
-   "date": "2026-11-15T07:43:21+00:00",
-   "commit": "40be003"
+   "date": "2026-11-15T18:07:52+00:00",
+   "commit": "0dd358f"
   }
  },
  "commits": [
@@ -310,7 +328,7 @@ window.SITE = {
    "sha": "d1351ea",
    "date": "2026-11-15",
    "subject": "Pass 2.6: second bank (variant B), tenant overrides from drift",
-   "body": "Mock app variant B relabels the member search button and drops the\nMember # label. A new onlyInRegion fallback (D21) finds a relabelled\ncontrol by its place in a labelled region, never by guessing. Replay on\na tenant reports drift and writes a pending override for that tenant;\n`interface override --approve` merges it after review, and overrides\napply at load by step id within their semver range. The fault matrix\ngains a bank-B arm. Both artifacts re-recorded on bank A with Claude."
+   "body": "Mock app variant B relabels the member search button and drops the\nMember # label. A new onlyInRegion fallback (D21) finds a relabelled\ncontrol by its place in a labelled region, never by guessing. Replay on\na tenant reports drift and writes a pending override for that tenant;\n`interfaze override --approve` merges it after review, and overrides\napply at load by step id within their semver range. The fault matrix\ngains a bank-B arm. Both artifacts re-recorded on bank A with Claude."
   },
   {
    "sha": "40be003",
@@ -334,6 +352,18 @@ window.SITE = {
    "sha": "c73a241",
    "date": "2026-11-15",
    "subject": "Site data for the README/REPORT commit",
+   "body": ""
+  },
+  {
+   "sha": "92b4f95",
+   "date": "2026-11-15",
+   "subject": "Page map: each bank's learned screens and actions (item 7)",
+   "body": "Discovery sees known actions and can run several per turn (follow_known);\nreplay falls back to at most two trusted read edges from a pinned map\nversion, verified live and reported as MAP_FALLBACK. Bank C variant,\nfault-matrix arm, D23 (map may confirm a postcondition), CLI --map."
+  },
+  {
+   "sha": "0dd358f",
+   "date": "2026-11-15",
+   "subject": "Rename the project from interfaze to interface",
    "body": ""
   }
  ],

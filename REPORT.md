@@ -27,8 +27,8 @@ FastAPI.
   tree is invisible. That's why bbox strategies stay in the schema, and why D2 (a screenshot to the model on a
   screen's first visit) is designed, though not yet built.
 - **Model choice.** Discovery's cost is spread over every free replay, so first-try success matters more than token
-  price (D12). Over 10 real runs: median $0.02 for lookup and $0.05 for the sub-account flow (probes included), with
-  no escalation needed.
+  price (D12). Over 20 real runs: median $0.017 for lookup and $0.028 for the sub-account flow (probes included),
+  every one recorded and replayed on another member, with no escalation needed.
 - **History.** It's append-only, with old snapshots cleared server-side. Claude 5.5 binds its thinking to the exact
   conversation, so editing earlier turns would break it (D17).
 - **A real Claude run → artifact → replay first** (D10), then each part deepened.
@@ -112,7 +112,7 @@ is kept only if:
 - the probe now ends in it;
 - the happy path still succeeds.
 
-**Fault matrix: 48/48 across two banks**, with 0 accounts opened.
+**Fault matrix: 73/73 across three banks**, with 0 accounts opened.
 
 **Drift** is secondary here, because these UIs are stable. A fallback hit still succeeds and is reported as drift.
 On a tenant, it also proposes an override.
@@ -154,6 +154,8 @@ The map can also confirm a postcondition, exactly: "this is the screen this acti
   - With C's map, learned from **one** verified lookup run on C, the whole fault matrix holds on C. That includes the
     sub-account flow, which the map never saw.
   - The map is per bank and never shared (D5): it's learned without review, while artifacts are curated.
+  - In discovery, a map seeded from one approved replay cut median turns from 4 to 3 (lookup) and 7 to 5 (sub-account),
+    with Claude running 6 known actions per run. N=5 per arm, so read it as a direction, not a rate.
 - **At scale**, drift events per tenant and step are the signal for when to approve an override and when to
   re-record. Weights in each bank's map show which paths still work there.
 
@@ -224,7 +226,7 @@ screen recording, with PII masked throughout.
   deliberately not built.
 - **Capability catalog / tool interface** (D15). The contract is already a tool signature.
 - **Desktop surface and a real co-browsing console.** Designed at their seams.
-- **Screenshots for the model** (D2). The tree was enough for every flow here: 10/10 discovery runs.
+- **Screenshots for the model** (D2). The tree was enough for every flow here: 20/20 discovery runs.
 - **RAG or a vector database: deliberately not used.** Every lookup is an exact key or a short list; similarity search
   would only add ways to be wrong.
 - **Next:**

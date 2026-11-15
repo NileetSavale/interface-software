@@ -1,0 +1,7 @@
+{"t": 0.0, "at": "2026-11-15T18:12:55+00:00", "event": "replay_started", "capability": "core_banking.open_sub_account", "version": "1.0.0", "inputs": ["accountType", "initialDeposit", "memberId", "nickname"], "tenant": "c", "page_map": null}
+{"t": 0.248, "at": "2026-11-15T18:12:55+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.338, "at": "2026-11-15T18:12:57+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.409, "at": "2026-11-15T18:12:57+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.457, "at": "2026-11-15T18:12:57+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.871, "at": "2026-11-15T18:12:58+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 13.635, "at": "2026-11-15T18:13:08+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261115T181255Z_551978", "completedAt": "2026-11-15T18:13:08+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "sign", "errorClass": "EXPECT_FAILED", "expected": "visible(frame=['nav'], role='link', name='Member Inquiry')", "observed": "not on screen", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261115T181255Z_551978/sign.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261115T181255Z_551978/sign.png"}]}}

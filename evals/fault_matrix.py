@@ -61,7 +61,7 @@ def cases() -> list[dict]:
 
 
 def kind(result_label: str) -> str:
-    return result_label.split("/")[0].split("+")[0]
+    return result_label.split("/")[0].split("+")[0].rstrip("*")
 
 
 def run(n: int = 1, **_) -> dict:
