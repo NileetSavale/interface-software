@@ -454,6 +454,14 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
+### As built: each bank's own credentials (D26)
+- `src/interface/artifact/templates.py`: secrets are read from a **mapping** (the environment by default; a vault
+  client that reads as a mapping drops in). On a tenant, `TenantSecrets` looks `{{secrets.APP_USER}}` up as
+  `APP_USER__B` only, **never falling back** to the shared name, so one bank's operator can't be signed into
+  another's system.
+- Replay checks every secret the artifact uses **before the browser opens**; a missing one is
+  `failed/MISSING_SECRET` at `preflight`, naming the key, never a value.
+
 ### As built: who may use the operator page (D25)
 - **A key per intervention**, 32 random bytes, made when the intervention is published and kept in memory only. It
   reaches the person only in the link the run prints, after a `#`: browsers never send the fragment, so it's in no

@@ -6,6 +6,7 @@ and are reported beside the result; drift (a fallback strategy hit) never fails 
 """
 import asyncio
 import json
+import os
 import re
 from collections import Counter
 from pathlib import Path
@@ -17,7 +18,7 @@ from interface.artifact.schema import (
     Artifact, ClickThrough, IdentityMatches, InputSpec, OutcomeSeen, Outcome, OutputPresent, RunSubflow, SetOp, Step,
     Target, TEMPLATE, Visible, WaitLonger,
 )
-from interface.artifact.templates import TemplateError, render
+from interface.artifact.templates import TemplateError, TenantSecrets, render, secrets_for
 from interface.evidence import Audit, RunLog, new_run_id, now, structure_only
 from interface.operator import _public
 from interface.pagemap import TRUSTED, PageMap, screen_of, target_name
@@ -115,7 +116,7 @@ class Replayer:
         self.inputs = {k: str(v) for k, v in inputs.items()}
         self.headed = headed
         self.allow_draft = allow_draft
-        self.env = env
+        self.env = secrets_for(env, tenant)  # a tenant's own operator credentials, never another bank's (D26)
         self.run_id = run_id or new_run_id("replay")
         self.audit = audit or Audit()
         # Attended: an operator channel is open, so escalations pause for a person instead of failing
@@ -149,6 +150,10 @@ class Replayer:
             return self._finish(Failed(run_id=self.run_id, completed_at=now(), at_step="preflight",
                                        error_class="NOT_APPROVED", expected="status approved",
                                        observed=f"status {self.artifact.status}"))
+        if missing := self._missing_secrets():
+            return self._finish(Failed(run_id=self.run_id, completed_at=now(), at_step="preflight",
+                                       error_class="MISSING_SECRET", expected="a value for every credential it uses",
+                                       observed="no value for " + ", ".join(missing)))
         if self.audit.tripped(self.key):
             return self._finish(Failed(run_id=self.run_id, completed_at=now(), at_step="preflight",
                                        error_class="CIRCUIT_OPEN", expected="no recent wrong-record incidents",
@@ -655,6 +660,13 @@ class Replayer:
         })
 
     # ── Helpers ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    def _missing_secrets(self) -> list[str]:
+        """Checked before the browser opens, so a bank with no credentials configured fails at once and says which."""
+        source = os.environ if self.env is None else self.env
+        names = sorted({name for step in self.artifact.all_steps() for scope, name in TEMPLATE.findall(step.value or "")
+                        if scope == "secrets"})
+        return [source.key(n) if isinstance(source, TenantSecrets) else n for n in names if n not in source]
 
     def _render(self, step_id: str, text: str) -> str:
         try:

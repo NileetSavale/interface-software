@@ -5,7 +5,9 @@ import time
 import pytest
 import uvicorn
 
-ENV = {"APP_USER": "teller01", "APP_PASSWORD": "demo-only-password"}
+OPERATOR = {"APP_USER": "teller01", "APP_PASSWORD": "demo-only-password"}
+# Each bank's own copy, as a tenant's replay looks them up (D26); the mock app has one demo operator for all three
+ENV = {**OPERATOR, **{f"{k}__{bank}": v for bank in "ABC" for k, v in OPERATOR.items()}}
 
 
 def free_port() -> int:

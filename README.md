@@ -39,7 +39,7 @@ The mock app holds only made-up members, so these are not real credentials. Arti
 Nothing below needs an API key except discovery itself.
 
 ```bash
-uv run pytest                              # 118 tests; discovery is driven by a scripted planner, not Claude
+uv run pytest                              # 120 tests; discovery is driven by a scripted planner, not Claude
 uv run python -m evals all                 # the four eval suites that need no LLM (~15 min)
 uv run python scripts/make_evidence.py     # rebuilds evidence/ (replays run fresh; no model)
 ```
@@ -105,7 +105,9 @@ uv run interface replay $A --input memberId=34567 --attended
 
 The caller got `needs_human` at the 30 s deadline, and the late result is collected afterwards.
 
-**6. A second bank on the same product.** Variant B says "Find Member" and has no `<label>` on Member #.
+**6. A second bank on the same product.** Variant B says "Find Member" and has no `<label>` on Member #. A bank
+signs on with its own operator: `--tenant b` reads `APP_USER__B` and `APP_PASSWORD__B` from `.env`, never the shared
+ones.
 
 ```bash
 # Terminal 1: Ctrl-C, then
@@ -161,5 +163,5 @@ src/interface/
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
 goals/        the two capabilities' goal specs          artifacts/  the discovered artifacts
 evals/        the five suites and their results         evidence/   curated runs
-tests/        118 tests                                 docs/       design, decisions, the site
+tests/        120 tests                                 docs/       design, decisions, the site
 ```

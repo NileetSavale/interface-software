@@ -25,7 +25,9 @@ from interface.replay.executor import Replayer
 
 ROOT = Path(__file__).resolve().parent.parent
 RESULTS = ROOT / "evals" / "results"
-ENV = {"APP_USER": "teller01", "APP_PASSWORD": "demo-only-password"}  # the mock app's demo operator, not a real one
+OPERATOR = {"APP_USER": "teller01", "APP_PASSWORD": "demo-only-password"}  # the mock app's demo operator, not a real one
+# Each bank's own copy, as a tenant's replay looks them up (D26); the mock app has one demo operator for all three
+ENV = {**OPERATOR, **{f"{k}__{bank}": v for bank in "ABC" for k, v in OPERATOR.items()}}
 ARTIFACTS = {
     "lookup": ROOT / "artifacts" / "core_banking.lookup_member_balance.json",
     "open_sub_account": ROOT / "artifacts" / "core_banking.open_sub_account.json",

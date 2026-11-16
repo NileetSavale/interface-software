@@ -130,7 +130,8 @@ postcondition, but only exactly: the screen this action is known to lead to here
   accounts, amounts, SSNs, phones and emails, and can't type a value it read off the page. **Names in free text**
   ("spoke with her son Carlos Mendes") are caught by a deterministic, fail-closed rule: capitalised runs in prose
   that the page doesn't use as labels (D24); a model-based NER can miss, and would tie replay to a model version.
-  Credentials come from the environment, typed by code on the sign-on page only. Everything on disk is redacted at
+  Credentials are typed by code on the sign-on page only, and each bank's are its own (`APP_USER__B`, no fallback;
+  a missing one fails before anything runs, D26), read through a mapping a vault can sit behind. Everything on disk is redacted at
   the write boundary; screenshots are masked in-page and fail closed.
 - **Measured:** 17/17 safety cases without the LLM, and 12/12 with Claude on hostile pages (injection, a fake
   password form, an off-site link, an "OK" commit), zero harm.

@@ -22,6 +22,7 @@ FailureClass = Literal[
     "RECOVERY_EXHAUSTED",   # a recoverable outcome kept recurring past its attempts, or the run's cap of 3
     "TIMEOUT",              # a wait ran out with no branch matched
     "NOT_APPROVED",         # a draft artifact was invoked unattended
+    "MISSING_SECRET",       # a credential the artifact uses has no value for this tenant; nothing was run (D26)
     "ESCALATION_UNATTENDED",  # an escalate outcome matched and no operator is attached to take over
     "OPERATOR_ABORTED",     # an operator ended the run from the intervention
     "SURFACE_ERROR",        # the browser or app surface itself failed

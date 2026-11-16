@@ -169,6 +169,7 @@
             "RECOVERY_EXHAUSTED",
             "TIMEOUT",
             "NOT_APPROVED",
+            "MISSING_SECRET",
             "ESCALATION_UNATTENDED",
             "OPERATOR_ABORTED",
             "SURFACE_ERROR"
