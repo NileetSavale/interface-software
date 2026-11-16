@@ -454,6 +454,23 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
+### As built: several matches and pages (Pass 3 item 5, D28)
+- **A row is named by what it shows.** When no static label names a table row, the recorder looks for a cell in it
+  whose text is exactly an input's value and records the row by it: "the Select link in the row where Date of
+  Birth = `{{inputs.dob}}`" (`locate.js` `rowContext`, `WebSurface.describe`). Replay fills it in; two matching rows
+  fail `AMBIGUOUS_TARGET`, none `TARGET_UNRESOLVED`. Never "the first" (D27 is reading-only and goal-declared).
+- **`pageUntil` (D28)**, the one loop: `target` is the Next control, `until` the target of the step that uses the
+  row, `maxPages` from the goal (default 10). Replay checks `until` on each page; ambiguous fails at once; no Next
+  left or the limit reached fails with how many pages were searched. After each press it waits for the old page to
+  go, so Next is never pressed twice on one page. `paged` / `page_found` events log every turn.
+- **Recorded from `next_page`**, a tool offered only when the goal says `resultsSpanPages`; repeated presses of
+  the same control are one loop, closed by the next act or extract. Claude is told that the row it needs is the
+  one showing the input's placeholder.
+- **Policy**: a page turn is classed like a click (it used to slip past the classifier as a non-click action). A
+  real link named Next is `read`; a button named Next stays `reversible`; irreversible names are always blocked.
+- **Mock**: three Chens, two born the same day; a 35-row transaction history, 10 a page. **Measured** in the fault
+  matrix (12 cases on bank A) and the robustness suite (rows shuffled on every page).
+
 ### As built: findings from an outside review (Pass 3)
 - **Only `http(s)` loads a page.** `refused()` used to let every other scheme through, so a tampered artifact could
   `navigate` to `file://` and extract the replaying machine's own files. Now `data:`/`blob:` pass only as resources a

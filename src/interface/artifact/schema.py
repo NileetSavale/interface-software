@@ -205,7 +205,7 @@ class WaitFor(Model):
 
 # ── Steps ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-Action = Literal["click", "type", "select", "check", "uncheck", "press", "navigate", "extract"]
+Action = Literal["click", "type", "select", "check", "uncheck", "press", "navigate", "extract", "pageUntil"]
 
 
 class Extractor(Target):
@@ -225,11 +225,19 @@ class Step(Model):
     )
     wait_for: WaitFor | None = None
     expect: Visible | None = Field(default=None, description="Postcondition. We never assume a click worked.")
+    until: Target | None = Field(default=None, description="pageUntil: what must be on screen to stop turning pages.")
+    max_pages: int | None = Field(default=None, ge=1, le=50, description="pageUntil: the most Next presses allowed.")
     recorded_by: Literal["model", "human", "author", "map"] = "model"
     needs_review: bool = False
 
     @model_validator(mode="after")
     def _shape_fits_action(self):
+        # D28: the only loop an artifact can hold. Bounded and with a declared exit: press target (the Next control)
+        # until `until` resolves to exactly one element, at most max_pages times
+        if (self.action == "pageUntil") != (self.until is not None and self.max_pages is not None):
+            raise ValueError(f"step {self.id}: pageUntil, and only it, carries until and maxPages")
+        if self.action == "pageUntil" and self.target is None:
+            raise ValueError(f"step {self.id}: pageUntil needs the Next control as its target")
         needs_target = {"click", "type", "select", "check", "uncheck"}
         if self.action in needs_target and self.target is None:
             raise ValueError(f"step {self.id}: {self.action} needs a target")
@@ -450,7 +458,8 @@ class Artifact(Model):
         texts = [s.value for s in steps if s.value]
         texts += [c.equals for c in self.success.checkpoint if isinstance(c, IdentityMatches)]
         # Targets may name an input (the link {{inputs.accountId}}), filled in at replay; never a secret
-        targets = [t.model_dump_json(by_alias=True) for s in steps for t in [s.target, *(s.extract or {}).values()] if t]
+        targets = [t.model_dump_json(by_alias=True) for s in steps for t in [s.target, s.until, *(s.extract or {}).values()]
+                   if t]
         texts += targets
         missing = {name for text in texts for scope, name in TEMPLATE.findall(text) if scope == "inputs" and name not in self.inputs}
         secret = sorted({name for text in targets for scope, name in TEMPLATE.findall(text) if scope == "secrets"})

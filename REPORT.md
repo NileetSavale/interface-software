@@ -75,6 +75,10 @@ reviewer as a spec.
 (`99999` → `MEMBER_NOT_FOUND`); each is replayed and the model names the screen. An outcome is kept only with fixed
 wording, the expected code, the probe now ending in it, and the happy path still succeeding.
 
+**Several matches and pages.** A row no label names is picked by the cell showing an input ("Select where Date of
+Birth = `{{inputs.dob}}`"); two matches fail `AMBIGUOUS_TARGET`, never the first. A row pages away is reached by
+`pageUntil`, the only loop an artifact can hold: Next until that row is on screen, at most `maxPages` times (D28).
+
 **Fault matrix: 85/85 across three banks**, 0 accounts opened. A fallback hit succeeds and is reported as drift.
 
 **When no strategy survives, the bank's page map** may stand in: at most two trusted edges from this bank's

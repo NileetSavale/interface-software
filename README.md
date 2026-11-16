@@ -40,7 +40,7 @@ The mock app holds only made-up members, so these are not real credentials. Arti
 Nothing below needs an API key except discovery itself.
 
 ```bash
-uv run pytest                              # 134 tests; discovery is driven by a scripted planner, not Claude
+uv run pytest                              # 138 tests; discovery is driven by a scripted planner, not Claude
 uv run python -m evals all                 # the four eval suites that need no LLM (~15 min)
 uv run python scripts/make_evidence.py     # rebuilds evidence/ (replays run fresh; no model)
 ```
@@ -147,6 +147,15 @@ uv run interface replay $S $IN --tenant c --map maps/c.json  # success, with MAP
 
 The second discovery on a bank with a map runs the known actions several per turn (`follow_known`).
 
+**8b. Several matches, and a row pages away.** With the mock app on bank A:
+
+```bash
+F=artifacts/core_banking.find_member_by_name.json; H=artifacts/core_banking.find_transaction_by_reference.json
+uv run interface replay $F --input lastName=Chen --input dob=07/04/1985   # success: one of three Chens
+uv run interface replay $F --input lastName=Chen --input dob=02/14/1990   # failed AMBIGUOUS_TARGET: never the first
+uv run interface replay $H --input memberId=34567 --input reference=REF-0025   # success, after turning to page 3
+```
+
 **9. An app we didn't write.** ParaBank, Parasoft's public demo bank: registers a fictional customer, has Claude
 discover two read-only capabilities, and replays them with no model (about $0.20; needs the network).
 
@@ -169,7 +178,7 @@ src/interface/
   session.py   the control token                                operator.py  the operator page
   evidence.py  run logs, redaction, audit and circuit breaker   runs.py      invoke with a deadline
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
-goals/        the two capabilities' goal specs          artifacts/  the discovered artifacts
+goals/        the capabilities. goal specs              artifacts/  the discovered artifacts
 evals/        the five suites and their results         evidence/   curated runs
-tests/        134 tests                                 docs/       design, decisions, the site
+tests/        138 tests                                 docs/       design, decisions, the site
 ```

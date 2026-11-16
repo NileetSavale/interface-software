@@ -1,0 +1,51 @@
+{
+  "capability": "core_banking.find_member_by_name",
+  "title": "Find a member by last name and date of birth",
+  "description": "Searches members by last name, picks the one with the given date of birth, and returns their member number and name.",
+  "product": "mock-core-banking",
+  "versionRange": ">=1.0 <2.0",
+  "entryPath": "/",
+  "goal": "Sign on, search for members with the last name {{inputs.lastName}}, open the one born on {{inputs.dob}}, and read their member number and name.",
+  "inputs": {
+    "lastName": {
+      "type": "string",
+      "description": "the member's last name",
+      "pattern": "^[A-Za-z' -]{2,30}$",
+      "sensitive": true
+    },
+    "dob": {
+      "type": "string",
+      "description": "date of birth, MM/DD/YYYY",
+      "pattern": "^[0-9]{2}/[0-9]{2}/[0-9]{4}$",
+      "sensitive": true,
+      "identifies": "member"
+    }
+  },
+  "outputs": {
+    "memberNumber": {
+      "type": "string",
+      "description": "the member's number, from their member page"
+    },
+    "memberName": {
+      "type": "string",
+      "description": "the member's name, from their member page"
+    }
+  },
+  "secrets": [
+    "APP_USER",
+    "APP_PASSWORD"
+  ],
+  "commitPaths": [
+    "/subaccount/confirm"
+  ],
+  "maxRisk": "read",
+  "probes": [
+    {
+      "inputs": {
+        "lastName": "Zzyzx"
+      },
+      "why": "a last name no member has",
+      "expect": "MEMBER_NOT_FOUND"
+    }
+  ]
+}

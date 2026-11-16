@@ -239,6 +239,8 @@ class Replayer:
 
         if step.action == "navigate":
             await self._navigate(step.id, self._render(step.id, step.value))
+        elif step.action == "pageUntil":
+            await self._page_until(step, timeout, recovering)
         elif step.action == "extract":
             for name, extractor in step.extract.items():
                 hit = await self._resolve(step, extractor, timeout, recovering)
@@ -458,9 +460,13 @@ class Replayer:
         """The recorded risk class is checked again against the live control, so a relabelled button that now
         reads "Confirm" is still blocked."""
         name = await hit.handle.evaluate("el => (el.value || el.innerText || el.getAttribute('aria-label') || '').trim()")
+        paging = step.action == "pageUntil"
         role = "button" if step.action == "click" else ""
+        if paging:
+            # Only a real link is a page turn that changes nothing; anything else is judged as a button would be
+            role = "link" if await hit.handle.evaluate("el => el.tagName === 'A' && !!el.href") else "button"
         try:
-            check_action(self.artifact.policy, step.action, role, name)
+            check_action(self.artifact.policy, step.action, role, name, paging)
         except PolicyViolation as e:
             raise self._fail(step.id, "POLICY_VIOLATION", f"a {step.risk} action", str(e))
 
@@ -589,6 +595,31 @@ class Replayer:
                 raise self._fail(step_id, "TIMEOUT", f"the {assertion.input} on screen", "never filled in")
             if shown.strip() != self._render(step_id, assertion.equals).strip():
                 await self._wrong_record(step_id, assertion, shown)
+
+    async def _page_until(self, step: Step, timeout: int, recovering: bool):
+        """D28, the only loop: press Next until `until` finds exactly one element, at most max_pages times. Several
+        matches on a page fail as ambiguous at once, never "the first"; running out of pages or presses fails saying
+        how many were searched. Each page turned is logged."""
+        for pressed in range(step.max_pages + 1):
+            found = await self._find(step.until, 1_500)
+            if isinstance(found, Resolved):
+                self.log.event("page_found", step=step.id, page=pressed + 1, pages_turned=pressed)
+                return
+            if any(code == "AMBIGUOUS_TARGET" for _, code in found.attempts):
+                raise self._fail(step.id, "AMBIGUOUS_TARGET", "exactly one match", f"several on page {pressed + 1}",
+                                 evidence=await self._evidence(step.id))
+            if pressed == step.max_pages:
+                break
+            if not isinstance(await self._find(step.target, 1_500), Resolved):
+                raise self._fail(step.id, "TARGET_UNRESOLVED", "the row on one of the pages",
+                                 f"not on any of the {pressed + 1} pages, and there's no next page",
+                                 evidence=await self._evidence(step.id))
+            hit = await self._act(step, step.target, "click", None, timeout, recovering, check_policy=True)
+            await self.surface.gone(hit.handle, timeout)  # the next page has replaced this one, so Next isn't pressed twice
+            self.log.event("paged", step=step.id, page=pressed + 2)
+        raise self._fail(step.id, "TARGET_UNRESOLVED", "the row within the page limit",
+                         f"not on any of the first {step.max_pages + 1} pages (maxPages {step.max_pages})",
+                         evidence=await self._evidence(step.id))
 
     async def _filled(self, handle, timeout_ms: int) -> str:
         """The element's text once it has any: a value a page fills in after loading is waited for, not read empty.

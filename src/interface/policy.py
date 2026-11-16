@@ -25,17 +25,20 @@ class PolicyViolation(Exception):
     pass
 
 
-def classify(action: str, role: str, name: str) -> Risk:
-    if action == "click" and role in COMMIT_ROLES:
+def classify(action: str, role: str, name: str, paging: bool = False) -> Risk:
+    """paging: a declared turn to the next page of results (D28). A link named "Next" there is a GET that changes
+    nothing, so it's read; a button named "Next" (a wizard's) stays reversible, and an irreversible name is always
+    irreversible. A page turn is classified like the click it is."""
+    if action in ("click", "pageUntil") and role in COMMIT_ROLES:
         if IRREVERSIBLE.search(name):
             return "irreversible"
-        if REVERSIBLE.search(name):
+        if REVERSIBLE.search(name) and not (paging and role == "link"):
             return "reversible"
     return "read"
 
 
-def check_action(policy: Policy, action: str, role: str, name: str) -> Risk:
-    risk = classify(action, role, name)
+def check_action(policy: Policy, action: str, role: str, name: str, paging: bool = False) -> Risk:
+    risk = classify(action, role, name, paging)
     if risk == "irreversible":
         raise PolicyViolation(f"blocked by policy: irreversible action ({role} {name!r}). Automation can reach a "
                               f"commit point but never press it; stop here.")

@@ -1,0 +1,52 @@
+{
+  "capability": "core_banking.find_transaction_by_reference",
+  "title": "Find a transaction in a member's history by its reference",
+  "description": "Opens a member's transaction history, pages through it to the transaction with the given reference, and returns its date and amount.",
+  "product": "mock-core-banking",
+  "versionRange": ">=1.0 <2.0",
+  "entryPath": "/",
+  "goal": "Sign on, look up member {{inputs.memberId}}, open their transaction history, find the transaction with reference {{inputs.reference}} (it may be on a later page), and read its date and amount.",
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "member"
+    },
+    "reference": {
+      "type": "string",
+      "description": "a transaction reference, e.g. REF-0007",
+      "pattern": "^REF-[0-9]{4}$"
+    }
+  },
+  "outputs": {
+    "transactionDate": {
+      "type": "string",
+      "description": "the transaction's date"
+    },
+    "amount": {
+      "type": "money",
+      "description": "the transaction's amount"
+    }
+  },
+  "resultsSpanPages": true,
+  "maxPages": 10,
+  "secrets": [
+    "APP_USER",
+    "APP_PASSWORD"
+  ],
+  "commitPaths": [
+    "/subaccount/confirm"
+  ],
+  "maxRisk": "read",
+  "probes": [
+    {
+      "inputs": {
+        "memberId": "99999"
+      },
+      "why": "a member number that doesn't exist",
+      "expect": "MEMBER_NOT_FOUND"
+    }
+  ]
+}

@@ -38,11 +38,27 @@ class Recorder:
         self._ids: set[str] = set()
         # Set once the page has shown something hostile: every step recorded after it needs a person's look
         self.landed: dict[str, Visible] = {}  # step id -> a heading on the screen it led to
+        self._paging: tuple[str, Target] | None = None  # a next_page awaiting the step that uses what it found
         self.review_from: str | None = None
+
+    def page(self, intent: str, target: Target):
+        """The model turned a page of results (next_page). Not a step yet: it becomes a pageUntil whose `until` is
+        the target of whatever step uses the row next. Several presses of the same control are one loop (D28)."""
+        if self._paging is None:
+            self._paging = (intent, target)
+
+    def _close_paging(self, until: Target):
+        if self._paging is not None:
+            intent, target = self._paging
+            self._paging = None
+            self.steps.append(Step(id=step_id(intent, self._ids), intent=intent, action="pageUntil", target=target,
+                                   until=until, max_pages=int(self.goal.get("maxPages", 10)), risk="read",
+                                   needs_review=self.review_from is not None))
 
     def act(self, intent: str, action: str, target: Target, value: str | None, risk: str, recorded_by: str = "model",
             needs_review: bool = False, landed: Visible | None = None):
         """landed: a heading on the screen the action led to, if it named one."""
+        self._close_paging(target)
         self.steps.append(Step(id=step_id(intent, self._ids), intent=intent, action=action, target=target, value=value,
                                risk=risk, recorded_by=recorded_by,
                                needs_review=needs_review or self.review_from is not None))
@@ -53,6 +69,7 @@ class Recorder:
         if output in self.outputs:
             raise ValueError(f"output {output} is already extracted; each output has exactly one source")
         self.outputs[output] = OutputSpec(type=kind)
+        self._close_paging(target)
         extractor = Extractor(**target.model_dump(), parse=PARSE[kind])
         self.steps.append(Step(id=step_id(intent, self._ids), intent=intent, action="extract",
                                extract={output: extractor}, risk="read", needs_review=self.review_from is not None))
@@ -82,6 +99,8 @@ class Recorder:
 
     def build(self, success: Visible) -> Artifact:
         """Raises ValidationError when the recording breaks a schema rule; the loop shows that to the model."""
+        if self._paging is not None:
+            raise ValueError("next_page was the last thing done: act on or extract from the row it paged to first")
         goal = self.goal
         checkpoint = [success, *(OutputPresent(output=o) for o in self.outputs), *self.identity]
         entry_path = goal.get("entryPath", "/")

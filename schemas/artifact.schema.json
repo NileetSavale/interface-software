@@ -1004,7 +1004,8 @@
             "uncheck",
             "press",
             "navigate",
-            "extract"
+            "extract",
+            "pageUntil"
           ],
           "title": "Action",
           "type": "string"
@@ -1079,6 +1080,33 @@
           ],
           "default": null,
           "description": "Postcondition. We never assume a click worked."
+        },
+        "until": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Target"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "pageUntil: what must be on screen to stop turning pages."
+        },
+        "maxPages": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "pageUntil: the most Next presses allowed.",
+          "title": "Maxpages"
         },
         "recordedBy": {
           "default": "model",

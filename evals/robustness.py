@@ -36,7 +36,7 @@ class Tracing(Replayer):
 def run(n: int = 30, **_) -> dict:
     flows = []
     with mock_app() as app:
-        for flow in ("lookup", "open_sub_account"):
+        for flow in ("lookup", "open_sub_account", "find_member", "history"):
             subject = artifact(flow, app)
             steps = [s.id for s in subject.all_steps() if s.action != "navigate"]
             app.layout(0)

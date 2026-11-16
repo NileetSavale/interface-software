@@ -65,6 +65,34 @@ def cases() -> list[dict]:
     return out
 
 
+def list_cases() -> list[dict]:
+    """Bank A only: a row chosen from several by the input it shows, never by position, and a row pages away (D28)."""
+    find, hist = HAPPY["find_member"], HAPPY["history"]
+    return [
+        dict(flow="find_member", case="one of several by date of birth", inputs=find, fault=None, expect="success"),
+        dict(flow="find_member", case="three Chens, one born that day", inputs={"lastName": "Chen", "dob": "07/04/1985"},
+             fault=None, expect="success"),
+        dict(flow="find_member", case="two Chens born the same day", inputs={"lastName": "Chen", "dob": "02/14/1990"},
+             fault=None, expect="failed/AMBIGUOUS_TARGET"),
+        dict(flow="find_member", case="no Chen born that day", inputs={"lastName": "Chen", "dob": "01/01/2000"},
+             fault=None, expect="failed/TARGET_UNRESOLVED"),
+        dict(flow="find_member", case="no member has that surname", inputs={**find, "lastName": "Zzyzx"}, fault=None,
+             expect="business_outcome/MEMBER_NOT_FOUND"),
+        dict(flow="find_member", case="the right row, the wrong member served", inputs=find, fault="wrong_record",
+             expect="failed/WRONG_RECORD"),
+        dict(flow="history", case="on page 1", inputs={**hist, "reference": "REF-0003"}, fault=None, expect="success"),
+        dict(flow="history", case="on page 3", inputs=hist, fault=None, expect="success"),
+        dict(flow="history", case="last row of the last page", inputs={**hist, "reference": "REF-0035"}, fault=None,
+             expect="success"),
+        dict(flow="history", case="on no page", inputs={**hist, "reference": "REF-0099"}, fault=None,
+             expect="failed/TARGET_UNRESOLVED"),
+        dict(flow="history", case="past the page limit", inputs=hist, fault=None, expect="failed/TARGET_UNRESOLVED",
+             max_pages=1),
+        dict(flow="history", case="member doesn't exist", inputs={**hist, "memberId": "99999"}, fault=None,
+             expect="business_outcome/MEMBER_NOT_FOUND"),
+    ]
+
+
 def kind(result_label: str) -> str:
     return result_label.split("/")[0].split("+")[0].rstrip("*")
 
@@ -119,10 +147,20 @@ def run(n: int = 1, **_) -> dict:
                                                 pending_dir=Path(tempfile.mkdtemp()),
                                                 page_map=bank_map.frozen() if bank_map else None)
                     record(variant, case, result, seconds, i)
+        app.variant("a")
+        for case in list_cases():
+            subject = artifact(case["flow"], app)
+            if case.get("max_pages"):
+                subject = subject.model_copy(update={"steps": [
+                    s.model_copy(update={"max_pages": case["max_pages"]}) if s.action == "pageUntil" else s
+                    for s in subject.steps]})
+            app.fault(case["fault"])
+            result, seconds, _ = replay(app, subject, case["inputs"], pending_dir=Path(tempfile.mkdtemp()))
+            record("a", case, result, seconds)
         committed = app.confirmed()
     confusion = Counter((kind(r["expect"]), kind(r["actual"])) for r in rows)
     return {
-        "n_per_case": n, "cases": len(cases()), "variants": ["a", "b", "c"], "runs": len(rows),
+        "n_per_case": n, "cases": len(cases()) + len(list_cases()), "variants": ["a", "b", "c"], "runs": len(rows),
         "passed": sum(r["pass"] for r in rows), "proposed_overrides": proposals,
         # The commit point: nothing in this suite may ever open an account
         "sub_accounts_opened": committed,

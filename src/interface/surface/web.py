@@ -16,7 +16,7 @@ from typing import Literal
 from playwright.async_api import BrowserContext, ElementHandle, Error as PlaywrightError, Frame, Locator, Page
 
 from interface.artifact.schema import (
-    Action, AnchorStrategy, LabelStrategy, OnlyInRegionStrategy, Policy, Regex, RegionScope, RoleStrategy, Strategy, TableCellStrategy, Target, TextMatch,
+    Action, AnchorStrategy, LabelStrategy, OnlyInRegionStrategy, Policy, Regex, RegionScope, RoleStrategy, RowWhere, Strategy, TableCellStrategy, Target, TextMatch,
     TextStrategy, Visible,
 )
 from interface.pii import LABELS, PATTERNS
@@ -253,6 +253,15 @@ class WebSurface(Surface):
         found = await frame.evaluate("([el, first]) => window.__ifz.describeValue(el, first)",
                                      [handle, purpose == "read" and first_result])
         as_control = {"role": role} if purpose == "act" else {}
+        # A row no static label names, named by the cell that equals an input: the Select link in the row where Date
+        # of Birth = {{inputs.dob}}. Two rows that match fail as ambiguous; none, as unresolved; never "the first"
+        if inputs and (row := await frame.evaluate("el => window.__ifz.rowContext(el)", handle)):
+            for cell in row["cells"]:
+                given = next((n for n, v in inputs.items() if v and v.strip() == cell["text"]), None)
+                if given and not (cell["column"] == row["column"] and purpose == "read"):
+                    candidates.append(TableCellStrategy(
+                        table_anchor=row["tableAnchor"], column=row["column"], **as_control,
+                        row_where=RowWhere(column=cell["column"], equals=f"{{{{inputs.{given}}}}}")))
         candidates += [TableCellStrategy.model_validate({**c, **as_control}) if c["kind"] == "tableCell" else
                        AnchorStrategy.model_validate({**c, **as_control}) for c in found]
 
@@ -462,6 +471,18 @@ class WebSurface(Surface):
         if condition.label:
             return frame.get_by_label(py_pattern(condition.label), exact=True)
         return frame.get_by_text(py_pattern(condition.text or condition.name), exact=isinstance(condition.text or condition.name, str))
+
+    async def gone(self, handle: object, timeout_ms: int) -> None:
+        """Wait until an element has left the page (its document was replaced), or the timeout passes."""
+        assert isinstance(handle, ElementHandle)
+        deadline = time.monotonic() + timeout_ms / 1000
+        while time.monotonic() < deadline:
+            try:
+                if not await handle.evaluate("el => el.isConnected"):
+                    return
+            except PlaywrightError:
+                return  # its execution context was destroyed: navigated away
+            await asyncio.sleep(POLL_SECONDS)
 
     async def headings(self) -> list[Visible]:
         """The visible headings that hold no data: what a screen is called, whatever record it shows."""

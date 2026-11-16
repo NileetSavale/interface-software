@@ -161,6 +161,21 @@
     return after();
   }
 
+  // Where an element sits in a labelled table with a header: the table's label, its column, and the text of every
+  // cell in its row by column, so the recorder can pick the row by the cell that equals an input (row where Date of
+  // Birth = {{inputs.dob}}) when no static label names the row
+  function rowContext(el) {
+    const cell = el.closest("td,th");
+    const table = cell && cell.closest("table");
+    const header = table && headerRow(table);
+    const label = table && tableLabel(table);
+    if (!header || !label || cell.parentElement === header) return null;
+    const heads = Array.from(header.cells).map(textOf);
+    if (!heads[cell.cellIndex]) return null;
+    return { tableAnchor: label, column: heads[cell.cellIndex],
+             cells: Array.from(cell.parentElement.cells).map((c, i) => ({ column: heads[i], text: textOf(c) })).filter((c) => c.column) };
+  }
+
   // The nearest labelled region around an element: what tells two same-named controls apart (scope, not index).
   // A fieldset is named by its legend, a dialog or landmark by aria-label. Names with digits are data, so skipped.
   function regionOf(el) {
@@ -222,5 +237,5 @@
     return masked;
   }
 
-  window.__ifz = { anchor, tableCell, describeValue, regionOf, textOf, maskPII };
+  window.__ifz = { anchor, tableCell, describeValue, rowContext, regionOf, textOf, maskPII };
 })();

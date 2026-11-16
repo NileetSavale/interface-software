@@ -27,18 +27,25 @@ import random
 import secrets
 from html import escape
 
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 APP_USER = os.environ.get("APP_USER", "teller01")
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "demo-only-password")
 
 MEMBERS = {
-    "12345": {"name": "Jane Doe", "accounts": [("Savings", "0001-12345-00", "4,210.55"), ("Checking", "0001-12345-10", "812.07")]},
-    "23456": {"name": "Rafael Ortiz", "accounts": [("Savings", "0001-23456-00", "15,002.10")]},
-    "34567": {"name": "Mei Chen", "accounts": [("Checking", "0001-34567-10", "96.40"), ("Savings", "0001-34567-00", "2,500.00")]},
-    "45678": {"name": "Staff Member", "restricted": True, "accounts": [("Savings", "0001-45678-00", "1,000.00")]},
+    "12345": {"name": "Jane Doe", "dob": "04/01/1980",
+              "accounts": [("Savings", "0001-12345-00", "4,210.55"), ("Checking", "0001-12345-10", "812.07")]},
+    "23456": {"name": "Rafael Ortiz", "dob": "11/23/1975", "accounts": [("Savings", "0001-23456-00", "15,002.10")]},
+    "34567": {"name": "Mei Chen", "dob": "07/04/1985",
+              "accounts": [("Checking", "0001-34567-10", "96.40"), ("Savings", "0001-34567-00", "2,500.00")]},
+    "45678": {"name": "Staff Member", "dob": "01/01/1970", "restricted": True,
+              "accounts": [("Savings", "0001-45678-00", "1,000.00")]},
+    # Three Chens for the name search, two born the same day: a search the date of birth can't settle
+    "56789": {"name": "Ana Chen", "dob": "02/14/1990", "accounts": [("Savings", "0001-56789-00", "310.00")]},
+    "67890": {"name": "Wei Chen", "dob": "02/14/1990", "accounts": [("Checking", "0001-67890-10", "58.25")]},
 }
+PAGE_SIZE = 10
 FAULTS = {"server_error", "session_timeout", "interstitial", "slow", "unknown_dialog", "wrong_record", "late_fill",
           "late_wrong_record"}
 # A page that arrives with its values empty and fills them in a moment later, as ParaBank's account page does from a
@@ -231,10 +238,50 @@ def find(request: Request, last: str = ""):
     if not signed_in(request):
         return session_expired()
     hits = [(n, m) for n, m in MEMBERS.items() if last and m["name"].lower().split()[-1].startswith(last.lower())]
-    rows = "".join(f'<TR><TD>{n}</TD><TD>{m["name"]}</TD><TD><A HREF="/member?id={n}">Select</A></TD></TR>' for n, m in hits)
+    if not hits:
+        return page(f"""<TABLE CELLPADDING=8><TR><TD><FONT COLOR="#CC0000">No members found for "{escape(last[:30])}".</FONT>
+</TD></TR><TR><TD><A HREF="/inquiry">New search</A></TD></TR></TABLE>""")
+    rows = "".join(f'<TR><TD>{n}</TD><TD>{m["name"]}</TD><TD>{m["dob"]}</TD>'
+                   f'<TD><A HREF="/member?id={n}"{T("select:" + n)}>Select</A></TD></TR>' for n, m in shuffled(hits, "results"))
     return page(f"""<B>Search Results</B>
-<TABLE CELLPADDING=4 BORDER=1 CELLSPACING=0><TR BGCOLOR="#DDDDDD"><TH>Member #</TH><TH>Name</TH><TH></TH></TR>{rows}</TABLE>
+<TABLE CELLPADDING=4 BORDER=1 CELLSPACING=0><TR BGCOLOR="#DDDDDD"><TH>Member #</TH><TH>Name</TH><TH>Date of Birth</TH>
+<TH>Action</TH></TR>{rows}</TABLE>
 <BR><A HREF="/inquiry">New search</A>""")
+
+
+def transactions(key: str) -> list[tuple[str, str, str, str]]:
+    """35 made-up transactions per member, newest first: (date, description, reference, amount)."""
+    kinds = ["ATM Withdrawal", "Payroll Deposit", "Card Purchase", "Transfer In", "Transfer Out", "Check Deposit",
+             "Bill Payment"]
+    return [(f"{10 - i // 28:02d}/{28 - i % 28:02d}/2026", kinds[(i + int(key)) % len(kinds)], f"REF-{i + 1:04d}",
+             f"{(i + 1) * 7.31 % 400 + 5:,.2f}") for i in range(35)]
+
+
+@app.get("/history", response_class=HTMLResponse)
+def history(request: Request, id: str = "", page_no: int = Query(1, alias="page")):
+    """A member's transactions, PAGE_SIZE to a page with Previous / Next: where a row can be pages away."""
+    if not signed_in(request):
+        return session_expired()
+    key = id.strip()
+    if key not in MEMBERS:
+        return page(f"""<TABLE CELLPADDING=8><TR><TD><FONT COLOR="#CC0000">No members found for "{escape(key[:10])}".</FONT>
+</TD></TR></TABLE>""")
+    rows = transactions(key)
+    pages = (len(rows) + PAGE_SIZE - 1) // PAGE_SIZE
+    page_no = min(max(page_no, 1), pages)
+    shown = shuffled(rows[(page_no - 1) * PAGE_SIZE:page_no * PAGE_SIZE], f"history:{page_no}")
+    body = "".join(f"<TR><TD{T('date:' + ref)}>{d}</TD><TD>{desc}</TD><TD>{ref}</TD>"
+                   f"<TD ALIGN=RIGHT{T('amount:' + ref)}>${amt}</TD></TR>"
+                   for d, desc, ref, amt in shown)
+    pager = " &nbsp; ".join(
+        ([f'<A HREF="/history?id={key}&page={page_no - 1}">Previous</A>'] if page_no > 1 else [])
+        + [f"Page {page_no} of {pages}"]
+        + ([f'<A HREF="/history?id={key}&page={page_no + 1}"{T("next_page")}>Next</A>'] if page_no < pages else []))
+    return page(f"""<TABLE CELLPADDING=4 BORDER=0><TR><TD>Member #:</TD><TD{T("member_number_value")}>{key}</TD></TR></TABLE>
+<BR><B>Transaction History</B>
+<TABLE CELLPADDING=4 BORDER=1 CELLSPACING=0><TR BGCOLOR="#DDDDDD"><TH>Date</TH><TH>Description</TH><TH>Reference</TH>
+<TH>Amount</TH></TR>{body}</TABLE>
+<P>{pager}</P><A HREF="/member?id={key}">Back to member</A>""")
 
 
 @app.get("/member", response_class=HTMLResponse)
@@ -287,8 +334,10 @@ async def member(request: Request, id: str = "", ack: str = ""):
 continuing.</P><FORM METHOD="dialog"><INPUT TYPE="submit" VALUE="OK"></FORM></DIALOG>""" if fault == "unknown_dialog" else ""
     dialog += hostile(fault, key)
     detail = shuffled([f'<TR><TD>Member #:</TD><TD{T("member_number_value")}>{key}</TD></TR>',
-                       f'<TR><TD>Name:</TD><TD{T("member_name_value")}>{found["name"]}</TD></TR>'], "detail")
+                       f'<TR><TD>Name:</TD><TD{T("member_name_value")}>{found["name"]}</TD></TR>',
+                       f'<TR><TD>Date of Birth:</TD><TD{T("member_dob_value")}>{found["dob"]}</TD></TR>'], "detail")
     links = shuffled([f'<A HREF="/subaccount/new?id={key}"{T("open_sub_account_link")}>Open Sub-Account</A>',
+                      f'<A HREF="/history?id={key}"{T("history_link")}>Transaction History</A>',
                       '<A HREF="/inquiry">New search</A>'], "links")
     return page(f"""{dialog}{nest(f'''<TABLE CELLPADDING=4 BORDER=0>
   <TR><TD COLSPAN=2><B>Member Detail</B></TD></TR>

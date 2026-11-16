@@ -73,6 +73,9 @@ TOOLS = [
           "reached: preferably the final screen's title or heading, otherwise a label only that screen has; never a "
           "data value."}, summary={"type": "string"}),
     _tool("give_up", "Stop: you're stuck or it isn't safe to continue.", reason={"type": "string"}),
+    # Offered only when the goal says results can span pages (D28)
+    _tool("next_page", "Go to the next page of results, when what you need isn't on this page. Recorded as a bounded "
+          "loop: replay pages until the row it's for is on screen.", ref=_REF, intent=_INTENT),
     _tool("follow_known", "Do actions already learned from verified runs on this app (the k1, k2… listed under "
           "'Known actions'), in the order given, in one call. Each is checked and recorded like your own action.",
           ids={"type": "array", "items": {"type": "string"}, "description": "e.g. [\"k1\", \"k2\", \"k3\"]"}),
@@ -108,6 +111,7 @@ class Discovery:
         self.hub = operator_hub
         self.pause_timeout_s = pause_timeout_s
         self._rung = 0
+        self.tools = [t for t in TOOLS if t["name"] != "next_page" or goal.get("resultsSpanPages")]
         parts = urlsplit(self.base_url)
         self.recorder = Recorder(goal, f"{parts.scheme}://{parts.netloc}", self.run_id, planner.model)
         self.policy = Policy(allowed_origins=[self.recorder.origin], max_risk=goal.get("maxRisk", "read"),
@@ -188,12 +192,15 @@ class Discovery:
         return (f"Goal: {self.goal['goal']}\n\nInputs (type these placeholders):\n{inputs or '- none'}\n\n"
                 f"Credentials available:\n{secrets or '- none'}\n\n"
                 + (f"Outputs to extract, with these names (done is refused until each is):\n{outputs}\n\n" if outputs else "")
+                + ("Results here can span pages. An input's value shows on screen as its placeholder, so the row you "
+                   "need is the one showing it: while it isn't on the page, use next_page; once it is, act on or "
+                   "extract from that row.\n\n" if self.goal.get("resultsSpanPages") else "")
                 + f"Current screen:\n{screen}")
 
     async def _loop(self) -> dict:
         messages: list = [{"role": "user", "content": self._intro(await self._screen())}]
         for turn_no in range(1, self.max_steps + 1):
-            turn = await self.planner.turn(SYSTEM, TOOLS, messages)
+            turn = await self.planner.turn(SYSTEM, self.tools, messages)
             turn_cost = turn.usage.cost(self.planner.model)
             self.cost += turn_cost
             calls = turn.tool_calls()
@@ -348,7 +355,9 @@ class Discovery:
         name, args = call["name"], call["input"] or {}
         try:
             match name:
-                case "click" | "type_text" | "select_option":
+                case "next_page" if not self.goal.get("resultsSpanPages"):
+                    return "next_page isn't available for this goal.", True, None
+                case "click" | "type_text" | "select_option" | "next_page":
                     return await self._act(name, args), False, None
                 case "follow_known":
                     return await self._follow(args), False, None
@@ -361,19 +370,19 @@ class Discovery:
                 case "give_up":
                     return "Stopped.", False, self._result("gave_up", reason=args.get("reason", ""))
                 case _:
-                    return f"Unknown tool {name}. Use one of: {', '.join(t['name'] for t in TOOLS)}.", True, None
+                    return f"Unknown tool {name}. Use one of: {', '.join(t['name'] for t in self.tools)}.", True, None
         except (SurfaceError, PolicyViolation, TemplateError, ValueError) as e:
             return f"{self.for_model(str(e))}\n\nCurrent screen:\n{await self._screen()}", True, None
 
     async def _act(self, name: str, args: dict) -> str:
-        action = {"click": "click", "type_text": "type", "select_option": "select"}[name]
+        action = {"click": "click", "type_text": "type", "select_option": "select", "next_page": "click"}[name]
         ref = args["ref"]
         role, label = self.surface.ref_line(ref)
         if (form := await self.surface.form_of(ref)) in self._hostile_forms:
             raise PolicyViolation("blocked by policy: this form asked for credentials after sign-on, so nothing on it "
                                   "is used (not its fields, not its buttons). Leave it alone; call give_up if the goal "
                                   "can't be reached without it.")
-        risk = check_action(self.policy, action, role, label)
+        risk = check_action(self.policy, action, role, label, paging=name == "next_page")
         target = await self.surface.describe(ref, "act", self.inputs)
         value = args.get("text", args.get("option"))
         if value is not None and re.search(r"⟨[A-Z]+_\d+", value):
@@ -395,7 +404,10 @@ class Discovery:
         screen = await self._screen()
         # Where a click landed, as a heading that wasn't on the screen before it: proof it got somewhere new
         landed = next((h for h in await self.surface.headings() if h not in headings), None) if action == "click" else None
-        self.recorder.act(args["intent"], action, target, value, risk, landed=landed)
+        if name == "next_page":
+            self.recorder.page(args["intent"], target)
+        else:
+            self.recorder.act(args["intent"], action, target, value, risk, landed=landed)
         self._transition(before, action, target, value, args["intent"], risk)
         return f"Done: {action} {role} {self.for_model(label)!r}.\n\nCurrent screen:\n{screen}"
 
@@ -456,7 +468,8 @@ class Discovery:
 
     async def _extract(self, args: dict) -> str:
         # The first row of a results table is a way to read only when the goal asks for the first result (D27)
-        target = await self.surface.describe(args["ref"], "read", first_result=bool(self.goal.get("firstResult")))
+        target = await self.surface.describe(args["ref"], "read", self.inputs,
+                                             first_result=bool(self.goal.get("firstResult")))
         value = await self.surface.read_ref(args["ref"])
         self.recorder.extract(args["intent"], args["output"], args["type"], target)
         # The model may see the value (it judges whether it read the right thing); the run log never keeps it

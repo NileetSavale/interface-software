@@ -32,7 +32,8 @@ OUT = ROOT / "evidence"
 # Values that must never appear in evidence: the mock's members, balances, member numbers, and the demo credentials
 FORBIDDEN = ["Jane Doe", "Mei Chen", "Rafael Ortiz", "Staff Member", "4,210.55", "4210.55", "2,500.00", "2500.00",
              "15,002.10", "812.07", "96.40", "12345", "34567", "23456", "45678", "0001-", "teller01",
-             "demo-only-password"]
+             "demo-only-password", "Ana Chen", "Wei Chen", "56789", "67890", "04/01/1980", "11/23/1975", "07/04/1985",
+             "02/14/1990", "187.75"]
 cases: list[dict] = []
 
 
@@ -53,11 +54,15 @@ def run(app, subject, inputs: dict, **kw):
     return asyncio.run(replayer.run()), replayer
 
 
+DISCOVERY_DIRS = {"lookup": "01-discovery-lookup", "open_sub_account": "02-discovery-open-sub-account",
+                  "find_member": "19-discovery-find-member", "history": "20-discovery-history-pages"}
+
+
 def discoveries():
-    for n, (flow, path) in enumerate(ARTIFACTS.items(), 1):
+    for flow, path in ARTIFACTS.items():
         art = load_artifact(path)
         run_id = art.provenance.discovery_run_id
-        dest = OUT / f"0{n}-discovery-{flow.replace('_', '-')}"
+        dest = OUT / DISCOVERY_DIRS[flow]
         shutil.copytree(RUNS / run_id, dest)
         for probe in sorted(RUNS.glob(f"{run_id}-probe*")):
             shutil.copytree(probe, dest / "probes" / probe.name.split("-")[-1])
@@ -192,6 +197,20 @@ def replays():
         if (replayer.pending_dir / "c.json").exists():
             shutil.copy(replayer.pending_dir / "c.json", OUT / "17-bank-c-map-fallback" / "proposed-override.c.json")
         app.variant("a")
+
+        # Item 5: one row out of several, and a row pages away (D28)
+        find, hist = artifact("find_member", app), artifact("history", app)
+        case("21-replay-one-of-three-chens", "Several matches: the one the input names", "Three Chens; the Select link "
+             "is found in the row where Date of Birth = {{inputs.dob}}, never by position, and the member page's date "
+             "of birth is checked before anything is read.", find, {"lastName": "Chen", "dob": "07/04/1985"})
+        case("22-replay-two-chens-same-birthday", "Several matches the input can't tell apart", "Two Chens born the "
+             "same day: AMBIGUOUS_TARGET. The run never takes the first one.", find,
+             {"lastName": "Chen", "dob": "02/14/1990"})
+        case("23-replay-row-on-page-3", "A row pages away", "pageUntil presses Next until the row where Reference = "
+             "{{inputs.reference}} is on screen, at most 10 times; each page turned is in the log.", hist,
+             HAPPY["history"])
+        case("24-replay-row-on-no-page", "A row on no page", "Searched all 4 pages, no next page: TARGET_UNRESOLVED, "
+             "saying how many pages it searched.", hist, {**HAPPY["history"], "reference": "REF-0099"})
 
 
 def map_discovery():

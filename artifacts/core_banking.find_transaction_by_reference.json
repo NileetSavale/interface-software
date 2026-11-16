@@ -1,0 +1,543 @@
+{
+  "schemaVersion": "1",
+  "capability": {
+    "id": "core_banking.find_transaction_by_reference",
+    "version": "1.0.0",
+    "title": "Find a transaction in a member's history by its reference",
+    "description": "Opens a member's transaction history, pages through it to the transaction with the given reference, and returns its date and amount."
+  },
+  "app": {
+    "product": "mock-core-banking",
+    "versionRange": ">=1.0 <2.0",
+    "surface": "web",
+    "entryPath": "/"
+  },
+  "status": "approved",
+  "provenance": {
+    "discoveryRunId": "disc_20261116T091435Z_3dd6a1",
+    "recordedAt": "2026-11-16T09:15:00+00:00",
+    "model": "claude-sonnet-5-5"
+  },
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "member"
+    },
+    "reference": {
+      "type": "string",
+      "description": "a transaction reference, e.g. REF-0007",
+      "pattern": "^REF-[0-9]{4}$",
+      "sensitive": false
+    }
+  },
+  "outputs": {
+    "transactionDate": {
+      "type": "string",
+      "redact": "none"
+    },
+    "amount": {
+      "type": "money",
+      "redact": "none"
+    }
+  },
+  "outcomes": [
+    {
+      "code": "APP_ERROR",
+      "kind": "fatal",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)internal server error|an unexpected error|service unavailable"
+        }
+      },
+      "description": "The application failed. Stop and keep the evidence."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)not authori[sz]ed|access denied|insufficient (privileges|permissions)"
+        }
+      },
+      "description": "The operator account may not do this. An answer for the caller, not a fault."
+    },
+    {
+      "code": "UNEXPECTED_DIALOG",
+      "kind": "escalate",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "role": "dialog"
+      },
+      "description": "A dialog the capability doesn't know. A person decides."
+    },
+    {
+      "code": "SLOW_LOAD",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)^\\s*(loading|please wait)\\b"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "wait",
+          "timeoutMs": 5000
+        },
+        "maxAttempts": 2,
+        "resume": "step"
+      },
+      "description": "The app shows a wait message. Wait longer, then carry on."
+    },
+    {
+      "code": "SESSION_EXPIRED",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)session (has )?(expired|timed out)"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "subflow",
+          "subflow": "sign_on"
+        },
+        "maxAttempts": 1,
+        "resume": "start"
+      },
+      "description": "Sign on again and run the steps from the first."
+    },
+    {
+      "code": "MEMBER_NOT_FOUND",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)No members found for"
+        }
+      },
+      "description": "The member inquiry screen reports that no member matches the supplied member number, offering a \"New search\" link. (learned from probe: a member number that doesn't exist)"
+    }
+  ],
+  "policy": {
+    "allowedOrigins": [
+      "http://127.0.0.1:4100"
+    ],
+    "allowedPaths": [
+      "/*"
+    ],
+    "maxRisk": "read",
+    "commitPaths": [
+      "/subaccount/confirm"
+    ]
+  },
+  "subflows": {
+    "sign_on": [
+      {
+        "id": "open_sign_on_page",
+        "intent": "open the sign-on page",
+        "action": "navigate",
+        "value": "/",
+        "risk": "read",
+        "recordedBy": "author",
+        "needsReview": false
+      },
+      {
+        "id": "enter_user",
+        "intent": "enter user",
+        "action": "type",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "User ID"
+            },
+            {
+              "kind": "label",
+              "label": "User ID"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "User ID",
+              "relation": "right-of",
+              "role": "textbox"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "User ID",
+              "relation": "after",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.APP_USER}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "enter_password",
+        "intent": "enter password",
+        "action": "type",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "Password"
+            },
+            {
+              "kind": "label",
+              "label": "Password"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "Password",
+              "relation": "right-of",
+              "role": "textbox"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "Password",
+              "relation": "after",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.APP_PASSWORD}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "sign",
+        "intent": "sign on",
+        "action": "click",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "button",
+              "name": "Sign On"
+            },
+            {
+              "kind": "text",
+              "text": "Sign On"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "Password",
+              "relation": "after",
+              "role": "button"
+            }
+          ]
+        },
+        "risk": "read",
+        "expect": {
+          "kind": "visible",
+          "frame": [
+            "nav"
+          ],
+          "role": "link",
+          "name": "Member Inquiry"
+        },
+        "recordedBy": "model",
+        "needsReview": false
+      }
+    ]
+  },
+  "preconditions": [
+    {
+      "use": "sign_on",
+      "unless": {
+        "kind": "visible",
+        "frame": [
+          "nav"
+        ],
+        "role": "link",
+        "name": "Member Inquiry"
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "open_member_inquiry",
+      "intent": "open member inquiry",
+      "action": "click",
+      "target": {
+        "frame": [
+          "nav"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Member Inquiry"
+          },
+          {
+            "kind": "text",
+            "text": "Member Inquiry"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "member_number",
+      "intent": "member number",
+      "action": "type",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Member #"
+          },
+          {
+            "kind": "label",
+            "label": "Member #"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Member #",
+            "relation": "right-of",
+            "role": "textbox"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Member #",
+            "relation": "after",
+            "role": "textbox"
+          }
+        ]
+      },
+      "value": "{{inputs.memberId}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "search",
+      "intent": "search",
+      "action": "click",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "within": {
+          "role": "group",
+          "name": "Member Inquiry"
+        },
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Search"
+          },
+          {
+            "kind": "text",
+            "text": "Search"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Member #",
+            "relation": "after",
+            "role": "button"
+          },
+          {
+            "kind": "onlyInRegion",
+            "role": "button"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "open_history",
+      "intent": "open history",
+      "action": "click",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Transaction History"
+          },
+          {
+            "kind": "text",
+            "text": "Transaction History"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "look_for_reference_next_page",
+      "intent": "look for reference on next page",
+      "action": "pageUntil",
+      "target": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "Next"
+          },
+          {
+            "kind": "text",
+            "text": "Next"
+          }
+        ]
+      },
+      "risk": "read",
+      "until": {
+        "frame": [
+          "main"
+        ],
+        "strategies": [
+          {
+            "kind": "tableCell",
+            "tableAnchor": "Transaction History",
+            "rowWhere": {
+              "column": "Reference",
+              "equals": "{{inputs.reference}}"
+            },
+            "column": "Date"
+          }
+        ]
+      },
+      "maxPages": 10,
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "date",
+      "intent": "date",
+      "action": "extract",
+      "extract": {
+        "transactionDate": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "tableCell",
+              "tableAnchor": "Transaction History",
+              "rowWhere": {
+                "column": "Reference",
+                "equals": "{{inputs.reference}}"
+              },
+              "column": "Date"
+            }
+          ],
+          "parse": "text"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "amount",
+      "intent": "amount",
+      "action": "extract",
+      "extract": {
+        "amount": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "tableCell",
+              "tableAnchor": "Transaction History",
+              "rowWhere": {
+                "column": "Reference",
+                "equals": "{{inputs.reference}}"
+              },
+              "column": "Amount"
+            }
+          ],
+          "parse": "money"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    }
+  ],
+  "success": {
+    "checkpoint": [
+      {
+        "kind": "visible",
+        "frame": [
+          "main"
+        ],
+        "text": "Reference"
+      },
+      {
+        "kind": "output",
+        "output": "transactionDate",
+        "notEmpty": true
+      },
+      {
+        "kind": "output",
+        "output": "amount",
+        "notEmpty": true
+      },
+      {
+        "kind": "identity",
+        "input": "memberId",
+        "target": {
+          "frame": [
+            "main"
+          ],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Member #:",
+              "relation": "right-of"
+            }
+          ]
+        },
+        "equals": "{{inputs.memberId}}"
+      }
+    ]
+  },
+  "overrides": {}
+}
