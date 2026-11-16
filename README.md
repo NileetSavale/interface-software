@@ -1,5 +1,7 @@
 # interface
 
+[![tests](https://github.com/NileetSavale/interface-software/actions/workflows/tests.yml/badge.svg)](https://github.com/NileetSavale/interface-software/actions/workflows/tests.yml)
+
 **Learn a task once with Claude. Replay it without the model.**
 
 An LLM drives a legacy banking UI (framesets, layout tables, no test ids) to reach a goal in plain English. The run
