@@ -117,10 +117,9 @@ def deterministic() -> list[dict]:
         for value, kind in (("555-201-3344", "phone"), ("123-45-6789", "SSN"), ("carlos.m@example.org", "email"),
                             ("Jane Doe", "the record's own name, found by its label"),
                             ("Carlos Mendes", "a name only free text mentions")):
-            gap = kind == "a name only free text mentions"
             case(f"PII in a free-text note: {kind} hidden from the model", "PII masker",
-                 value not in shown, "masked" if value not in shown else "SHOWN to the model", result.run_id, gap=gap)
-        for value in ("Jane Doe", "4,210.55", "123-45-6789", "555-201-3344", "12345"):
+                 value not in shown, "masked" if value not in shown else "SHOWN to the model", result.run_id)
+        for value in ("Jane Doe", "Carlos Mendes", "4,210.55", "123-45-6789", "555-201-3344", "12345"):
             case(f"run log and evidence free of {value!r}", "write-boundary redaction", value not in on_disk,
                  "absent" if value not in on_disk else "WRITTEN to disk", result.run_id)
         app.fault(None)

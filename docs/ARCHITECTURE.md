@@ -546,7 +546,8 @@ full handoff in `evidence/`.
   never saw them.
 - **Limits:** regex and label-based detection misses PII in free text (e.g. a note field). Screenshot masking
   depends on a11y coverage. A production version would add an NER pass and fail closed: no screenshot is sent to
-  the model if any region can't be classified.
+  the model if any region can't be classified. *Built instead: a fail-closed rule for names in free text (D24),
+  below.*
 
 ### As built (Pass 2 item 3)
 - **Code:** `src/interface/pii.py` (Masker, PATTERNS, LABELS); `locate.js` `maskPII`; `WebSurface.screenshot`.
@@ -580,6 +581,17 @@ full handoff in `evidence/`.
 - The same detectors as above apply, plus secret env names (the pattern from loop_runner `verifier.py`).
 - Credentials come from env and are typed by the Session, never by the model.
 - **Prompt injection:** page text is data, not instructions (same rule as loop_runner's system prompts).
+
+### As built: names in free text (D24)
+- **Where:** prose only, meaning text, paragraph, cell or list content of five words or more. The names of controls,
+  headings, columns and options are the page's **vocabulary**, never prose.
+- **What's hidden:** every run of two or more capitalised words (initials, `Mc`/`O'`, hyphens, accents and particles
+  like `de la` included), or a title and a name (`Mr. Lee`), as a stable `⟨NAME_n⟩`.
+- **What isn't:** a run the page uses as a label, also when a sentence's first word is stuck to it ("Use Member
+  Inquiry"). A guess from a note is not hidden on a later screen that uses it as a label ("Holiday Club" as an
+  option), so a note can't blind the model to a control.
+- **Fails closed:** a non-name phrase may be hidden; a two-word name is not let through. Deterministic, no model.
+- **Limit:** a lone first name ("ask Carlos") or a lower-case name. Tests: `tests/test_pii.py`.
 
 **Limits to state honestly in REPORT:** regex redaction misses free-text PII; screenshot masking depends on a11y
 coverage; classification of irreversibility is heuristic, which is why it's reviewable.

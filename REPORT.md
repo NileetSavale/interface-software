@@ -208,16 +208,19 @@ screen recording, with PII masked throughout.
 - **Data handling.**
   - **The model sees** `{{placeholders}}` for inputs and secrets, and stable `⟨NAME_1⟩` tokens for names, account
     numbers, amounts, SSNs, phones and emails. It can't type a value it read off the page.
+  - **Names in free text** (a note: "spoke with her son Carlos Mendes") have no label to give them away. A rule
+    hides every run of two or more capitalised words, or a title and a name, unless the page uses it as a label
+    (D24). It fails closed and is deterministic: a model-based NER would catch more, but it can miss, and replay
+    would then depend on a model version.
   - **Credentials** come from the environment, are typed by code, and only on the sign-on page. A form that asks
     later is blocked, and later steps need review.
   - **On disk,** everything is redacted at the write boundary. Screenshots are masked in the page and fail closed.
   - **Wrong-record evidence** keeps structure only.
-  - **Measured:** 15/16 safety cases without the LLM, and 12/12 with Claude on hostile pages (injection, a fake
+  - **Measured:** 17/17 safety cases without the LLM, and 12/12 with Claude on hostile pages (injection, a fake
     password form, an off-site link, an "OK" commit), with zero harm.
 - **Limits.**
   - The risk classifier is name-based, and commit paths must be declared per app.
-  - A name that appears **only in free text** reaches the model. This is the one open case; it needs an NER pass
-    that fails closed.
+  - In free text, a lone first name ("ask Carlos") or a name in lower case still reaches the model.
   - Masking depends on accessibility-tree coverage.
 
 ## Cuts
@@ -230,7 +233,7 @@ screen recording, with PII masked throughout.
 - **RAG or a vector database: deliberately not used.** Every lookup is an exact key or a short list; similarity search
   would only add ways to be wrong.
 - **Next:**
-  - an NER PII pass;
+  - a lone-first-name check in free text, against a names list;
   - per-tenant base URLs and allowlists as configuration;
   - sharing learned outcomes across an app's capabilities;
   - racing the "already signed in?" check, which costs about 2 s of each ~4 s replay.
