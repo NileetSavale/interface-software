@@ -68,5 +68,20 @@ async def register() -> list[str]:
     return accounts
 
 
+async def customer_exists() -> bool:
+    """Whether the saved login still signs on, outside any replay: after a reset of the public database it doesn't."""
+    async with async_playwright() as p:
+        browser = await p.chromium.launch()
+        page = await browser.new_page()
+        await page.goto(f"{BASE}/index.htm", wait_until="load")
+        await page.fill("input[name=username]", os.environ.get("PARABANK_USER", ""))
+        await page.fill("input[name=password]", os.environ.get("PARABANK_PASSWORD", ""))
+        await page.click('input[value="Log In"]')
+        await page.wait_for_load_state("load")
+        gone = await page.get_by_text("could not be verified").count() > 0
+        await browser.close()
+    return not gone
+
+
 if __name__ == "__main__":
     print(f"registered a fictional customer; accounts {', '.join(asyncio.run(register()))}; login saved to {ENV_FILE}")

@@ -2,8 +2,9 @@
 
     fault-matrix   suite 1, no LLM          stability    suite 3, no LLM
     discovery      suite 2, Claude, $       safety       suite 4 (--llm adds the Claude cases, $)
-    robustness     suite 5, no LLM          report       rebuild evals/report.md from evals/results/
-    all            every suite that needs no LLM, then the report
+    robustness     suite 5, no LLM          parabank     suite 6, no LLM, needs the network (a public demo bank)
+    report         rebuild evals/report.md from evals/results/
+    all            every suite that needs neither an LLM nor the network, then the report
 
 Each suite writes evals/results/<suite>.json (with date, commit and N); the report reads only those files.
 """
@@ -15,7 +16,7 @@ from evals.common import save
 from interface.cli import load_dotenv
 
 SUITES = {"fault-matrix": "fault_matrix", "stability": "stability", "robustness": "robustness",
-          "safety": "safety", "discovery": "discovery"}
+          "safety": "safety", "discovery": "discovery", "parabank": "parabank"}
 NO_LLM = ["fault-matrix", "stability", "robustness", "safety"]
 
 

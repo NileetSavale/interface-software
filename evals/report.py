@@ -51,6 +51,22 @@ strategy or a recovery on some runs. Durations include launching a fresh browser
 """
 
 
+def parabank(d: dict) -> str:
+    rows = [[a["flow"], a["n"], f"{a['success_rate']:.0%}", a["distinct_outputs"], a["p50_s"], a["p95_s"],
+             ", ".join(f"{k} ×{v}" for k, v in a["results"].items())] for a in d["arms"]]
+    resets = d["database_resets"]
+    return f"""## 6. Replay stability on an app we didn't write (no LLM, network)
+{_stamp(d)} [ParaBank]({d['site']}/index.htm), Parasoft's public demo bank: the two artifacts Claude discovered there
+([`evidence/parabank/`](../evidence/parabank/README.md)), {d['n_per_account']} replays on each of a fictional
+customer's two accounts, spaced out. Public database resets during the run: **{resets}**{" (each confirmed by a sign-on outside replay, a new customer registered, the run retried once)" if resets else ""}.
+
+{_table(["flow", "N", "success", "distinct outputs per account", "p50 s", "p95 s", "results"], rows)}
+
+A public server's data can change between runs and it resets now and then, so this is a separate arm, not part of
+`all`: the suites above run on the mock, where every condition is staged.
+"""
+
+
 def robustness(d: dict) -> str:
     parts = [f"""## 5. Recorder robustness (no LLM)
 {_stamp(d)} {d['seeds']} shuffled layouts per flow (frames, fieldsets, rows, columns and nesting reordered; labels kept).
@@ -106,7 +122,7 @@ between arms is noise.
 
 def write() -> str:
     sections = [(s, fn) for s, fn in (("fault_matrix", fault_matrix), ("discovery", discovery), ("stability", stability),
-                                      ("safety", safety), ("robustness", robustness))]
+                                      ("safety", safety), ("robustness", robustness), ("parabank", parabank))]
     body = [fn(data) for s, fn in sections if (data := _load(s))]
     missing = [s for s, _ in sections if not _load(s)]
     text = f"""# Evaluation report
