@@ -5,6 +5,7 @@ Same inputs, same steps: the only branching is on outcomes the artifact declares
 and are reported beside the result; drift (a fallback strategy hit) never fails a run, it's reported.
 """
 import asyncio
+import hashlib
 import json
 import os
 import re
@@ -112,6 +113,10 @@ class Replayer:
         artifact = overrides.apply(artifact, tenant) if tenant else artifact
         self.pending_dir = pending_dir or Path("artifacts") / artifact.capability.id / "overrides.pending"
         self.artifact = artifact
+        # What this run will do, as a short hash: approving an override or re-recording changes it, so the drift
+        # report compares only runs of the same steps (approving alone, a status change, doesn't)
+        self.revision = hashlib.sha256(artifact.model_dump_json(include={
+            "preconditions", "subflows", "steps", "outcomes", "success"}).encode()).hexdigest()[:12]
         self.base_url = base_url.rstrip("/")
         self.inputs = {k: str(v) for k, v in inputs.items()}
         self.headed = headed
@@ -143,7 +148,8 @@ class Replayer:
 
     async def run(self):
         self.log.event("replay_started", capability=self.artifact.capability.id, version=self.artifact.capability.version,
-                       inputs=sorted(self.inputs), tenant=self.tenant, page_map=self.map.version() if self.map else None)
+                       revision=self.revision, inputs=sorted(self.inputs), tenant=self.tenant,
+                       page_map=self.map.version() if self.map else None)
         if errors := validate_inputs(self.artifact, self.inputs):
             return self._finish(InvalidInput(run_id=self.run_id, completed_at=now(), errors=errors))
         if self.artifact.status != "approved" and not self.allow_draft:

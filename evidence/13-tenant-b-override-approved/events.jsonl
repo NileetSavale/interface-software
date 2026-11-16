@@ -1,13 +1,13 @@
-{"t": 0.0, "at": "2026-11-16T10:14:46+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "inputs": ["memberId"], "tenant": "b", "page_map": null}
-{"t": 0.241, "at": "2026-11-16T10:14:46+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.343, "at": "2026-11-16T10:14:48+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.409, "at": "2026-11-16T10:14:48+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.461, "at": "2026-11-16T10:14:48+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.867, "at": "2026-11-16T10:14:48+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.308, "at": "2026-11-16T10:14:49+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.373, "at": "2026-11-16T10:14:49+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "anchor"}
-{"t": 3.753, "at": "2026-11-16T10:14:49+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.812, "at": "2026-11-16T10:14:49+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
-{"t": 3.836, "at": "2026-11-16T10:14:49+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
-{"t": 3.845, "at": "2026-11-16T10:14:49+00:00", "event": "checkpoint_passed"}
-{"t": 3.87, "at": "2026-11-16T10:14:49+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261116T101446Z_2c9c23", "completedAt": "2026-11-16T10:14:49+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}
+{"t": 0.0, "at": "2026-11-16T19:58:08+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b72ba70cfad0", "inputs": ["memberId"], "tenant": "b", "page_map": null}
+{"t": 0.227, "at": "2026-11-16T19:58:09+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.281, "at": "2026-11-16T19:58:11+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.35, "at": "2026-11-16T19:58:11+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.396, "at": "2026-11-16T19:58:11+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.814, "at": "2026-11-16T19:58:11+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.254, "at": "2026-11-16T19:58:12+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.302, "at": "2026-11-16T19:58:12+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.702, "at": "2026-11-16T19:58:12+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.752, "at": "2026-11-16T19:58:12+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 3.78, "at": "2026-11-16T19:58:12+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
+{"t": 3.79, "at": "2026-11-16T19:58:12+00:00", "event": "checkpoint_passed"}
+{"t": 3.808, "at": "2026-11-16T19:58:12+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261116T195808Z_8a1857", "completedAt": "2026-11-16T19:58:12+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

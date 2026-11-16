@@ -1,14 +1,14 @@
-{"t": 0.0, "at": "2026-11-16T10:16:15+00:00", "event": "replay_started", "capability": "core_banking.find_transaction_by_reference", "version": "1.0.0", "inputs": ["memberId", "reference"], "tenant": null, "page_map": null}
-{"t": 0.263, "at": "2026-11-16T10:16:16+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.339, "at": "2026-11-16T10:16:18+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.405, "at": "2026-11-16T10:16:18+00:00", "event": "acted", "step": "enter_user", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.445, "at": "2026-11-16T10:16:18+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.847, "at": "2026-11-16T10:16:18+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.254, "at": "2026-11-16T10:16:19+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.316, "at": "2026-11-16T10:16:19+00:00", "event": "acted", "step": "member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.705, "at": "2026-11-16T10:16:19+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 4.105, "at": "2026-11-16T10:16:19+00:00", "event": "acted", "step": "open_history", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 6.093, "at": "2026-11-16T10:16:21+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 2}
-{"t": 8.042, "at": "2026-11-16T10:16:23+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 3}
-{"t": 10.011, "at": "2026-11-16T10:16:25+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 4}
-{"t": 13.782, "at": "2026-11-16T10:16:29+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261116T101615Z_4d09c7", "completedAt": "2026-11-16T10:16:29+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "look_for_reference_next_page", "errorClass": "TARGET_UNRESOLVED", "expected": "the row on one of the pages", "observed": "not on any of the 4 pages, and there's no next page", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261116T101615Z_4d09c7/look_for_reference_next_page.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261116T101615Z_4d09c7/look_for_reference_next_page.png"}]}}
+{"t": 0.0, "at": "2026-11-16T20:00:14+00:00", "event": "replay_started", "capability": "core_banking.find_transaction_by_reference", "version": "1.0.0", "revision": "8f2c8458650c", "inputs": ["memberId", "reference"], "tenant": null, "page_map": null}
+{"t": 0.228, "at": "2026-11-16T20:00:14+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.298, "at": "2026-11-16T20:00:17+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.367, "at": "2026-11-16T20:00:17+00:00", "event": "acted", "step": "enter_user", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.412, "at": "2026-11-16T20:00:17+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.828, "at": "2026-11-16T20:00:17+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.25, "at": "2026-11-16T20:00:18+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.293, "at": "2026-11-16T20:00:18+00:00", "event": "acted", "step": "member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.683, "at": "2026-11-16T20:00:18+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.098, "at": "2026-11-16T20:00:18+00:00", "event": "acted", "step": "open_history", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 6.05, "at": "2026-11-16T20:00:20+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 2}
+{"t": 7.984, "at": "2026-11-16T20:00:22+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 3}
+{"t": 9.935, "at": "2026-11-16T20:00:24+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 4}
+{"t": 13.631, "at": "2026-11-16T20:00:28+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261116T200014Z_49221f", "completedAt": "2026-11-16T20:00:28+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "look_for_reference_next_page", "errorClass": "TARGET_UNRESOLVED", "expected": "the row on one of the pages", "observed": "not on any of the 4 pages, and there's no next page", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261116T200014Z_49221f/look_for_reference_next_page.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261116T200014Z_49221f/look_for_reference_next_page.png"}]}}

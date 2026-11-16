@@ -7,6 +7,7 @@
     interface replay artifacts/core_banking.lookup_member_balance.json --tenant b --base-url http://localhost:4101 ...
     interface override artifacts/core_banking.lookup_member_balance.json --tenant b            (show the pending one)
     interface override artifacts/core_banking.lookup_member_balance.json --tenant b --approve
+    interface drift                                     (which steps drifted on which bank, across recent runs)
 """
 import argparse
 import asyncio
@@ -139,6 +140,16 @@ def cmd_override(args) -> int:
     return 0
 
 
+def cmd_drift(args) -> int:
+    from interface import drift
+    runs = [r for r in drift.read_runs(Path(args.runs))
+            if (not args.capability or r.capability.split("@")[0] == args.capability)
+            and (not args.tenant or r.tenant == args.tenant)]
+    rows = drift.report(runs, window=args.window, settle=args.settle, artifacts=Path(args.artifacts))
+    print(drift.as_json(rows) if args.json else drift.render(rows, runs))
+    return 0
+
+
 def cmd_discover(args) -> int:
     from interface.discovery.loop import discover
     goal = json.loads(Path(args.goal).read_text())
@@ -201,6 +212,16 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--tenant", required=True)
     p.add_argument("--approve", action="store_true")
     p.set_defaults(fn=cmd_override)
+
+    p = sub.add_parser("drift", help="across recent replays: which steps drifted on which bank, and what to do")
+    p.add_argument("--runs", default="runs", help="the run logs to read")
+    p.add_argument("--artifacts", default="artifacts", help="where the artifacts are, to name them in the advice")
+    p.add_argument("--capability", help="only this capability id")
+    p.add_argument("--tenant", help="only this tenant ('(default)' for runs with none)")
+    p.add_argument("--window", type=int, default=20, help="recent runs per capability and bank")
+    p.add_argument("--settle", type=int, default=3, help="consecutive runs on one fallback before it's a change")
+    p.add_argument("--json", action="store_true")
+    p.set_defaults(fn=cmd_drift)
 
     p = sub.add_parser("approve", help="mark a reviewed artifact as approved for unattended replay")
     p.add_argument("artifact")

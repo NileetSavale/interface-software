@@ -225,6 +225,14 @@ window.SITE = {
    "chose": "<strong>A <code>pageUntil</code> step, the only loop an artifact can hold: press the Next control until <code>until</code> (the row the next step uses) finds exactly one element, at most <code>maxPages</code> times. Recorded only from the model's <code>next_page</code> tool, which is offered only when the goal declares <code>resultsSpanPages</code>. A page turn is classed like a click; only a real link named Next is read</strong>",
    "why": "Without it, capabilities stop at whatever fits on one page, which a bank's histories never do. Bounded and with a declared exit, replay stays deterministic: same inputs, same pages turned, each logged. Several matching rows fail as ambiguous at once, running out fails saying how many pages were searched, and the goal, not the model, decides that results can span pages.",
    "kind": "agreed"
+  },
+  {
+   "id": "D29",
+   "topic": "When drift across runs means \"change the artifact\"",
+   "proposed": "(Pass 3 item 7) Each replay reports its own drift, but one fallback can be a slow page as easily as a renamed button. The AI recommended a report that reads the run logs, with a verdict per bank and step",
+   "chose": "<strong>Agreed, acting only on a settled change: the last 3 runs on a bank all found the control by the same fallback (approve the override drift proposed), or all missed it, or kept switching fallbacks (re-record). Anything less is \"watch\". Only runs of the artifact's latest revision count, so an approved override starts afresh. The report only reads</strong>",
+   "why": "A single miss is often the input, not the bank: two members born the same day are <code>AMBIGUOUS_TARGET</code> by design. Advice to change an artifact that every run on that bank will follow should rest on a repeated observation. The revision hash keeps the report from re-raising drift that a person already fixed. Approving stays a person's act, as it is everywhere else.",
+   "kind": "agreed"
   }
  ],
  "evals": {
@@ -506,7 +514,13 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Suite 7: concurrent replays across two banks",
    "body": "Two mock-app server processes (bank A; bank B on its approved override and\nown operator), lookup for four members at 1, 4 and 8 at once. A result\ncounts only if it carries its own member's name."
+  },
+  {
+   "sha": "4f82c1d",
+   "date": "2026-11-16",
+   "subject": "Suite 7 results at 63d3183, REPORT and site",
+   "body": ""
   }
  ],
- "tests": 105
+ "tests": 114
 };

@@ -1,0 +1,151 @@
+[
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "enter_user_id",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "enter_password",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "sign",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "open_member_inquiry",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "enter_member_number",
+    "verdict": "approve override",
+    "reason": "the last 3 runs all found it by 'anchor', none failed",
+    "runs": 3,
+    "first": 0,
+    "fallbacks": {
+      "anchor": 3
+    },
+    "failures": {},
+    "since": "replay_20261116T195804Z_5fd64e",
+    "action": "review it: interface override <the core_banking.lookup_member_balance artifact> --tenant b, then add --approve"
+  },
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "search_member",
+    "verdict": "approve override",
+    "reason": "the last 3 runs all found it by 'onlyInRegion', none failed",
+    "runs": 3,
+    "first": 0,
+    "fallbacks": {
+      "onlyInRegion": 3
+    },
+    "failures": {},
+    "since": "replay_20261116T195804Z_5fd64e",
+    "action": "review it: interface override <the core_banking.lookup_member_balance artifact> --tenant b, then add --approve"
+  },
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "read_name",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.lookup_member_balance@1.0.0",
+    "tenant": "b",
+    "step": "read_savings_balance",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.open_sub_account@1.0.0",
+    "tenant": "c",
+    "step": "enter_user_id",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.open_sub_account@1.0.0",
+    "tenant": "c",
+    "step": "enter_password",
+    "verdict": "stable",
+    "reason": "every recent run found it by the first strategy",
+    "runs": 3,
+    "first": 3,
+    "fallbacks": {},
+    "failures": {},
+    "since": null,
+    "action": null
+  },
+  {
+    "capability": "core_banking.open_sub_account@1.0.0",
+    "tenant": "c",
+    "step": "sign",
+    "verdict": "re-record",
+    "reason": "the last 3 runs all failed at this step (EXPECT_FAILED)",
+    "runs": 3,
+    "first": 0,
+    "fallbacks": {},
+    "failures": {
+      "EXPECT_FAILED": 3
+    },
+    "since": "replay_20261116T195824Z_8cce79",
+    "action": "re-record step 'sign' (interface discover \u2026 --base-url <c's app>), review and re-approve <the core_banking.open_sub_account artifact>"
+  }
+]

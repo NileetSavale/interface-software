@@ -118,6 +118,7 @@ uv run interface replay $A --input memberId=34567 --tenant b          # success 
 uv run interface override $A --tenant b                                # review the proposal
 uv run interface override $A --tenant b --approve                      # approve it into the artifact
 uv run interface replay $A --input memberId=34567 --tenant b          # success, no drift
+uv run interface drift                                                # per bank and step: stable, watch, approve override or re-record
 ```
 
 **7. A flow that changes data, stopping at the commit point.**

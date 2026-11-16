@@ -32,49 +32,49 @@
     "title": "Replay, no model: another member",
     "why": "Recorded on one member, replayed on another. Outputs go to the caller; on disk they're placeholders.",
     "result": "success",
-    "run_id": "replay_20261116T101349Z_40cfba"
+    "run_id": "replay_20261116T195711Z_67b7b7"
   },
   {
     "dir": "04-replay-not-found",
     "title": "Business outcome: no such member",
     "why": "A legitimate answer, not a failure. The outcome was learned by a probe during discovery.",
     "result": "business_outcome/MEMBER_NOT_FOUND",
-    "run_id": "replay_20261116T101354Z_64bd91"
+    "run_id": "replay_20261116T195716Z_fcceaa"
   },
   {
     "dir": "05-replay-invalid-input",
     "title": "Bad input, rejected before the app is touched",
     "why": "The member number breaks the input's pattern; no browser action runs.",
     "result": "invalid_input",
-    "run_id": "replay_20261116T101358Z_292b1a"
+    "run_id": "replay_20261116T195720Z_6614b7"
   },
   {
     "dir": "06-replay-session-timeout-recovered",
     "title": "Recoverable: the session expires mid-run",
     "why": "Signs on again through the sign-on subflow and restarts (read-only capability). Reported as a recovery beside the success.",
     "result": "success+recovered",
-    "run_id": "replay_20261116T101358Z_ffb955"
+    "run_id": "replay_20261116T195720Z_b1352a"
   },
   {
     "dir": "07-replay-app-error",
     "title": "Hard failure: the app returns a 500",
     "why": "Stops at once with the step, what was expected and what was seen, plus a masked screenshot and an accessibility snapshot.",
     "result": "failed/APP_ERROR",
-    "run_id": "replay_20261116T101403Z_466616"
+    "run_id": "replay_20261116T195725Z_99c261"
   },
   {
     "dir": "08-replay-wrong-record",
     "title": "Hard failure: the app shows a different member",
     "why": "The identity gate fires before anything is read. Evidence keeps the page's structure but none of its data, and no screenshot.",
     "result": "failed/WRONG_RECORD",
-    "run_id": "replay_20261116T101407Z_90dea8"
+    "run_id": "replay_20261116T195729Z_b92fea"
   },
   {
     "dir": "09-replay-sub-account-commit-point",
     "title": "Changing data: stops at the review screen",
     "why": "Fills the new sub-account form and reaches the review screen. Confirm is never pressed.",
     "result": "success",
-    "run_id": "replay_20261116T101412Z_08a5d7",
+    "run_id": "replay_20261116T195734Z_c12379",
     "accounts_opened": 0
   },
   {
@@ -82,14 +82,14 @@
     "title": "Business outcome on a form: deposit below the minimum",
     "why": "The form comes back with a validation message, recognised as DEPOSIT_BELOW_MINIMUM.",
     "result": "business_outcome/DEPOSIT_BELOW_MINIMUM",
-    "run_id": "replay_20261116T101416Z_3a53ba"
+    "run_id": "replay_20261116T195738Z_3718f7"
   },
   {
     "dir": "11-handoff-unknown-notice",
     "title": "Escalation: a person takes the live session and hands back",
     "why": "An unknown notice page appears. The run pauses and publishes an intervention; an operator claims control on the operator page, acknowledges the notice in the same browser, and hands back. Automation verifies the screen and finishes. recording.webm is the run, with PII masked throughout.",
     "result": "success",
-    "run_id": "replay_20261116T101421Z_76e582",
+    "run_id": "replay_20261116T195743Z_e8335b",
     "intervention": {
       "step": "read_name",
       "reason": "TARGET_UNRESOLVED: can't find the control for 'read name'"
@@ -100,21 +100,21 @@
     "title": "Second bank: drift, and an override proposed",
     "why": "Bank B says \"Find Member\" and has no <label> on Member #. Fallback strategies find both controls; the run succeeds, reports drift, and writes the proposed override for B (proposed-override.b.json).",
     "result": "success+drift",
-    "run_id": "replay_20261116T101441Z_d8fb8b"
+    "run_id": "replay_20261116T195804Z_5fd64e"
   },
   {
     "dir": "13-tenant-b-override-approved",
     "title": "Second bank, override approved: no drift",
     "why": "With B's override applied at load, the first strategies hit again on B.",
     "result": "success",
-    "run_id": "replay_20261116T101446Z_2c9c23"
+    "run_id": "replay_20261116T195808Z_8a1857"
   },
   {
     "dir": "14-guard-ok-commit-blocked",
     "title": "Guard: a commit button labelled \"OK\"",
     "why": "The artifact is tampered to press it. The button's name says nothing, but the request goes to a declared commit path, so the browser drops it before it leaves: POLICY_VIOLATION, nothing opened.",
     "result": "failed/POLICY_VIOLATION",
-    "run_id": "replay_20261116T101449Z_4956a1",
+    "run_id": "replay_20261116T195812Z_e72f66",
     "accounts_opened": 0
   },
   {
@@ -122,42 +122,49 @@
     "title": "Third bank, no page map: stops at once",
     "why": "Bank C renames the menu's \"Member Inquiry\" to \"Member Lookup\". No recorded strategy survives, and even sign-on was proved by that link, so the run fails at sign-on, saying so.",
     "result": "failed/EXPECT_FAILED",
-    "run_id": "replay_20261116T101501Z_b31dd8"
+    "run_id": "replay_20261116T195824Z_8cce79"
   },
   {
     "dir": "17-bank-c-map-fallback",
     "title": "Third bank, with its page map: the bounded fallback",
     "why": "C's map was learned from one verified run of the *lookup* flow on C. The sub-account flow, which the map never saw, replays through it: MAP_FALLBACK confirms the screen sign-on leads to and finds \"Member Lookup\", each with the pinned map version, and the fix is proposed as an override for C. bank-c-map.json is the map: screens and actions, no data.",
     "result": "success+recovered+drift",
-    "run_id": "replay_20261116T101515Z_46bb1f"
+    "run_id": "replay_20261116T195837Z_51fd67"
+  },
+  {
+    "dir": "25-drift-report",
+    "title": "Drift across runs: what to approve, what to re-record",
+    "why": "`interface drift` over three runs on each bank. B found two controls by the same fallback every time: approve its proposed override. C's sign-on proof failed every time: re-record. The run ids are in report.json.",
+    "result": "approve override, re-record, stable",
+    "run_id": null
   },
   {
     "dir": "21-replay-one-of-three-chens",
     "title": "Several matches: the one the input names",
     "why": "Three Chens; the Select link is found in the row where Date of Birth = {{inputs.dob}}, never by position, and the member page's date of birth is checked before anything is read.",
     "result": "success",
-    "run_id": "replay_20261116T101548Z_eaed3f"
+    "run_id": "replay_20261116T195947Z_3e18c0"
   },
   {
     "dir": "22-replay-two-chens-same-birthday",
     "title": "Several matches the input can't tell apart",
     "why": "Two Chens born the same day: AMBIGUOUS_TARGET. The run never takes the first one.",
     "result": "failed/AMBIGUOUS_TARGET",
-    "run_id": "replay_20261116T101553Z_80fee1"
+    "run_id": "replay_20261116T195951Z_8cea28"
   },
   {
     "dir": "23-replay-row-on-page-3",
     "title": "A row pages away",
     "why": "pageUntil presses Next until the row where Reference = {{inputs.reference}} is on screen, at most 10 times; each page turned is in the log.",
     "result": "success",
-    "run_id": "replay_20261116T101607Z_e09fb5"
+    "run_id": "replay_20261116T200006Z_010e6f"
   },
   {
     "dir": "24-replay-row-on-no-page",
     "title": "A row on no page",
     "why": "Searched all 4 pages, no next page: TARGET_UNRESOLVED, saying how many pages it searched.",
     "result": "failed/TARGET_UNRESOLVED",
-    "run_id": "replay_20261116T101615Z_4d09c7"
+    "run_id": "replay_20261116T200014Z_49221f"
   },
   {
     "dir": "15-discovery-hostile-form",

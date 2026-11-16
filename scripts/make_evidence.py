@@ -24,6 +24,7 @@ from evals.common import ARTIFACTS, ENV, HAPPY, artifact, bank_c_map, label, moc
 from evals.safety import click, tampered  # noqa: E402
 from interface.artifact.io import load_artifact  # noqa: E402
 from interface.artifact.schema import Override  # noqa: E402
+from interface.drift import as_json, read_runs, render, report  # noqa: E402
 from interface.evidence import RUNS, Audit  # noqa: E402
 from interface.operator import OperatorHub  # noqa: E402
 from interface.replay.executor import Replayer  # noqa: E402
@@ -196,6 +197,27 @@ def replays():
         (OUT / "17-bank-c-map-fallback" / "bank-c-map.json").write_text(json.dumps(bank.data, indent=1) + "\n")
         if (replayer.pending_dir / "c.json").exists():
             shutil.copy(replayer.pending_dir / "c.json", OUT / "17-bank-c-map-fallback" / "proposed-override.c.json")
+
+        # Drift across runs: a run that drifts succeeds and says so; the report reads every bank's recent runs and
+        # says which change has settled (two more runs on each bank beside cases 12 and 16)
+        drifted = [next(c["run_id"] for c in cases if c["dir"] == d) for d in ("12-tenant-b-drift", "16-bank-c-no-map")]
+        for _ in range(2):
+            drifted.append(run(app, sub, HAPPY["open_sub_account"], tenant="c")[0].run_id)
+        app.variant("b")
+        for _ in range(2):
+            drifted.append(run(app, lookup, HAPPY["lookup"], tenant="b")[0].run_id)
+        runs = read_runs(RUNS, drifted)
+        rows = report(runs)
+        dest = OUT / "25-drift-report"
+        dest.mkdir()
+        (dest / "report.txt").write_text(render(rows, runs) + "\n")
+        (dest / "report.json").write_text(as_json(rows) + "\n")
+        cases.append({"dir": dest.name, "title": "Drift across runs: what to approve, what to re-record", "why":
+                      "`interface drift` over three runs on each bank. B found two controls by the same fallback "
+                      "every time: approve its proposed override. C's sign-on proof failed every time: re-record. "
+                      "The run ids are in report.json.", "result": ", ".join(sorted({r.verdict for r in rows})),
+                      "run_id": None})
+        print(f"{dest.name:<36} {cases[-1]['result']}", flush=True)
         app.variant("a")
 
         # Item 5: one row out of several, and a row pages away (D28)

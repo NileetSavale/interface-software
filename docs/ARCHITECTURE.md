@@ -760,6 +760,28 @@ fieldset".
 - With the proposal approved, the whole contract holds on B as on A, and the happy path has no drift.
 - Bank A is unaffected by B's override.
 
+### As built: the drift report (Pass 3 item 7, D29)
+`interface drift` (`src/interface/drift.py`) reads every replay's `events.jsonl`, which is already redacted, and
+reduces each run to how each step's control was found: by the first strategy, by a named fallback, by the page map,
+or missed (`TARGET_UNRESOLVED`, `AMBIGUOUS_TARGET`, `EXPECT_FAILED`). Then, per capability, bank and step, over the
+last 20 runs of the artifact's latest revision:
+
+| Verdict | When | What it says to do |
+|---|---|---|
+| stable | every run found it by the first strategy | nothing |
+| watch | a fallback or a miss now and then | nothing yet |
+| approve override | the last 3 runs on a tenant all used the same fallback | `interface override … --tenant X`, then `--approve` |
+| re-record | the last 3 all missed it, or switched fallbacks, or drifted with no tenant to override for | re-record the step, re-approve |
+
+- Each replay logs a **revision**: a hash of the steps, subflows, outcomes and success check it ran, after the
+  tenant's override. Approving an override or re-recording changes it; approving alone doesn't.
+- `--json` for a scheduler; `--capability`, `--tenant`, `--window` and `--settle` narrow it.
+- On the 3,700 runs the eval suites left behind it reads in under a second. It flags bank C's three relabelled
+  controls for an override, and lists the eval's deliberate misses (two members born the same day, a reference on
+  no page) as watch, not re-record.
+- Evidence case 25 runs it on three replays per bank: B's two fallbacks → approve override; C's sign-on proof,
+  missing every time → re-record.
+
 ---
 
 ## 7a. Page map: learned, per-bank app knowledge (built, by user decision)
