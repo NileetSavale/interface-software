@@ -82,12 +82,13 @@ async def handoff(app, subject, video: Path):
     async def operator(intervention, http):
         seen["intervention"] = intervention
         await asyncio.sleep(1.5)
-        await http.post(f"/interventions/{intervention.id}/claim", params={"operator": "alice"})
-        seen["state"] = (await http.get(f"/interventions/{intervention.id}/state")).json()
+        await http.post(f"/interventions/{intervention.id}/claim", params={"operator": "alice"}, headers=hub.auth(intervention.id))
+        seen["state"] = (await http.get(f"/interventions/{intervention.id}/state", headers=hub.auth(intervention.id))).json()
         await asyncio.sleep(1.5)
         await hub.open[intervention.id][2].page.frame("main").get_by_role("button", name="Acknowledge").click()
         await asyncio.sleep(1.5)
-        await http.post(f"/interventions/{intervention.id}/handback", params={"operator": "alice"})
+        await http.post(f"/interventions/{intervention.id}/handback", params={"operator": "alice"},
+                        headers=hub.auth(intervention.id))
 
     async with httpx.AsyncClient(base_url=f"http://127.0.0.1:{port}") as http:
         hub.on_publish = lambda i: tasks.append(asyncio.create_task(operator(i, http)))

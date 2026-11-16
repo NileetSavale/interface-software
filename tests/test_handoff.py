@@ -50,16 +50,24 @@ def main_frame(hub, intervention):
 
 async def clicks(hub, intervention, http, button):
     """A person takes control, clicks `button` in the live browser, and hands back."""
-    page = hub.open[intervention.id][2].page
-    assert (await http.post(f"/interventions/{intervention.id}/claim", params={"operator": "alice"})).status_code == 200
+    page, base, key = hub.open[intervention.id][2].page, f"/interventions/{intervention.id}", hub.auth(intervention.id)
+    # Without the intervention's key, nothing: not what it is, not the live screen, not a single button
+    for method, path in (("GET", "/state"), ("GET", "/screenshot"), ("POST", "/claim"), ("POST", "/abort")):
+        for headers in ({}, {"X-Intervention-Key": "guessed"}):
+            r = await http.request(method, base + path, params={"operator": "mallory"}, headers=headers)
+            assert r.status_code == 403, (method, path, r.status_code)
+    assert "Jane" not in (await http.get(base)).text and intervention.subject not in (await http.get("/")).text
+    assert (await http.get(base + "/state", headers={**key, "Host": "evil.example"})).status_code == 400
+    assert (await http.post(base + "/claim", params={"operator": "alice"}, headers=key)).status_code == 200
     # Nobody else may hand back a session alice holds
-    assert (await http.post(f"/interventions/{intervention.id}/handback", params={"operator": "bob"})).status_code == 409
-    state = (await http.get(f"/interventions/{intervention.id}/state")).json()
+    assert (await http.post(base + "/handback", params={"operator": "bob"}, headers=key)).status_code == 409
+    state = (await http.get(base + "/state", headers=key)).json()
     assert state["state"] == "human" and state["holder"] == "operator:alice"
-    assert (await http.get(f"/interventions/{intervention.id}/screenshot")).headers["content-type"] == "image/png"
+    shot = await http.get(base + "/screenshot", headers=key)
+    assert shot.headers["content-type"] == "image/png" and shot.headers["cache-control"] == "no-store"
     await page.frame("main").get_by_role("button", name=button).click()
     await asyncio.sleep(0.3)
-    assert (await http.post(f"/interventions/{intervention.id}/handback", params={"operator": "alice"})).status_code == 200
+    assert (await http.post(base + "/handback", params={"operator": "alice"}, headers=key)).status_code == 200
 
 
 def test_unknown_notice_is_handed_to_a_person_and_the_run_finishes(base_url, tmp_path):
@@ -78,6 +86,9 @@ def test_unknown_notice_is_handed_to_a_person_and_the_run_finishes(base_url, tmp
     assert '"to": "paused_for_human"' in events and '"to": "human"' in events and '"to": "resuming"' in events
     assert '"event": "human_action"' in events and '"name": "Acknowledge"' in events
     assert '"verdict": "step had already acted"' in events
+    # The refused attempts are on the run's record; the key itself is in no file the run wrote
+    assert events.count('"event": "operator_rejected"') == 8
+    assert all("#key=" not in p.read_text(errors="ignore") for p in replayer.log.dir.glob("*") if p.is_file())
 
 
 def test_unexpected_dialog_resumes_only_once_it_is_gone(base_url, tmp_path):
@@ -88,10 +99,11 @@ def test_unexpected_dialog_resumes_only_once_it_is_gone(base_url, tmp_path):
         attempts.append(intervention.reason)
         if len(attempts) == 1:
             # Hands back without dealing with it: the resume check refuses and the run pauses again
-            await http.post(f"/interventions/{intervention.id}/claim", params={"operator": "alice"})
-            await http.post(f"/interventions/{intervention.id}/handback", params={"operator": "alice"})
+            base, key = f"/interventions/{intervention.id}", hub.auth(intervention.id)
+            await http.post(base + "/claim", params={"operator": "alice"}, headers=key)
+            await http.post(base + "/handback", params={"operator": "alice"}, headers=key)
             for _ in range(50):
-                if (await http.get(f"/interventions/{intervention.id}/state")).json()["state"] == "paused_for_human":
+                if (await http.get(base + "/state", headers=key)).json()["state"] == "paused_for_human":
                     break
                 await asyncio.sleep(0.1)
             await clicks(hub, intervention, http, "OK")
@@ -106,7 +118,7 @@ def test_operator_can_abort(base_url, tmp_path):
     artifact = artifact_without(base_url)
 
     async def person(hub, intervention, http):
-        await http.post(f"/interventions/{intervention.id}/abort", params={"operator": "alice"})
+        await http.post(f"/interventions/{intervention.id}/abort", params={"operator": "alice"}, headers=hub.auth(intervention.id))
 
     result, _ = asyncio.run(attended_replay(base_url, artifact, "12345", person, tmp_path, fault="unknown_dialog"))
     assert isinstance(result, Failed) and result.error_class == "OPERATOR_ABORTED"

@@ -109,7 +109,8 @@ postcondition, but only exactly: the screen this action is known to lead to here
   holder, epoch and expiry: the epoch rises on every transfer and is checked just before input is dispatched, so a
   click decided before a handoff can't land after it (D9); a silent operator loses it on expiry.
 - **Handoff:** the intervention carries capability, step, reason, a redacted snapshot and a screenshot. The operator
-  page offers Take control, Hand back and Abort; the person works in **the automation's own browser**, recorded by
+  page, usable only with the intervention's own key from the printed link (D25), offers Take control, Hand back and
+  Abort; the person works in **the automation's own browser**, recorded by
   injected listeners. On hand-back, automation re-observes and decides: resolved, already done, retry, skip, or
   pause again. In discovery, a person's actions become steps flagged for review.
 - **The caller** gets `needs_human` and a run handle at its deadline while the run continues; the late result is

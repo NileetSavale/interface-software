@@ -454,6 +454,19 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
+### As built: who may use the operator page (D25)
+- **A key per intervention**, 32 random bytes, made when the intervention is published and kept in memory only. It
+  reaches the person only in the link the run prints, after a `#`: browsers never send the fragment, so it's in no
+  server log or Referer, and it's in no file the run writes.
+- **The page is an empty shell.** The intervention, the live screenshot and every button are separate calls that
+  must carry `X-Intervention-Key` (compared in constant time). A custom header can't be sent from another site
+  without a CORS grant, which the server never gives, so a page elsewhere can't press Take control or Abort.
+- **Also:** no listing of interventions; Host must be `127.0.0.1` or `localhost` (no DNS rebinding); `no-store`,
+  `X-Frame-Options: DENY`, `no-referrer`; the page drops the key from the address bar and keeps it for the tab.
+  Each refused call is an `operator_rejected` event on the run.
+- **Limit:** the operator's name is self-declared. The key proves the link came through the operator channel; a
+  bank's SSO would supply the identity.
+
 ### As built (Pass 2 item 2)
 - **Code:**
   - `src/interface/session.py`: Session, ControlToken, Intervention.
