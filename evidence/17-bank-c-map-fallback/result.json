@@ -1,20 +1,20 @@
 {
-  "runId": "replay_20261116T195837Z_51fd67",
-  "completedAt": "2026-11-16T19:59:10+00:00",
+  "runId": "replay_20261116T201324Z_777cdb",
+  "completedAt": "2026-11-16T20:13:58+00:00",
   "recovered": [
     {
       "code": "MAP_FALLBACK",
       "stepId": "sign",
       "attempt": 1,
       "action": "page map: confirmed the screen this action leads to",
-      "mapVersion": "ce7ff56b8258"
+      "mapVersion": "8b7f8901ee76"
     },
     {
       "code": "MAP_FALLBACK",
       "stepId": "open_member_inquiry",
       "attempt": 1,
       "action": "page map: click link 'Member Lookup'",
-      "mapVersion": "ce7ff56b8258"
+      "mapVersion": "8b7f8901ee76"
     }
   ],
   "drift": [
@@ -22,13 +22,13 @@
       "stepId": "enter_member_number",
       "hitRank": 2,
       "strategy": "anchor",
-      "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpw0jlc7my/c.json"
+      "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp8j9lruce/c.json"
     },
     {
       "stepId": "search_member",
       "hitRank": 2,
       "strategy": "onlyInRegion",
-      "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpw0jlc7my/c.json"
+      "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp8j9lruce/c.json"
     }
   ],
   "status": "success",

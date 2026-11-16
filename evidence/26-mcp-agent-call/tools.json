@@ -1,0 +1,317 @@
+[
+  {
+    "name": "core_banking__find_member_by_name",
+    "title": "Find a member by last name and date of birth",
+    "description": "Find a member by last name and date of birth. Searches members by last name, picks the one with the given date of birth, and returns their member number and name.\nReturns on success: memberNumber, memberName.\nMay instead answer business_outcome, with code: PERMISSION_DENIED (The operator account may not do this. An answer for the caller, not a fault.); MEMBER_NOT_FOUND (The search returned a \"No members found\" message for the last name entered, so no member record matched and none could be opened. (learned from probe: a last name no member has))\nReads only; changes nothing.\nReplays a recorded, approved procedure with no model; the same inputs take the same steps.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lastName",
+        "dob"
+      ],
+      "properties": {
+        "lastName": {
+          "type": "string",
+          "description": "the member's last name Sensitive: masked in every log.",
+          "pattern": "^[A-Za-z' -]{2,30}$"
+        },
+        "dob": {
+          "type": "string",
+          "description": "date of birth, MM/DD/YYYY Sensitive: masked in every log.",
+          "pattern": "^[0-9]{2}/[0-9]{2}/[0-9]{4}$"
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "success",
+            "business_outcome",
+            "failed",
+            "invalid_input"
+          ]
+        },
+        "runId": {
+          "type": "string",
+          "description": "The run's id: its evidence is under runs/<runId>/."
+        },
+        "outputs": {
+          "type": "object",
+          "description": "On success: the values the capability read."
+        },
+        "code": {
+          "type": "string",
+          "description": "On business_outcome: which answer the app gave."
+        },
+        "errorClass": {
+          "type": "string",
+          "description": "On failed: why (TARGET_UNRESOLVED, WRONG_RECORD, ...)."
+        },
+        "atStep": {
+          "type": "string",
+          "description": "On business_outcome or failed: the step it happened at."
+        },
+        "errors": {
+          "type": "array",
+          "description": "On invalid_input: which input broke which rule."
+        }
+      },
+      "required": [
+        "status",
+        "runId"
+      ]
+    },
+    "annotations": {
+      "title": "Find a member by last name and date of birth",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "interface/capability": "core_banking.find_member_by_name@1.0.0"
+    }
+  },
+  {
+    "name": "core_banking__find_transaction_by_reference",
+    "title": "Find a transaction in a member's history by its reference",
+    "description": "Find a transaction in a member's history by its reference. Opens a member's transaction history, pages through it to the transaction with the given reference, and returns its date and amount.\nReturns on success: transactionDate, amount.\nMay instead answer business_outcome, with code: PERMISSION_DENIED (The operator account may not do this. An answer for the caller, not a fault.); MEMBER_NOT_FOUND (The member inquiry screen reports that no member matches the supplied member number, offering a \"New search\" link. (learned from probe: a member number that doesn't exist))\nReads only; changes nothing.\nReplays a recorded, approved procedure with no model; the same inputs take the same steps.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memberId",
+        "reference"
+      ],
+      "properties": {
+        "memberId": {
+          "type": "string",
+          "description": "5-digit member number Sensitive: masked in every log.",
+          "pattern": "^[0-9]{5}$"
+        },
+        "reference": {
+          "type": "string",
+          "description": "a transaction reference, e.g. REF-0007",
+          "pattern": "^REF-[0-9]{4}$"
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "success",
+            "business_outcome",
+            "failed",
+            "invalid_input"
+          ]
+        },
+        "runId": {
+          "type": "string",
+          "description": "The run's id: its evidence is under runs/<runId>/."
+        },
+        "outputs": {
+          "type": "object",
+          "description": "On success: the values the capability read."
+        },
+        "code": {
+          "type": "string",
+          "description": "On business_outcome: which answer the app gave."
+        },
+        "errorClass": {
+          "type": "string",
+          "description": "On failed: why (TARGET_UNRESOLVED, WRONG_RECORD, ...)."
+        },
+        "atStep": {
+          "type": "string",
+          "description": "On business_outcome or failed: the step it happened at."
+        },
+        "errors": {
+          "type": "array",
+          "description": "On invalid_input: which input broke which rule."
+        }
+      },
+      "required": [
+        "status",
+        "runId"
+      ]
+    },
+    "annotations": {
+      "title": "Find a transaction in a member's history by its reference",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "interface/capability": "core_banking.find_transaction_by_reference@1.0.0"
+    }
+  },
+  {
+    "name": "core_banking__lookup_member_balance",
+    "title": "Look up a member's savings balance",
+    "description": "Look up a member's savings balance. Searches for a member by member number and returns the member's name and the current balance of their savings account.\nReturns on success: memberName, savingsBalance.\nMay instead answer business_outcome, with code: PERMISSION_DENIED (The operator account may not do this. An answer for the caller, not a fault.); MEMBER_NOT_FOUND (The member inquiry screen says no members were found for the number entered, so the member doesn't exist. (learned from probe: a member number that doesn't exist)); INVALID_MEMBER_NUMBER (The application rejected the member number as malformed and showed an \"Invalid member number\" message with a New search link. (learned from probe: a member number the application rejects as malformed))\nReads only; changes nothing.\nReplays a recorded, approved procedure with no model; the same inputs take the same steps.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memberId"
+      ],
+      "properties": {
+        "memberId": {
+          "type": "string",
+          "description": "5-digit member number Sensitive: masked in every log.",
+          "pattern": "^[0-9]{5}$"
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "success",
+            "business_outcome",
+            "failed",
+            "invalid_input"
+          ]
+        },
+        "runId": {
+          "type": "string",
+          "description": "The run's id: its evidence is under runs/<runId>/."
+        },
+        "outputs": {
+          "type": "object",
+          "description": "On success: the values the capability read."
+        },
+        "code": {
+          "type": "string",
+          "description": "On business_outcome: which answer the app gave."
+        },
+        "errorClass": {
+          "type": "string",
+          "description": "On failed: why (TARGET_UNRESOLVED, WRONG_RECORD, ...)."
+        },
+        "atStep": {
+          "type": "string",
+          "description": "On business_outcome or failed: the step it happened at."
+        },
+        "errors": {
+          "type": "array",
+          "description": "On invalid_input: which input broke which rule."
+        }
+      },
+      "required": [
+        "status",
+        "runId"
+      ]
+    },
+    "annotations": {
+      "title": "Look up a member's savings balance",
+      "readOnlyHint": true,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "interface/capability": "core_banking.lookup_member_balance@1.0.0"
+    }
+  },
+  {
+    "name": "core_banking__open_sub_account",
+    "title": "Prepare a new sub-account for a member",
+    "description": "Prepare a new sub-account for a member. Fills in the new sub-account form for a member and stops at the review screen. Opening the account (Confirm) is left to a person.\nReturns on success: nothing (it reaches a screen).\nMay instead answer business_outcome, with code: PERMISSION_DENIED (The operator account may not do this. An answer for the caller, not a fault.); MEMBER_NOT_FOUND (The member search returned \"No members found\" for the supplied member number, so the sub-account form could not be opened. (learned from probe: a member number that doesn't exist)); DEPOSIT_BELOW_MINIMUM (The Open Sub-Account form came back with a message giving the minimum opening deposit, so the below-minimum deposit was rejected and the review screen was not reached. (learned from probe: an opening deposit below the minimum))\nFills in a change and stops at the app's review screen: it never commits (a person does).\nReplays a recorded, approved procedure with no model; the same inputs take the same steps.",
+    "inputSchema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memberId",
+        "accountType",
+        "nickname",
+        "initialDeposit"
+      ],
+      "properties": {
+        "memberId": {
+          "type": "string",
+          "description": "5-digit member number Sensitive: masked in every log.",
+          "pattern": "^[0-9]{5}$"
+        },
+        "accountType": {
+          "type": "string",
+          "description": "Kind of sub-account",
+          "enum": [
+            "Savings",
+            "Checking",
+            "Certificate",
+            "Holiday Club"
+          ]
+        },
+        "nickname": {
+          "type": "string",
+          "description": "Nickname shown on statements",
+          "pattern": "^[A-Za-z ]{1,20}$"
+        },
+        "initialDeposit": {
+          "type": "string",
+          "description": "Opening deposit in dollars, e.g. 250.00 Sensitive: masked in every log.",
+          "pattern": "^[0-9]+\\.[0-9]{2}$"
+        }
+      }
+    },
+    "outputSchema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "success",
+            "business_outcome",
+            "failed",
+            "invalid_input"
+          ]
+        },
+        "runId": {
+          "type": "string",
+          "description": "The run's id: its evidence is under runs/<runId>/."
+        },
+        "outputs": {
+          "type": "object",
+          "description": "On success: the values the capability read."
+        },
+        "code": {
+          "type": "string",
+          "description": "On business_outcome: which answer the app gave."
+        },
+        "errorClass": {
+          "type": "string",
+          "description": "On failed: why (TARGET_UNRESOLVED, WRONG_RECORD, ...)."
+        },
+        "atStep": {
+          "type": "string",
+          "description": "On business_outcome or failed: the step it happened at."
+        },
+        "errors": {
+          "type": "array",
+          "description": "On invalid_input: which input broke which rule."
+        }
+      },
+      "required": [
+        "status",
+        "runId"
+      ]
+    },
+    "annotations": {
+      "title": "Prepare a new sub-account for a member",
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": false,
+      "openWorldHint": false
+    },
+    "_meta": {
+      "interface/capability": "core_banking.open_sub_account@1.0.0"
+    }
+  }
+]

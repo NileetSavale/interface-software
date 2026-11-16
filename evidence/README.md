@@ -37,6 +37,7 @@ for the mock's names, balances, member numbers and credentials, and fails if it 
 | [`23-replay-row-on-page-3`](23-replay-row-on-page-3/) | A row pages away | `success` | pageUntil presses Next until the row where Reference = {{inputs.reference}} is on screen, at most 10 times; each page turned is in the log. |
 | [`24-replay-row-on-no-page`](24-replay-row-on-no-page/) | A row on no page | `failed/TARGET_UNRESOLVED` | Searched all 4 pages, no next page: TARGET_UNRESOLVED, saying how many pages it searched. |
 | [`25-drift-report`](25-drift-report/) | Drift across runs: what to approve, what to re-record | `approve override, re-record, stable` | `interface drift` over three runs on each bank. B found two controls by the same fallback every time: approve its proposed override. C's sign-on proof failed every time: re-record. The run ids are in report.json. |
+| [`26-mcp-agent-call`](26-mcp-agent-call/) | An agent's view: approved artifacts as MCP tools | `success` | `interface mcp` lists this bank's approved artifacts as tools (tools.json: input schemas, outcomes, read-only hints) and a call is a replay with no model. call.json is the answer the agent got, with the values masked here; the caller gets them in full. |
 
 **On an app we didn't write:** [`parabank/`](parabank/README.md) has two capabilities Claude discovered on ParaBank,
 Parasoft's public demo bank, replayed with no model, and what that app found that the mock hadn't.

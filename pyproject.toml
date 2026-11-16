@@ -6,6 +6,7 @@ requires-python = ">=3.13"
 dependencies = [
     "anthropic>=2.8.0",
     "fastapi>=0.163.0",
+    "mcp>=1.20",
     "playwright>=1.65.2",
     "pydantic>=2.9",
     "python-multipart>=0.0.33",

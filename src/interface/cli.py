@@ -8,6 +8,7 @@
     interface override artifacts/core_banking.lookup_member_balance.json --tenant b            (show the pending one)
     interface override artifacts/core_banking.lookup_member_balance.json --tenant b --approve
     interface drift                                     (which steps drifted on which bank, across recent runs)
+    interface mcp --base-url http://127.0.0.1:4100      (approved artifacts as MCP tools, over stdio)
 """
 import argparse
 import asyncio
@@ -150,6 +151,12 @@ def cmd_drift(args) -> int:
     return 0
 
 
+def cmd_mcp(args) -> int:
+    from interface.mcp_server import serve
+    asyncio.run(serve(Path(args.artifacts), args.base_url, args.tenant))
+    return 0
+
+
 def cmd_discover(args) -> int:
     from interface.discovery.loop import discover
     goal = json.loads(Path(args.goal).read_text())
@@ -222,6 +229,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--settle", type=int, default=3, help="consecutive runs on one fallback before it's a change")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_drift)
+
+    p = sub.add_parser("mcp", help="serve this bank's approved artifacts as MCP tools (stdio)")
+    p.add_argument("--artifacts", default="artifacts")
+    p.add_argument("--base-url", default=DEFAULT_BASE_URL, help="the bank's app: only artifacts allowed on it are tools")
+    p.add_argument("--tenant", help="run this tenant's version of each artifact, with its own credentials")
+    p.set_defaults(fn=cmd_mcp)
 
     p = sub.add_parser("approve", help="mark a reviewed artifact as approved for unattended replay")
     p.add_argument("artifact")

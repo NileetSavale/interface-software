@@ -16,7 +16,7 @@ mid-run, and nothing automated can ever press "Confirm".
   success, business outcomes, recovery, hard failures, a handoff with a screen recording, a second bank, a blocked
   commit, and a third bank run without and with its page map. Plus [`evidence/parabank/`](evidence/parabank/README.md):
   two capabilities discovered and replayed on ParaBank, a public demo bank we didn't write.
-- **Measured:** [`evals/report.md`](evals/report.md): five suites, N and commit stated.
+- **Measured:** [`evals/report.md`](evals/report.md): seven suites, N and commit stated.
 - **Visual tour:** <https://nileetsavale.github.io/interface-software/>: interactive architecture, decisions, numbers.
 
 ## Setup
@@ -164,6 +164,14 @@ discover two read-only capabilities, and replays them with no model (about $0.20
 uv run python scripts/parabank_evidence.py   # → evidence/parabank/
 ```
 
+**10. An agent calling the capabilities.** `interface mcp` serves the bank's approved artifacts as MCP tools over
+stdio: one tool each, its input schema from the artifact, its answer the result contract. For an agent host's config:
+
+```json
+{"mcpServers": {"bank-a": {"command": "uv", "args": ["run", "--directory", "/path/to/interface", "interface", "mcp",
+                                                     "--base-url", "http://127.0.0.1:4100"]}}}
+```
+
 Exit codes: 0 for success or a business outcome, 2 for invalid input, 3 for needs human, 1 for a failure.
 
 ## Layout
@@ -178,8 +186,9 @@ src/interface/
   pagemap.py   each bank's learned map of screens and actions
   session.py   the control token                                operator.py  the operator page
   evidence.py  run logs, redaction, audit and circuit breaker   runs.py      invoke with a deadline
+  drift.py     the drift report across runs                   mcp_server.py  approved artifacts as MCP tools
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
 goals/        the capabilities' goal specs              artifacts/  the discovered artifacts
-evals/        the five suites and their results         evidence/   curated runs
-tests/        138 tests                                 docs/       design, decisions, the site
+evals/        the seven suites and their results        evidence/   curated runs
+tests/        150 tests                                 docs/       design, decisions, the site
 ```

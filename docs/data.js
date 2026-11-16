@@ -233,6 +233,14 @@ window.SITE = {
    "chose": "<strong>Agreed, acting only on a settled change: the last 3 runs on a bank all found the control by the same fallback (approve the override drift proposed), or all missed it, or kept switching fallbacks (re-record). Anything less is \"watch\". Only runs of the artifact's latest revision count, so an approved override starts afresh. The report only reads</strong>",
    "why": "A single miss is often the input, not the bank: two members born the same day are <code>AMBIGUOUS_TARGET</code> by design. Advice to change an artifact that every run on that bank will follow should rest on a repeated observation. The revision hash keeps the report from re-raising drift that a person already fixed. Approving stays a person's act, as it is everywhere else.",
    "kind": "agreed"
+  },
+  {
+   "id": "D30",
+   "topic": "How a calling agent reaches a capability",
+   "proposed": "(Pass 3 item 8) The capability catalog was cut in D15; the user chose to build everything listed. The AI recommended an MCP server over the artifacts, not a new catalog format",
+   "chose": "<strong>Agreed: <code>interface mcp</code> serves each approved artifact as one MCP tool. One server per bank: only artifacts whose allowlist holds that bank's origin are listed. The input schema is the artifact's inputs, the output is the result contract, and annotations say read-only or \"stops before commit\". The catalog is read from disk on every list and call; drafts are never offered. Unattended only</strong>",
+   "why": "The artifact already is a typed tool signature, so a catalog would only copy it. MCP is what agent hosts already speak. Scoping by origin keeps one bank's server from offering, or running, another bank's procedures. Reading from disk each time means withdrawing approval takes effect on the next call, with no cache to forget. An attended server (the D11 deadline and run handle as tool results) is the next step, not built.",
+   "kind": "agreed"
   }
  ],
  "evals": {
@@ -520,7 +528,13 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Suite 7 results at 63d3183, REPORT and site",
    "body": ""
+  },
+  {
+   "sha": "37bb2ec",
+   "date": "2026-11-16",
+   "subject": "Item 7: interface drift, the per-bank drift report (D29)",
+   "body": "Reads the run logs and gives each capability, bank and step a verdict over\nits latest revision's recent runs: stable, watch, approve override (3 runs\non one fallback) or re-record (3 misses, a fallback that keeps changing, or\ndrift with no tenant). Each replay now logs a revision hash so an approved\noverride starts afresh. Evidence case 25, tests, docs."
   }
  ],
- "tests": 114
+ "tests": 117
 };

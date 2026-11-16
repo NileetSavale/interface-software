@@ -2,8 +2,8 @@
 
 Claude discovers a task once against a live legacy UI, and the run becomes a typed, versioned capability. Once a
 person approves it, it replays without the model: same inputs, same steps, same typed result, in about 4 s for $0.
-Numbers come from [`evals/report.md`](evals/report.md) (five suites, a clean commit, N stated). The full design is in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 24 decisions, including where I overrode the AI I built this
+Numbers come from [`evals/report.md`](evals/report.md) (seven suites, each stamped with its commit, N stated). The full design is in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 30 decisions, including where I overrode the AI I built this
 with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## Architecture
@@ -15,6 +15,7 @@ with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
   every call.
 - **Recorder**: turns each live action into a surface-neutral target, described from the live page.
 - **Artifact**: the contract, with an exported JSON Schema. **Replay** runs an approved one with no model.
+- **To a calling agent**, each approved artifact is an MCP tool (`interface mcp`, one server per bank, D30).
 - **Shared**: the surface, the policy gate, the PII masker, a control token for handoff, a redacted evidence log,
   and each bank's **page map** of screens and actions learned from verified runs (D3/D4).
 
@@ -156,7 +157,6 @@ postcondition, but only exactly: the screen this action is known to lead to here
 ## Cuts
 
 - **Approval-gated commits** through the handoff channel: designed, deliberately not built.
-- **Capability catalog** (D15): the contract is already a tool signature.
 - **Desktop surface, real co-browsing console:** designed at their seams.
 - **Screenshots for the model** (D2): the tree sufficed in 20/20 discovery runs.
 - **RAG / vector database: deliberately not used.** Every lookup is an exact key or a short list.

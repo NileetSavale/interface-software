@@ -16,16 +16,18 @@ import tempfile
 from pathlib import Path
 
 import httpx
+from mcp import Client
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 from evals.common import ARTIFACTS, ENV, HAPPY, artifact, bank_c_map, label, mock_app  # noqa: E402
 from evals.safety import click, tampered  # noqa: E402
-from interface.artifact.io import load_artifact  # noqa: E402
+from interface.artifact.io import dump_artifact, load_artifact  # noqa: E402
 from interface.artifact.schema import Override  # noqa: E402
 from interface.drift import as_json, read_runs, render, report  # noqa: E402
 from interface.evidence import RUNS, Audit  # noqa: E402
+from interface.mcp_server import build  # noqa: E402
 from interface.operator import OperatorHub  # noqa: E402
 from interface.replay.executor import Replayer  # noqa: E402
 
@@ -233,6 +235,29 @@ def replays():
              HAPPY["history"])
         case("24-replay-row-on-no-page", "A row on no page", "Searched all 4 pages, no next page: TARGET_UNRESOLVED, "
              "saying how many pages it searched.", hist, {**HAPPY["history"], "reference": "REF-0099"})
+
+        # Item 8: what a calling agent sees, over MCP: the approved artifacts as tools, and one call
+        catalog = Path(tempfile.mkdtemp())
+        for flow, path in ARTIFACTS.items():
+            (catalog / path.name).write_text(dump_artifact(artifact(flow, app)))
+
+        async def agent():
+            async with Client(build(catalog, app.base_url, env=ENV)) as client:
+                return await client.list_tools(), await client.call_tool("core_banking__lookup_member_balance",
+                                                                         HAPPY["lookup"])
+
+        listed, called = asyncio.run(agent())
+        body = called.structured_content
+        keep("26-mcp-agent-call", body["runId"], "An agent's view: approved artifacts as MCP tools",
+             "`interface mcp` lists this bank's approved artifacts as tools (tools.json: input schemas, outcomes, "
+             "read-only hints) and a call is a replay with no model. call.json is the answer the agent got, with the "
+             "values masked here; the caller gets them in full.")
+        cases[-1]["result"] = body["status"]
+        dest = OUT / "26-mcp-agent-call"
+        (dest / "tools.json").write_text(json.dumps(
+            [t.model_dump(by_alias=True, exclude_none=True) for t in listed.tools], indent=2) + "\n")
+        (dest / "call.json").write_text(json.dumps({**body, "outputs": {
+            k: f"{{{{outputs.{k}}}}}" for k in body.get("outputs", {})}}, indent=2) + "\n")
 
 
 def map_discovery():

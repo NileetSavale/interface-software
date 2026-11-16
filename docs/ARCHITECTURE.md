@@ -943,10 +943,31 @@ invalid).
      4. Replay on B again: rank 1 hits, no drift.
 2. **Page map (§7a), built fully:** per-bank, weighted, with the map-assisted replay fallback. This also covers the
    "assisted fallback" stretch goal.
-3. ~~Capability catalog~~: **cut** (REPORT §7 "Cuts"). It's the stretch goal least connected to the rest. The
-   artifact's contract half is already a tool signature, so it's a short next step.
+3. ~~Capability catalog~~: **cut** from the time-box (D15). It's the stretch goal least connected to the rest. The
+   artifact's contract half is already a tool signature, so it's a short next step. **Built later** as an MCP
+   server (Pass 3 item 8, D30; below).
 
 Already covered by core decisions: `draft → approved` gating (half of "Confidence & approval").
+
+### As built: approved artifacts as MCP tools (Pass 3 item 8, D30)
+`interface mcp --base-url <bank's app> [--tenant X]` (`src/interface/mcp_server.py`) is a stdio MCP server, one per
+bank. What a calling agent sees:
+
+- **One tool per approved artifact** whose `allowedOrigins` holds the bank's origin. The name is the capability id
+  (`core_banking__lookup_member_balance`).
+- **Input schema** from the artifact's inputs (type, pattern, enum values; sensitive ones say they're masked).
+- **Description**: what it returns, the business outcomes it can answer with (`MEMBER_NOT_FOUND`, ...), and whether it
+  only reads or stops at a review screen. Annotations say the same: `readOnlyHint`, never `destructiveHint`.
+- **A call is a replay**: the same executor, policy, network gate, redaction, evidence and circuit breaker. No model.
+- **The result contract as structured content**: `status`, `runId`, `outputs` | `code` | `errorClass` + `atStep` |
+  `errors`. A business outcome is not `isError`; a failure is.
+- **Read from disk on every list and call**: deprecating an artifact refuses the next call without a restart.
+- **With `--tenant`**, each call runs the tenant's version and credentials (D26), and drift proposes the tenant's
+  override where `interface override` looks.
+
+Tested through a real MCP client in process (`tests/test_mcp_server.py`) and over stdio. Evidence case 26 has the
+tool list an agent gets and one call. Not built: an attended server, which would return `needs_human` with a run
+handle at the D11 deadline.
 
 ---
 
@@ -1015,7 +1036,7 @@ short, rather than leaving a higher item half-finished:
 | 4 | Recorder-robustness eval + `open_sub_account` flow | should |
 | 5 | Variant B + step-id overrides + drift → proposed override | should |
 | 6 | Page map + map-assisted fallback + discovery-reliability eval (map on/off) | could |
-| — | Capability catalog | cut |
+| — | Capability catalog | cut (built after the time-box as `interface mcp`, D30) |
 
 Honest expectation: priorities 1–3 fit well in 5 days, 4–5 probably, and 6 (built fully, per D4) is the most at
 risk. If 6 is only partly built, the REPORT says so and gives the design.

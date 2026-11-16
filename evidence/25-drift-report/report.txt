@@ -1,8 +1,8 @@
 core_banking.lookup_member_balance@1.0.0  tenant b: 3 runs, 6 of 8 steps stable
-  APPROVE OVERRIDE  enter_member_number: the last 3 runs all found it by 'anchor', none failed [first 0, anchor 3], since replay_20261116T195804Z_5fd64e
+  APPROVE OVERRIDE  enter_member_number: the last 3 runs all found it by 'anchor', none failed [first 0, anchor 3], since replay_20261116T201251Z_1f6a45
                     → review it: interface override <the core_banking.lookup_member_balance artifact> --tenant b, then add --approve
-  APPROVE OVERRIDE  search_member: the last 3 runs all found it by 'onlyInRegion', none failed [first 0, onlyInRegion 3], since replay_20261116T195804Z_5fd64e
+  APPROVE OVERRIDE  search_member: the last 3 runs all found it by 'onlyInRegion', none failed [first 0, onlyInRegion 3], since replay_20261116T201251Z_1f6a45
                     → review it: interface override <the core_banking.lookup_member_balance artifact> --tenant b, then add --approve
 core_banking.open_sub_account@1.0.0  tenant c: 3 runs, 2 of 3 steps stable
-  RE-RECORD         sign: the last 3 runs all failed at this step (EXPECT_FAILED) [first 0, EXPECT_FAILED 3], since replay_20261116T195824Z_8cce79
+  RE-RECORD         sign: the last 3 runs all failed at this step (EXPECT_FAILED) [first 0, EXPECT_FAILED 3], since replay_20261116T201311Z_6fa73b
                     → re-record step 'sign' (interface discover … --base-url <c's app>), review and re-approve <the core_banking.open_sub_account artifact>
