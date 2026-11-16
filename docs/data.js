@@ -314,6 +314,15 @@ window.SITE = {
    "date": "2026-11-16T09:59:29+00:00",
    "commit": "e6893f9"
   },
+  "concurrency": {
+   "ok": 72,
+   "runs": 72,
+   "crossed": 0,
+   "top": 8,
+   "speedup": 4.8,
+   "date": "2026-11-16T10:24:49+00:00",
+   "commit": "63d3183"
+  },
   "parabank": {
    "ok": 40,
    "runs": 40,
@@ -485,6 +494,18 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Several matches and pages (D28)",
    "body": "A row no label names is picked by the cell showing an input ('Select\nwhere Date of Birth = {{inputs.dob}}'); two matches fail AMBIGUOUS_TARGET,\nnone TARGET_UNRESOLVED, never the first. pageUntil, the only loop an\nartifact can hold, presses Next until that row is on screen, at most\nmaxPages times; recorded from next_page, offered only when the goal says\nresults span pages. A page turn is classed like a click: only a real link\nnamed Next is read.\n\nTwo capabilities discovered by Claude on the mock (three Chens, two born\nthe same day; a 4-page transaction history), 12 fault-matrix cases on\nbank A, both flows in the robustness suite, evidence 19-24."
+  },
+  {
+   "sha": "a9140fb",
+   "date": "2026-11-16",
+   "subject": "Eval results at e6893f9, evidence 21-24, site and REPORT numbers",
+   "body": "Fault matrix 97/97 (12 list and page cases), robustness 120/120 over four\nflows, safety 18/18 + 12/12 with Claude, discovery 20/20, stability\n80/80, ParaBank 40/40."
+  },
+  {
+   "sha": "63d3183",
+   "date": "2026-11-16",
+   "subject": "Suite 7: concurrent replays across two banks",
+   "body": "Two mock-app server processes (bank A; bank B on its approved override and\nown operator), lookup for four members at 1, 4 and 8 at once. A result\ncounts only if it carries its own member's name."
   }
  ],
  "tests": 105

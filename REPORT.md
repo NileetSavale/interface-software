@@ -108,7 +108,9 @@ postcondition, but only exactly: the screen this action is known to lead to here
 - **Discovery with a map** cut median turns 4 → 3 (lookup) and 8 → 5 (sub-account), Claude running 6 known actions
   per run, and median cost $0.017 → $0.011 and $0.029 → $0.023. In an earlier run the sub-account flow got slightly
   dearer with the map, as the known-actions list adds tokens to every turn. N=5 per arm: a direction, not a rate.
-- **At scale**, drift per tenant and step says when to approve an override or re-record.
+- **At scale**, drift per tenant and step says when to approve an override or re-record. Replays share no state:
+  72/72 concurrent lookups across two banks (each its own server) returned their own member's answer, and 8 at once
+  ran 4.8× the throughput of one on a laptop (suite 7). A deployment puts the same unit behind a per-bank queue.
 
 ## Escalation & handoff
 

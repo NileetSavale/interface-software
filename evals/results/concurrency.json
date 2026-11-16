@@ -1,0 +1,58 @@
+{
+  "suite": "concurrency",
+  "date": "2026-11-16T10:24:49+00:00",
+  "commit": "63d3183",
+  "banks": [
+    "a",
+    "b"
+  ],
+  "members": 4,
+  "rounds": 3,
+  "levels": [
+    1,
+    4,
+    8
+  ],
+  "arms": [
+    {
+      "concurrency": 1,
+      "runs": 24,
+      "own_answer": 24,
+      "someone_elses": 0,
+      "results": {
+        "success": 24
+      },
+      "wall_s": 92.5,
+      "per_minute": 15.6,
+      "p50_s": 3.85,
+      "p95_s": 3.9
+    },
+    {
+      "concurrency": 4,
+      "runs": 24,
+      "own_answer": 24,
+      "someone_elses": 0,
+      "results": {
+        "success": 24
+      },
+      "wall_s": 30.8,
+      "per_minute": 46.8,
+      "p50_s": 5.08,
+      "p95_s": 5.43
+    },
+    {
+      "concurrency": 8,
+      "runs": 24,
+      "own_answer": 24,
+      "someone_elses": 0,
+      "results": {
+        "success": 24
+      },
+      "wall_s": 19.3,
+      "per_minute": 74.8,
+      "p50_s": 6.28,
+      "p95_s": 6.71
+    }
+  ],
+  "sub_accounts_opened": 0
+}

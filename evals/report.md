@@ -262,3 +262,17 @@ customer's two accounts, spaced out. Public database resets during the run: **0*
 
 A public server's data can change between runs and it resets now and then, so this is a separate arm, not part of
 `all`: the suites above run on the mock, where every condition is staged.
+
+## 7. Concurrent replays (no LLM)
+_Run 2026-11-16 10:24 UTC at commit `63d3183`._ Lookup for 4 members on banks A, B (each its own server
+process; B on its approved override and its own operator), ×3, run at each concurrency level in one process,
+each replay in its own browser. Sub-accounts opened: **0**.
+
+| at once | runs | own answer | someone else's | results | replays/min | p50 s | p95 s |
+|---|---|---|---|---|---|---|---|
+| 1 | 24 | 24/24 | 0 | success ×24 | 15.6 | 3.85 | 3.9 |
+| 4 | 24 | 24/24 | 0 | success ×24 | 46.8 | 5.08 | 5.43 |
+| 8 | 24 | 24/24 | 0 | success ×24 | 74.8 | 6.28 | 6.71 |
+
+"Own answer" means a success carrying the name of the member that run asked for; "someone else's" must be 0: a
+cookie, session, control token or output leaking between runs would show there or as a WRONG_RECORD.
