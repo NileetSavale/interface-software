@@ -14,7 +14,7 @@ import time
 from interface.artifact.schema import Artifact
 from interface.evidence import now
 from interface.replay.executor import Replayer
-from interface.replay.result import NeedsHuman, RunPending
+from interface.replay.result import Failed, NeedsHuman, RunPending
 
 TTL_S = 15 * 60
 
@@ -34,6 +34,8 @@ class Runs:
             return await asyncio.wait_for(asyncio.shield(task), deadline_s)
         except asyncio.TimeoutError:
             return self._pending(replayer.run_id)
+        except Exception:
+            return self.get_result(replayer.run_id)  # the crash, as the typed failure _done kept
 
     def get_result(self, run_id: str):
         self._expire()
@@ -49,6 +51,8 @@ class Runs:
                 await asyncio.wait_for(asyncio.shield(self._running[run_id][0]), timeout_s)
             except asyncio.TimeoutError:
                 pass
+            except Exception:
+                pass  # a crash: _done has kept it as a typed failure
         return self.get_result(run_id)
 
     def _pending(self, run_id: str):
@@ -61,9 +65,18 @@ class Runs:
         return RunPending(run_id=run_id, status="running", since=since)
 
     def _done(self, run_id: str, task: asyncio.Task):
-        self._running.pop(run_id, None)
+        _, replayer, _ = self._running.pop(run_id)
         if not task.cancelled() and task.exception() is None:
-            self._finished[run_id] = (task.result(), time.monotonic())
+            result = task.result()
+        else:
+            # A run that crashed after its caller stopped waiting still owes it an answer: a typed failure to
+            # collect, never "no such run"
+            why = "cancelled" if task.cancelled() else f"{type(task.exception()).__name__}: {task.exception()}"
+            why = replayer.log.redact(why)
+            replayer.log.event("run_crashed", error=why)
+            result = Failed(run_id=run_id, completed_at=now(), at_step="unknown", error_class="INTERNAL_ERROR",
+                            expected="the run to finish with a result", observed=why[:500])
+        self._finished[run_id] = (result, time.monotonic())
 
     def _expire(self):
         cutoff = time.monotonic() - TTL_S

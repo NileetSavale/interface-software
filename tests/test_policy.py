@@ -46,3 +46,31 @@ def test_network_gate_refuses_commit_paths_and_other_origins():
     assert "origin" in refused(policy, "https://cdn.example.com/x.png", document=False)
     assert refused(policy, "data:image/png;base64,AAAA", document=False) is None
     assert refused(policy, "http://localhost:4100/subaccount/review", document=True) is None
+
+
+@pytest.mark.parametrize("url", ["file:///etc/passwd", "FILE:///Users/someone/.ssh/id_rsa", "chrome://settings",
+                                 "view-source:http://localhost:4100/", "ftp://localhost:4100/x", "javascript:alert(1)",
+                                 "data:text/html,<h1>Sign in again</h1>", "blob:http://localhost:4100/abc"])
+def test_only_http_and_https_load_a_page(url):
+    """Found in review: any other scheme used to pass, so a tampered artifact could open file:// and read the disk."""
+    from interface.policy import refused
+    with pytest.raises(PolicyViolation, match="aren't allowed"):
+        check_url(POLICY, url)
+    if not url.startswith(("data:", "blob:")):
+        assert "aren't allowed" in refused(POLICY, url, document=False)
+
+
+def test_a_tampered_artifact_cannot_open_a_local_file(base_url, tmp_path):
+    import asyncio
+    from interface.artifact.schema import Step
+    from interface.replay.executor import Replayer
+    from interface.replay.result import Failed
+    from tests.conftest import ENV
+    from tests.test_handoff import artifact_without
+    artifact = artifact_without(base_url)
+    secret = tmp_path / "secret.txt"
+    secret.write_text("not for the model")
+    peek = Step(id="peek", intent="open a local file", action="navigate", value=secret.as_uri(), risk="read")
+    tampered = artifact.model_copy(update={"steps": [peek, *artifact.steps]})
+    result = asyncio.run(Replayer(tampered, base_url, {"memberId": "12345"}, env=ENV, pending_dir=tmp_path).run())
+    assert isinstance(result, Failed) and result.error_class == "POLICY_VIOLATION" and result.at_step == "peek"

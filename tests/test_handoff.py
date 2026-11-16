@@ -226,3 +226,27 @@ def test_invoke_returns_needs_human_at_the_deadline_and_the_run_finishes_later(b
     httpx.post(base_url + "/__faults", params={"name": "unknown_dialog", "times": 1})
     late = asyncio.run(run())
     assert isinstance(late, Success) and late.outputs["memberName"] == "Jane Doe", late
+
+
+def test_a_run_that_crashes_after_the_deadline_still_answers(base_url, tmp_path, monkeypatch):
+    """Found in review: a run that raised after its caller got needs_human/running was dropped, and get_result said
+    it never existed. It must leave a typed failure to collect."""
+    from interface.replay.result import Failed, RunPending
+    from interface.runs import Runs
+
+    async def crashes(self):
+        await asyncio.sleep(0.3)
+        raise RuntimeError("the browser went away")
+
+    monkeypatch.setattr(Replayer, "run", crashes)
+
+    async def run():
+        runs = Runs()
+        first = await runs.invoke(artifact_without(base_url), base_url, {"memberId": "12345"}, deadline_s=0.05,
+                                  env=ENV, audit=Audit(tmp_path / "audit.jsonl"))
+        assert isinstance(first, RunPending)
+        return await runs.wait(first.run_id, 5)
+
+    late = asyncio.run(run())
+    assert isinstance(late, Failed) and late.error_class == "INTERNAL_ERROR" and "went away" in late.observed
+

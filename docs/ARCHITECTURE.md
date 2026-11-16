@@ -454,6 +454,15 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
+### As built: findings from an outside review (Pass 3)
+- **Only `http(s)` loads a page.** `refused()` used to let every other scheme through, so a tampered artifact could
+  `navigate` to `file://` and extract the replaying machine's own files. Now `data:`/`blob:` pass only as resources a
+  page made itself, and every other scheme (`file:`, `chrome:`, `view-source:`, `ftp:`) is refused for pages and
+  requests alike. A test and a safety-eval case cover it.
+- **A run that crashes after its deadline still answers.** `Runs` kept only clean finishes, so `get_result` on a
+  crashed late run said it never existed. The crash is now a typed `failed/INTERNAL_ERROR` (message redacted) and a
+  `run_crashed` event; `invoke` and `wait` return it rather than raise.
+
 ### As built: a third-party app, ParaBank (Pass 3 item 4)
 `scripts/parabank_evidence.py` registers a fictional customer on Parasoft's public demo bank, has Claude discover two
 read-only capabilities and replays them with no model; [`evidence/parabank/`](../evidence/parabank/README.md). What

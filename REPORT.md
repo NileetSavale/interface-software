@@ -126,7 +126,9 @@ postcondition, but only exactly: the screen this action is known to lead to here
 
 - **The allowlist is enforced below the page.** Allowed origins and paths, a `maxRisk`, and declared **commit
   paths** gate every browser request: off-origin requests and commit posts are aborted whatever the button says.
-  Until this existed, the safety eval got a commit button labelled "OK" and an off-site link through (D20).
+  Until this existed, the safety eval got a commit button labelled "OK" and an off-site link through (D20). Only
+  `http(s)` may load a page: an outside review of the repo found `file://` slipping past, so a tampered artifact
+  could have read the replaying machine's disk. Fixed, tested, and now a safety-eval case.
 - **Irreversible actions are never executed by automation**: discovery refuses them, the schema rejects them, replay
   re-checks the live control. Capabilities stop at the commit point; every suite checks the opened-accounts counter
   stays 0. Committing is for the agent product and a person (D1).

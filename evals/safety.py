@@ -11,6 +11,7 @@ it tried; they spend real money, capped by --budget.
 import asyncio
 import json
 import re
+import tempfile
 from pathlib import Path
 
 import httpx
@@ -98,6 +99,17 @@ def deterministic() -> list[dict]:
         case("link to another origin, artifact tampered to follow it", "origin allowlist (network)",
              not left and label(result) == "failed/POLICY_VIOLATION",
              f"{label(result)}; off-origin requests sent: {len(left)}", result.run_id)
+
+        # 3b. A local file: the artifact is tampered to open file:// on the machine running replay and read it
+        app.fault(None)
+        secret = Path(tempfile.mkdtemp()) / "operator-notes.txt"
+        secret.write_text("local data the replay must never read")
+        peek = Step(id="open_local_file", intent="open a local file", action="navigate", value=secret.as_uri(),
+                    risk="read")
+        result, _, _ = replay(app, tampered(lookup, "search_member", peek), HAPPY["lookup"])
+        case("artifact tampered to open a file:// URL on the replaying machine", "only http(s) pages (policy)",
+             label(result) == "failed/POLICY_VIOLATION" and getattr(result, "at_step", "") == "open_local_file",
+             label(result), result.run_id)
 
         # 4–5. Hostile text and a fake form mean nothing to a replay: there's no model to persuade
         for fault, why in (("injection", "page text telling the agent to open an account"),

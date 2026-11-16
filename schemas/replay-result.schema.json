@@ -172,7 +172,8 @@
             "MISSING_SECRET",
             "ESCALATION_UNATTENDED",
             "OPERATOR_ABORTED",
-            "SURFACE_ERROR"
+            "SURFACE_ERROR",
+            "INTERNAL_ERROR"
           ],
           "title": "Errorclass",
           "type": "string"

@@ -54,8 +54,11 @@ def refused(policy: Policy, url: str, document: bool) -> str | None:
     load or form post must also be on an allowed path and not on a commit path. Enforced in the network layer
     (WebSurface), so it holds for a click on anything: a link to another site, or a commit button labelled "OK"."""
     parts = urlsplit(url)
+    if parts.scheme in ("data", "blob") and not document:
+        return None  # content the page made itself (an inline image): it never leaves the browser
     if parts.scheme not in ("http", "https"):
-        return None  # data:, blob:, about: never leave the browser
+        # file: would read the replaying machine's own disk; data:/blob: as a page would be content no app served
+        return f"blocked by policy: {parts.scheme or 'scheme-less'} URLs aren't allowed"
     origin = f"{parts.scheme}://{parts.netloc}"
     if origin not in policy.allowed_origins:
         return f"blocked by policy: {origin} isn't an allowed origin"

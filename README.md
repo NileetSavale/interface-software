@@ -40,7 +40,7 @@ The mock app holds only made-up members, so these are not real credentials. Arti
 Nothing below needs an API key except discovery itself.
 
 ```bash
-uv run pytest                              # 124 tests; discovery is driven by a scripted planner, not Claude
+uv run pytest                              # 134 tests; discovery is driven by a scripted planner, not Claude
 uv run python -m evals all                 # the four eval suites that need no LLM (~15 min)
 uv run python scripts/make_evidence.py     # rebuilds evidence/ (replays run fresh; no model)
 ```
@@ -171,5 +171,5 @@ src/interface/
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
 goals/        the two capabilities' goal specs          artifacts/  the discovered artifacts
 evals/        the five suites and their results         evidence/   curated runs
-tests/        124 tests                                 docs/       design, decisions, the site
+tests/        134 tests                                 docs/       design, decisions, the site
 ```
