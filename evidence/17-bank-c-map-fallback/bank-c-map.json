@@ -68,8 +68,8 @@
   }
  },
  "edges": {
-  "e9fee9412970": {
-   "key": "e9fee9412970",
+  "3d027e466541": {
+   "key": "3d027e466541",
    "from": "d91e3785a3f8",
    "to": "d91e3785a3f8",
    "action": "type",
@@ -92,6 +92,12 @@
       "anchorText": "User ID",
       "relation": "right-of",
       "role": "textbox"
+     },
+     {
+      "kind": "anchor",
+      "anchorText": "User ID",
+      "relation": "after",
+      "role": "textbox"
      }
     ]
    },
@@ -102,13 +108,13 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794807511.8249888,
+     "at": 1794819818.472814,
      "ok": true
     }
    ]
   },
-  "695487182b7c": {
-   "key": "695487182b7c",
+  "4ae34b682e45": {
+   "key": "4ae34b682e45",
    "from": "d91e3785a3f8",
    "to": "d91e3785a3f8",
    "action": "type",
@@ -131,6 +137,12 @@
       "anchorText": "Password",
       "relation": "right-of",
       "role": "textbox"
+     },
+     {
+      "kind": "anchor",
+      "anchorText": "Password",
+      "relation": "after",
+      "role": "textbox"
      }
     ]
    },
@@ -141,13 +153,13 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794807511.8249888,
+     "at": 1794819818.472814,
      "ok": true
     }
    ]
   },
-  "238d869baddc": {
-   "key": "238d869baddc",
+  "cae77033ab33": {
+   "key": "cae77033ab33",
    "from": "d91e3785a3f8",
    "to": "8f6411c0d268",
    "action": "click",
@@ -164,6 +176,12 @@
      {
       "kind": "text",
       "text": "Sign On"
+     },
+     {
+      "kind": "anchor",
+      "anchorText": "Password",
+      "relation": "after",
+      "role": "button"
      }
     ]
    },
@@ -174,7 +192,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794807511.8249888,
+     "at": 1794819818.472814,
      "ok": true
     }
    ]
@@ -207,13 +225,13 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794807511.8249888,
+     "at": 1794819818.472814,
      "ok": true
     }
    ]
   },
-  "de777187a5b9": {
-   "key": "de777187a5b9",
+  "0d567f890f47": {
+   "key": "0d567f890f47",
    "from": "42b75111cfd8",
    "to": "42b75111cfd8",
    "action": "type",
@@ -227,6 +245,12 @@
       "anchorText": "Member #",
       "relation": "right-of",
       "role": "textbox"
+     },
+     {
+      "kind": "anchor",
+      "anchorText": "Member #",
+      "relation": "after",
+      "role": "textbox"
      }
     ]
    },
@@ -237,13 +261,13 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794807511.8249888,
+     "at": 1794819818.472814,
      "ok": true
     }
    ]
   },
-  "4a21e2bc9cdd": {
-   "key": "4a21e2bc9cdd",
+  "5b5f5c71af71": {
+   "key": "5b5f5c71af71",
    "from": "42b75111cfd8",
    "to": "8a49f9c469fa",
    "action": "click",
@@ -260,6 +284,12 @@
      {
       "kind": "text",
       "text": "Find Member"
+     },
+     {
+      "kind": "anchor",
+      "anchorText": "Member #",
+      "relation": "after",
+      "role": "button"
      }
     ]
    },
@@ -270,7 +300,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794807511.8249888,
+     "at": 1794819818.472814,
      "ok": true
     }
    ]

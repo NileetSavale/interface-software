@@ -14,8 +14,8 @@
   },
   "status": "draft",
   "provenance": {
-    "discoveryRunId": "disc_20261116T053058Z_32b0e9",
-    "recordedAt": "2026-11-16T05:31:17+00:00",
+    "discoveryRunId": "disc_20261116T084958Z_ff6819",
+    "recordedAt": "2026-11-16T08:50:17+00:00",
     "model": "claude-sonnet-5-5"
   },
   "inputs": {
@@ -140,12 +140,12 @@
           "matches": "(?i)Minimum opening deposit is"
         }
       },
-      "description": "The Open Sub-Account form came back with a message stating the minimum opening deposit, so the app rejected the deposit as too low and did not go on to the review screen. (learned from probe: an opening deposit below the minimum)"
+      "description": "The Open Sub-Account form was shown again with a message stating the minimum opening deposit, so the below-minimum deposit was rejected and no review screen appeared. (learned from probe: an opening deposit below the minimum)"
     }
   ],
   "policy": {
     "allowedOrigins": [
-      "http://127.0.0.1:53980"
+      "http://127.0.0.1:60625"
     ],
     "allowedPaths": [
       "/*"
@@ -401,6 +401,12 @@
             "anchorText": "Account type",
             "relation": "right-of",
             "role": "combobox"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Account type",
+            "relation": "after",
+            "role": "combobox"
           }
         ]
       },
@@ -432,6 +438,12 @@
             "anchorText": "Nickname",
             "relation": "right-of",
             "role": "textbox"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Nickname",
+            "relation": "after",
+            "role": "textbox"
           }
         ]
       },
@@ -453,6 +465,12 @@
             "kind": "anchor",
             "anchorText": "Initial deposit",
             "relation": "right-of",
+            "role": "textbox"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Initial deposit",
+            "relation": "after",
             "role": "textbox"
           }
         ]
@@ -479,6 +497,12 @@
           {
             "kind": "text",
             "text": "Continue"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Initial deposit",
+            "relation": "after",
+            "role": "button"
           }
         ]
       },

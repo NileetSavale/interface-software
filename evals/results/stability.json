@@ -1,7 +1,7 @@
 {
   "suite": "stability",
-  "date": "2026-11-16T08:01:42+00:00",
-  "commit": "ee0569f",
+  "date": "2026-11-16T08:53:06+00:00",
+  "commit": "57bfc8d",
   "n_per_arm": 20,
   "arms": [
     {
@@ -27,7 +27,7 @@
         "success": 20
       },
       "distinct_outputs": 1,
-      "p50_s": 6.64,
+      "p50_s": 6.6,
       "p95_s": 6.72,
       "max_s": 6.74,
       "unsteady_steps": {}
@@ -41,9 +41,9 @@
         "success": 20
       },
       "distinct_outputs": 1,
-      "p50_s": 4.67,
-      "p95_s": 4.72,
-      "max_s": 4.75,
+      "p50_s": 4.68,
+      "p95_s": 4.71,
+      "max_s": 4.72,
       "unsteady_steps": {}
     },
     {
@@ -56,8 +56,8 @@
       },
       "distinct_outputs": 1,
       "p50_s": 7.42,
-      "p95_s": 7.59,
-      "max_s": 7.59,
+      "p95_s": 7.52,
+      "max_s": 7.54,
       "unsteady_steps": {}
     }
   ]

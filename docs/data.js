@@ -193,62 +193,86 @@ window.SITE = {
    "chose": "<strong>The rule: in prose only, hide every run of two or more capitalised words, or a title and a name, unless the page uses it as a label</strong>",
    "why": "A bank needs a guarantee, not a probability. The rule is deterministic, adds no dependency, and errs toward hiding: at worst a phrase that isn't a name is hidden. A statistical model catches lone first names but can miss names outright, and it ties what the model sees to a model version. Lone first names stay a stated limit.",
    "kind": "agreed"
+  },
+  {
+   "id": "D25",
+   "topic": "Who may use the operator page",
+   "proposed": "(found listing gaps before submission) The page had no check at all: anyone who could reach the port could see the live, unmasked screen and take control or abort, the index listed every intervention, and any site in the operator's browser could post to it. The AI recommended a per-intervention key",
+   "chose": "<strong>Agreed: a random key per intervention, delivered only in the printed link's <code>#</code> fragment and required as a header on every call; an empty page shell; Host, framing and caching locked down; refusals logged</strong>",
+   "why": "Taking control of a live banking session is the most powerful action in the system, so it has to be the hardest to reach. A header can't be forged cross-site without CORS, the fragment keeps the key out of every log, and the key is scoped to one intervention and dies with it. Identity stays self-declared: that belongs to the bank's sign-on, not to this layer.",
+   "kind": "agreed"
+  },
+  {
+   "id": "D26",
+   "topic": "Whose credentials a tenant's replay types",
+   "proposed": "(found listing gaps before submission) Every bank's replay read the same <code>APP_USER</code> from the environment. The AI recommended a per-tenant lookup behind a mapping, with no fallback",
+   "chose": "<strong>Agreed: <code>{{secrets.APP_USER}}</code> on bank B is <code>APP_USER__B</code> and nothing else; a missing one fails before the browser opens (<code>MISSING_SECRET</code>), naming the key and never a value. The source is any mapping, the environment by default</strong>",
+   "why": "A fallback to the shared name is exactly how one bank's operator would be signed into another bank's system. Failing loudly at preflight beats failing at sign-on with a half-run. Reading secrets through a mapping means a vault client drops in without touching replay.",
+   "kind": "agreed"
+  },
+  {
+   "id": "D27",
+   "topic": "Reading the first row of a results list",
+   "proposed": "(found on ParaBank) \"The first transaction found\" has nothing stable to name its row by: the row's key is a date, which is data. The only way to say it is a position, which my D8 rule rejected for picking controls. The AI offered a narrow <code>row: first</code>, matching by amount, folding it into item 5, or dropping the flow",
+   "chose": "<strong>A narrow <code>row: first</code> on a table cell: reading only, never acting; recorded only when the goal declares it wants the first result; on a table found by its own label and header; an empty table finds nothing</strong>",
+   "why": "D8 is about choosing between same-named controls, where an index silently picks the wrong one. \"The first result\" is what the caller asked for, so the position is the meaning, not a guess. Keeping it off controls means nothing is ever clicked by position, and an empty table failing is what turns \"no transactions\" from a hollow success into an answer.",
+   "kind": "agreed"
   }
  ],
  "evals": {
   "fault_matrix": {
-   "passed": 73,
-   "runs": 73,
+   "passed": 85,
+   "runs": 85,
    "opened": 0,
-   "date": "2026-11-16T05:24:57+00:00",
-   "commit": "70e2687",
+   "date": "2026-11-16T08:45:34+00:00",
+   "commit": "57bfc8d",
    "misses": []
   },
   "stability": {
    "ok": 80,
    "runs": 80,
    "distinct": 1,
-   "p50": 3.8,
-   "date": "2026-11-16T05:32:30+00:00",
-   "commit": "70e2687"
+   "p50": 3.83,
+   "date": "2026-11-16T08:53:06+00:00",
+   "commit": "57bfc8d"
   },
   "robustness": {
    "ok": 60,
    "runs": 60,
    "wrong": 0,
-   "date": "2026-11-16T05:36:55+00:00",
-   "commit": "70e2687"
+   "date": "2026-11-16T08:57:31+00:00",
+   "commit": "57bfc8d"
   },
   "safety": {
-   "passed": 17,
-   "total": 17,
+   "passed": 18,
+   "total": 18,
    "gaps": 0,
    "llm_passed": 12,
    "llm_total": 12,
-   "llm_spent": 0.3947,
+   "llm_spent": 0.3945,
    "harm": 0,
-   "date": "2026-11-16T05:13:05+00:00",
-   "commit": "70e2687"
+   "date": "2026-11-16T08:31:38+00:00",
+   "commit": "57bfc8d"
   },
   "discovery": {
    "recorded": 20,
    "runs": 20,
    "replays": 20,
    "median_cost": [
-    0.019,
-    0.0113,
-    0.0282,
-    0.0321
+    0.0173,
+    0.0112,
+    0.0287,
+    0.023
    ],
-   "spent": 0.525,
+   "spent": 0.4936,
    "arms": [
     {
      "flow": "lookup",
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 5,
-     "median_cost_usd": 0.019,
+     "median_turns": 4,
+     "median_cost_usd": 0.0173,
      "escalated_runs": 0
     },
     {
@@ -257,7 +281,7 @@ window.SITE = {
      "recorded": 5,
      "replays_on_other_member": 5,
      "median_turns": 3,
-     "median_cost_usd": 0.0113,
+     "median_cost_usd": 0.0112,
      "escalated_runs": 0
     },
     {
@@ -265,8 +289,8 @@ window.SITE = {
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 7,
-     "median_cost_usd": 0.0282,
+     "median_turns": 8,
+     "median_cost_usd": 0.0287,
      "escalated_runs": 0
     },
     {
@@ -275,12 +299,20 @@ window.SITE = {
      "recorded": 5,
      "replays_on_other_member": 5,
      "median_turns": 6,
-     "median_cost_usd": 0.0321,
+     "median_cost_usd": 0.023,
      "escalated_runs": 0
     }
    ],
-   "date": "2026-11-16T05:37:03+00:00",
-   "commit": "70e2687"
+   "date": "2026-11-16T08:56:10+00:00",
+   "commit": "57bfc8d"
+  },
+  "parabank": {
+   "ok": 40,
+   "runs": 40,
+   "distinct": 1,
+   "resets": 0,
+   "date": "2026-11-16T09:02:08+00:00",
+   "commit": "57bfc8d"
   }
  },
  "commits": [
@@ -385,7 +417,55 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Hide names that only free text mentions (D24)",
    "body": "A fail-closed rule in the masker: in prose only, every run of two or more\ncapitalised words, or a title and a name, becomes a NAME placeholder unless\nthe page uses it as a label. A guess from a note never hides a label on a\nlater screen. The safety eval's known gap is now a passing case, and the\nrun log is checked for the free-text name too."
+  },
+  {
+   "sha": "d898807",
+   "date": "2026-11-16",
+   "subject": "Eval results at 70e2687, regenerated evidence, REPORT cut to ~1,650 words",
+   "body": "All five suites after the free-text name rule: fault matrix 73/73, safety\n17/17 with no known gap + 12/12 with Claude, discovery 20/20, stability\n80/80, robustness 60/60. REPORT keeps its seven headings and every number;\ndetail moves to ARCHITECTURE and DECISIONS."
+  },
+  {
+   "sha": "340180a",
+   "date": "2026-11-16",
+   "subject": "Operator page: a key per intervention (D25)",
+   "body": "Every call about an intervention needs its key, delivered only in the\nprinted link's fragment and sent as a header; the page is an empty shell,\ninterventions aren't listed, Host/framing/caching are locked down, and\nrefusals are logged on the run. The site no longer calls the live view\nmasked: it never was."
+  },
+  {
+   "sha": "946b968",
+   "date": "2026-11-16",
+   "subject": "CI: the test suite on Linux with no API key, and its badge",
+   "body": ""
+  },
+  {
+   "sha": "847877e",
+   "date": "2026-11-16",
+   "subject": "Each bank's own operator credentials (D26)",
+   "body": "A tenant's replay reads {{secrets.X}} as X__TENANT only, never the shared\nname; a missing one fails at preflight as MISSING_SECRET, naming the key.\nSecrets come through a mapping, so a vault client can stand in for the\nenvironment."
+  },
+  {
+   "sha": "3d48d54",
+   "date": "2026-11-16",
+   "subject": "ParaBank: two capabilities on an app we didn't write (D27)",
+   "body": "Claude discovers account balance and find-transaction-by-amount on\nParasoft's public demo bank; both replay with no model on other accounts\nand fail cleanly where the app has no answer (evidence/parabank/).\n\nWhat the real app found, each fixed and tested: captions over fields and\nidentical buttons (the 'after' anchor); controls named by an input\n({{inputs.x}} in targets, filled at replay); an onload focus move that\nmisplaced typed text (wait for load, verify typed fields, check before\nsubmit); sign-on proof that depended on the request (a landed heading);\ngoals declare outputs; row: first for a results list (D27); three\nmasker gaps caught by the evidence scan."
+  },
+  {
+   "sha": "ee0569f",
+   "date": "2026-11-16",
+   "subject": "Only http(s) loads a page; a crashed late run still answers",
+   "body": "From an outside review: refused() let every non-http(s) scheme through,\nso a tampered artifact could navigate to file:// and read the replaying\nmachine's disk. data:/blob: now pass only as a page's own resources;\neverything else is refused. A run that crashed after its caller's\ndeadline was dropped; it now leaves a typed failed/INTERNAL_ERROR.\nTests for both, and a new safety-eval case."
+  },
+  {
+   "sha": "cd82b5b",
+   "date": "2026-11-16",
+   "subject": "Suite 6: replay stability on ParaBank (network, no LLM)",
+   "body": "Both ParaBank artifacts replayed on a fresh fictional customer's two\naccounts, spaced out; a public-database reset is counted only when a\nsign-on outside replay confirms the customer is gone. Not part of 'all'."
+  },
+  {
+   "sha": "57bfc8d",
+   "date": "2026-11-16",
+   "subject": "An empty value is 'not shown yet', not someone else's record",
+   "body": "Found by the ParaBank stability suite: its account page fills its cells\n~150 ms after load, and 2/20 replays read the account number empty and\nraised a false WRONG_RECORD (opening the circuit breaker). Identifiers and\noutputs are now waited for until they have text, then compared once; a\nmismatch is still WRONG_RECORD at once, one that never appears a TIMEOUT.\nMock faults late_fill and late_wrong_record put both in the fault matrix."
   }
  ],
- "tests": 92
+ "tests": 101
 };

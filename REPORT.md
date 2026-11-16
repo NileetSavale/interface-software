@@ -23,7 +23,7 @@ with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
   2026): exact, cheap, layout-proof. An app with no tree is invisible, so bbox strategies stay in the schema and D2
   (a screenshot on a screen's first visit) is designed.
 - **Model choice.** Discovery's cost is spread over every free replay, so first-try success beats token price
-  (D12). Over 20 real runs: median $0.019 (lookup) and $0.028 (sub-account), probes included, all recorded and
+  (D12). Over 20 real runs: median $0.017 (lookup) and $0.029 (sub-account), probes included, all recorded and
   replayed on another member, no escalation.
 - **History** is append-only with old snapshots cleared server-side: Claude 5.5 binds its thinking to the exact
   conversation (D17).
@@ -75,7 +75,7 @@ reviewer as a spec.
 (`99999` → `MEMBER_NOT_FOUND`); each is replayed and the model names the screen. An outcome is kept only with fixed
 wording, the expected code, the probe now ending in it, and the happy path still succeeding.
 
-**Fault matrix: 73/73 across three banks**, 0 accounts opened. A fallback hit succeeds and is reported as drift.
+**Fault matrix: 85/85 across three banks**, 0 accounts opened. A fallback hit succeeds and is reported as drift.
 
 **When no strategy survives, the bank's page map** may stand in: at most two trusted edges from this bank's
 verified runs, `read` only when unattended, ending in the step's own action with the next control then present,
@@ -100,10 +100,10 @@ postcondition, but only exactly: the screen this action is known to lead to here
   ([`evidence/parabank/`](evidence/parabank/README.md)). It found what the mock hadn't: captions over fields, four
   identical buttons, an onload focus move that misplaced typed text, results lists (D27), and values filled in after
   load, which raised a false `WRONG_RECORD` in 2 of 20 replays. Each is fixed and tested, and its stability is now
-  a suite of its own.
-- **Discovery with a map** cut median turns 5 → 3 (lookup) and 7 → 6 (sub-account), Claude running 6 known actions
-  per run. Lookup got cheaper ($0.019 → $0.011); the sub-account flow didn't ($0.028 → $0.032), as the known-actions
-  list adds tokens to every turn. N=5 per arm: a direction, not a rate.
+  a suite of its own: **40/40** replays on ParaBank, one distinct output per account.
+- **Discovery with a map** cut median turns 4 → 3 (lookup) and 8 → 6 (sub-account), Claude running 6 known actions
+  per run, and median cost $0.017 → $0.011 and $0.029 → $0.023. In an earlier run the sub-account flow got slightly
+  dearer with the map, as the known-actions list adds tokens to every turn. N=5 per arm: a direction, not a rate.
 - **At scale**, drift per tenant and step says when to approve an override or re-record.
 
 ## Escalation & handoff
@@ -141,7 +141,7 @@ postcondition, but only exactly: the screen this action is known to lead to here
   Credentials are typed by code on the sign-on page only, and each bank's are its own (`APP_USER__B`, no fallback;
   a missing one fails before anything runs, D26), read through a mapping a vault can sit behind. Everything on disk is redacted at
   the write boundary; screenshots are masked in-page and fail closed.
-- **Measured:** 17/17 safety cases without the LLM, and 12/12 with Claude on hostile pages (injection, a fake
+- **Measured:** 18/18 safety cases without the LLM, and 12/12 with Claude on hostile pages (injection, a fake
   password form, an off-site link, an "OK" commit), zero harm.
 - **Limits:** the risk classifier is name-based and commit paths are declared per app; a lone first name or a
   lower-case name in free text still reaches the model; masking depends on accessibility-tree coverage.

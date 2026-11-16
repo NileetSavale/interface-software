@@ -1,11 +1,11 @@
-{"t": 0.0, "at": "2026-11-16T05:37:23+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "inputs": ["memberId"], "tenant": null, "page_map": null}
-{"t": 0.266, "at": "2026-11-16T05:37:23+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.455, "at": "2026-11-16T05:37:25+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.533, "at": "2026-11-16T05:37:25+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.589, "at": "2026-11-16T05:37:26+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 3.012, "at": "2026-11-16T05:37:26+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.449, "at": "2026-11-16T05:37:26+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.5, "at": "2026-11-16T05:37:26+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.897, "at": "2026-11-16T05:37:27+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.919, "at": "2026-11-16T05:37:27+00:00", "event": "outcome", "code": "MEMBER_NOT_FOUND", "kind": "business", "step": "search_member"}
-{"t": 3.956, "at": "2026-11-16T05:37:27+00:00", "event": "replay_finished", "status": "business_outcome", "result": {"runId": "replay_20261116T053723Z_4b63de", "completedAt": "2026-11-16T05:37:27+00:00", "recovered": [], "drift": [], "status": "business_outcome", "code": "MEMBER_NOT_FOUND", "atStep": "search_member", "details": {}}}
+{"t": 0.0, "at": "2026-11-16T09:02:30+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.264, "at": "2026-11-16T09:02:30+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.35, "at": "2026-11-16T09:02:32+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.428, "at": "2026-11-16T09:02:32+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.479, "at": "2026-11-16T09:02:33+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.898, "at": "2026-11-16T09:02:33+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.34, "at": "2026-11-16T09:02:33+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.413, "at": "2026-11-16T09:02:33+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.801, "at": "2026-11-16T09:02:34+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.835, "at": "2026-11-16T09:02:34+00:00", "event": "outcome", "code": "MEMBER_NOT_FOUND", "kind": "business", "step": "search_member"}
+{"t": 3.862, "at": "2026-11-16T09:02:34+00:00", "event": "replay_finished", "status": "business_outcome", "result": {"runId": "replay_20261116T090230Z_34517e", "completedAt": "2026-11-16T09:02:34+00:00", "recovered": [], "drift": [], "status": "business_outcome", "code": "MEMBER_NOT_FOUND", "atStep": "search_member", "details": {}}}

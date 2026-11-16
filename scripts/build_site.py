@@ -89,6 +89,10 @@ def summary(results: dict) -> dict:
                           "arms": [{k: a[k] for k in ("flow", "n", "recorded", "replays_on_other_member", "median_turns",
                                                       "median_cost_usd", "escalated_runs")} for a in arms],
                           "date": dc["date"], "commit": dc["commit"]}
+    if pb := results.get("parabank"):
+        s["parabank"] = {"ok": sum(a["results"].get("success", 0) for a in pb["arms"]), "runs": sum(a["n"] for a in pb["arms"]),
+                         "distinct": max(a["distinct_outputs"] for a in pb["arms"]), "resets": pb["database_resets"],
+                         "date": pb["date"], "commit": pb["commit"]}
     return s
 
 
