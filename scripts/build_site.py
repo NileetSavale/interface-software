@@ -95,6 +95,12 @@ def summary(results: dict) -> dict:
                             "crossed": sum(a["someone_elses"] for a in cc["arms"]), "top": top["concurrency"],
                             "speedup": round(top["per_minute"] / cc["arms"][0]["per_minute"], 1),
                             "date": cc["date"], "commit": cc["commit"]}
+    if tm := results.get("terminal"):
+        dc = tm.get("discovery") or {}
+        s["terminal"] = {"passed": tm["passed"], "cases": tm["cases"], "guard": tm["commit_guard"]["pass"],
+                         "stable": round(tm["stability"]["success_rate"] * tm["stability"]["n"]),
+                         "stable_n": tm["stability"]["n"], "recorded": dc.get("recorded"), "disc_n": dc.get("n"),
+                         "date": tm["date"], "commit": tm["commit"]}
     if pb := results.get("parabank"):
         s["parabank"] = {"ok": sum(a["results"].get("success", 0) for a in pb["arms"]), "runs": sum(a["n"] for a in pb["arms"]),
                          "distinct": max(a["distinct_outputs"] for a in pb["arms"]), "resets": pb["database_resets"],

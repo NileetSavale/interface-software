@@ -1,0 +1,31 @@
+{
+  "capability": "core_banking_terminal.lookup_member_balance",
+  "title": "Look up a member's savings balance (green screen)",
+  "description": "On the core system's terminal: searches for a member by member number and returns the member's name and the current balance of their savings account.",
+  "product": "mock-core-banking-terminal",
+  "surface": "terminal",
+  "versionRange": ">=1.0 <2.0",
+  "entryPath": "/",
+  "goal": "Sign on, look up member {{inputs.memberId}}, and read the member's name and current savings balance.",
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "member"
+    }
+  },
+  "outputs": {
+    "memberName": {"type": "string", "description": "the member's name"},
+    "savingsBalance": {"type": "money", "description": "the savings balance"}
+  },
+  "secrets": ["APP_USER", "APP_PASSWORD"],
+  "commitPaths": ["/CB0410"],
+  "maxRisk": "read",
+  "probes": [
+    {"inputs": {"memberId": "99999"}, "why": "a member number that doesn't exist", "expect": "MEMBER_NOT_FOUND"},
+    {"inputs": {"memberId": "01234"}, "why": "a member number the application rejects as malformed", "expect": "INVALID_MEMBER_NUMBER"},
+    {"inputs": {"memberId": "45678"}, "why": "a member the operator may not view", "expect": "PERMISSION_DENIED"}
+  ]
+}

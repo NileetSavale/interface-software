@@ -16,7 +16,7 @@ mid-run, and nothing automated can ever press "Confirm".
   success, business outcomes, recovery, hard failures, a handoff with a screen recording, a second bank, a blocked
   commit, and a third bank run without and with its page map. Plus [`evidence/parabank/`](evidence/parabank/README.md):
   two capabilities discovered and replayed on ParaBank, a public demo bank we didn't write.
-- **Measured:** [`evals/report.md`](evals/report.md): seven suites, N and commit stated.
+- **Measured:** [`evals/report.md`](evals/report.md): eight suites, N and commit stated.
 - **Visual tour:** <https://nileetsavale.github.io/interface-software/>: interactive architecture, decisions, numbers.
 
 ## Setup
@@ -164,6 +164,17 @@ discover two read-only capabilities, and replays them with no model (about $0.20
 uv run python scripts/parabank_evidence.py   # → evidence/parabank/
 ```
 
+**9b. A green screen.** The same thread on a 24x80 terminal host, read through a VT100 emulator:
+
+```bash
+uv run interface mock-terminal                     # telnet://127.0.0.1:4300; --variant b for the second bank
+T=artifacts/core_banking_terminal.lookup_member_balance.json
+uv run interface approve $T
+uv run interface replay $T --base-url telnet://127.0.0.1:4300 --input memberId=34567
+uv run interface discover goals/terminal_lookup_member_balance.json --base-url telnet://127.0.0.1:4300 \
+    --input memberId=12345 --out /tmp/terminal   # Claude on the green screen, about $0.02
+```
+
 **10. An agent calling the capabilities.** `interface mcp` serves the bank's approved artifacts as MCP tools over
 stdio: one tool each, its input schema from the artifact, its answer the result contract. For an agent host's config:
 
@@ -184,14 +195,16 @@ src/interface/
   discovery/   loop.py (the agent loop and escalation ladder), planner.py (Claude), recorder.py, probes.py
   artifact/    schema.py (the contract), overrides.py (tenants), library.py (standard outcomes)
   replay/      executor.py (deterministic replay), result.py (the five result types)
-  surface/     web.py + locate.js (Playwright over the accessibility tree), human.js (records a person's actions)
+  surface/     web.py + locate.js (Playwright over the accessibility tree), human.js (records a person's actions),
+               terminal.py (a VT100 green screen, read through an emulator)
   policy.py    allowlist, risk classes, the network gate        pii.py       the masker the model sees through
   pagemap.py   each bank's learned map of screens and actions
   session.py   the control token                                operator.py  the operator page
   evidence.py  run logs, redaction, audit and circuit breaker   runs.py      invoke with a deadline
   drift.py     the drift report across runs                   mcp_server.py  approved artifacts as MCP tools
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
+apps/mock_terminal/       the green-screen host: the same members and faults on a 24x80 terminal
 goals/        the capabilities' goal specs              artifacts/  the discovered artifacts
-evals/        the seven suites and their results        evidence/   curated runs
-tests/        150 tests                                 docs/       design, decisions, the site
+evals/        the eight suites and their results        evidence/   curated runs
+tests/        156 tests                                 docs/       design, decisions, the site
 ```

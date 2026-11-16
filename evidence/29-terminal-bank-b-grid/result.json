@@ -1,0 +1,24 @@
+{
+  "runId": "replay_20261116T211023Z_a85cfe",
+  "completedAt": "2026-11-16T21:10:27+00:00",
+  "recovered": [],
+  "drift": [
+    {
+      "stepId": "enter_member_number",
+      "hitRank": 3,
+      "strategy": "bbox",
+      "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp2jl2abpo/b.json"
+    },
+    {
+      "stepId": "search",
+      "hitRank": 1,
+      "strategy": "bbox",
+      "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp2jl2abpo/b.json"
+    }
+  ],
+  "status": "success",
+  "outputs": {
+    "memberName": "{{outputs.memberName}}",
+    "savingsBalance": "{{outputs.savingsBalance}}"
+  }
+}

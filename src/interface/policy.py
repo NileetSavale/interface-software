@@ -59,7 +59,7 @@ def refused(policy: Policy, url: str, document: bool) -> str | None:
     parts = urlsplit(url)
     if parts.scheme in ("data", "blob") and not document:
         return None  # content the page made itself (an inline image): it never leaves the browser
-    if parts.scheme not in ("http", "https"):
+    if parts.scheme not in ("http", "https", "telnet"):  # telnet: a green-screen host (TerminalSurface)
         # file: would read the replaying machine's own disk; data:/blob: as a page would be content no app served
         return f"blocked by policy: {parts.scheme or 'scheme-less'} URLs aren't allowed"
     origin = f"{parts.scheme}://{parts.netloc}"

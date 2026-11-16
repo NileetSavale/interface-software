@@ -109,7 +109,8 @@ class Recorder:
         return Artifact(
             capability=Capability(id=goal["capability"], version="1.0.0", title=goal["title"],
                                   description=goal["description"]),
-            app=App(product=goal["product"], version_range=goal.get("versionRange", "*"), surface="web",
+            app=App(product=goal["product"], version_range=goal.get("versionRange", "*"),
+                    surface=goal.get("surface", "web"),
                     entry_path=entry_path),
             status="draft",
             provenance=Provenance(discovery_run_id=self.run_id, model=self.model,

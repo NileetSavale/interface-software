@@ -760,6 +760,40 @@ fieldset".
 - With the proposal approved, the whole contract holds on B as on A, and the happy path has no drift.
 - Bank A is unaffected by B's override.
 
+### As built: the green screen (Pass 3 item 9, D31)
+`src/interface/surface/terminal.py` is a second Surface, for a character terminal. The mock host is
+`apps/mock_terminal` (`interface mock-terminal`, telnet://127.0.0.1:4300): 24x80, screen codes, reverse-video fields,
+Tab between fields, Ctrl-U to erase, Enter and F1–F12, the same members and faults as the web mock, a sub-account
+review screen whose F10=Post commits, and a bank B that renames the member field and the search key.
+
+**Reading it.** pyte, a VT100 emulator, keeps the grid with each cell's attributes. The surface turns it into the
+snapshot the model already reads:
+
+| On the screen | In the snapshot |
+|---|---|
+| row 1: `CB0300  MEMBER INQUIRY` | `text "CB0300"`, `heading "MEMBER INQUIRY"` |
+| `Member # . . . . :` then a reverse-video run | `textbox "Member #"` (the caption is its name, as a `<label>` is) |
+| `Name . . . . . . :  Jane Doe` | `text "Name:"`, `text "Jane Doe"` (so the masker's label rule applies) |
+| last row: `Enter=Search  F3=Exit` | `button "Search" (key Enter)`, `button "Exit" (key F3)` |
+
+**Targets.** Role and name, label, the caption it's right of, then `bbox` (column, row and width in character
+cells, 0-based). Every target's `frame` is the screen code, so nothing resolves on another screen. A value drawn
+blank and filled in later is waited for, never read empty.
+
+**Acting.** Typing tabs to the field, erases it, types, and checks the field shows it (a hidden field shows one `*`
+a character). A button is a key press. On a screen listed in `commitPaths` (`/CB0410`), only exit and cancel keys are
+sent; anything else is recorded as a refusal, like the web's network gate.
+
+**Shared, not forked.** The executor and discovery loop pick the surface from `app.surface` / the goal's `surface`.
+What they used to read off DOM handles (the live name, link or button, form, path) became Surface methods. The
+system prompt gains a short note for terminals; the web prompt is unchanged.
+
+**Measured** (suite 8): Claude recorded it 5/5 (5 turns, median $0.018 with probes) and every recording replayed on
+another member; the fault matrix holds 31/31 on bank A, on bank B at first contact (both renamed controls found by
+grid position) and with B's override approved; F10=Post on the review screen was never sent; 20/20 stable replays.
+A first attempt at the Claude arm crashed when a probe's API call raised. A probe the model can't answer is now
+skipped and the recording stands (tested).
+
 ### As built: the drift report (Pass 3 item 7, D29)
 `interface drift` (`src/interface/drift.py`) reads every replay's `events.jsonl`, which is already redacted, and
 reduces each run to how each step's control was found: by the first strategy, by a named fallback, by the page map,

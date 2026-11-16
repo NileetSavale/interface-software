@@ -32,6 +32,12 @@ KEEP_MASKED_JS = """(() => { const [p, l] = %s;
   document.addEventListener("DOMContentLoaded", mask); document.addEventListener("input", mask, true);
   setInterval(mask, 100); })();"""
 LOCATE_JS = (Path(__file__).parent / "locate.js").read_text()
+LIVE_NAME_JS = """el => {
+  if (el.matches('input[type=submit],input[type=button],input[type=reset]')) return el.value || '';
+  if (el.matches('input,select,textarea')) return el.getAttribute('aria-label') || (el.labels && el.labels[0]
+    ? el.labels[0].innerText : '');
+  return el.getAttribute('aria-label') || el.innerText || '';
+}"""
 POLL_SECONDS = 0.15
 _SNAPSHOT_LINE = re.compile(r"""^\s*-\s+'?(?P<role>[a-z]+)(?:\s+"(?P<name>(?:[^"\\]|\\.)*)")?.*\[ref=(?P<ref>\w+)\]""")
 _REF = re.compile(r"\s*\[ref=\w+\]")
@@ -471,6 +477,23 @@ class WebSurface(Surface):
         if condition.label:
             return frame.get_by_label(py_pattern(condition.label), exact=True)
         return frame.get_by_text(py_pattern(condition.text or condition.name), exact=isinstance(condition.text or condition.name, str))
+
+    async def control_name(self, handle: object) -> str:
+        """The name the policy re-check classifies: a button's value or text, or its aria-label."""
+        return await handle.evaluate("el => (el.value || el.innerText || el.getAttribute('aria-label') || '').trim()")
+
+    async def live_name(self, handle: object) -> str:
+        """The accessible name a drift override would record for the control as it is now."""
+        return await handle.evaluate(LIVE_NAME_JS)
+
+    async def is_link(self, handle: object) -> bool:
+        return await handle.evaluate("el => el.tagName === 'A' && !!el.href")
+
+    async def form_key(self, handle: object) -> str | None:
+        return await handle.evaluate(FORM_KEY_JS)
+
+    async def path_of_handle(self, handle: object) -> str:
+        return await handle.evaluate("el => el.ownerDocument.location.pathname")
 
     async def gone(self, handle: object, timeout_ms: int) -> None:
         """Wait until an element has left the page (its document was replaced), or the timeout passes."""

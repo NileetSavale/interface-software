@@ -1,0 +1,17 @@
+{
+  "appliesTo": ">=1.0.0 <2.0.0",
+  "ops": [
+    {
+      "op": "set",
+      "step": "enter_member_number",
+      "path": "target.strategies[kind=role].name",
+      "value": "Mbr Number"
+    },
+    {
+      "op": "set",
+      "step": "search",
+      "path": "target.strategies[kind=role].name",
+      "value": "Find"
+    }
+  ]
+}

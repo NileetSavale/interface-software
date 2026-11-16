@@ -1,6 +1,7 @@
 """interface: discover a capability with Claude, review and approve it, replay it without the model.
 
     interface mock-app
+    interface mock-terminal                             (the green-screen host, telnet://127.0.0.1:4300)
     interface discover goals/lookup_member_balance.json --input memberId=12345
     interface approve artifacts/core_banking.lookup_member_balance.json
     interface replay artifacts/core_banking.lookup_member_balance.json --input memberId=12345
@@ -185,6 +186,12 @@ def cmd_mock_app(args) -> int:
     return 0
 
 
+def cmd_mock_terminal(args) -> int:
+    from apps.mock_terminal.app import main as serve_terminal
+    serve_terminal(args.port, args.variant, args.fault)
+    return 0
+
+
 def load_dotenv(path: Path = Path(".env")):
     """KEY=value lines; the real environment wins over the file."""
     if not path.exists():
@@ -261,6 +268,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--variant", default="a", choices=["a", "b", "c"],
                    help="b: a second bank's templates; c: b with the menu link renamed")
     p.set_defaults(fn=cmd_mock_app)
+
+    p = sub.add_parser("mock-terminal", help="serve the mock green-screen core-banking host (telnet://)")
+    p.add_argument("--port", type=int, default=4300)
+    p.add_argument("--variant", default="a", choices=["a", "b"], help="b: a second bank's labels, same grid")
+    p.add_argument("--fault", help="session_timeout, server_error, wrong_record, slow or late_fill, every time")
+    p.set_defaults(fn=cmd_mock_terminal)
 
     args = parser.parse_args(argv)
     return args.fn(args)

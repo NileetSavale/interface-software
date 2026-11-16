@@ -1,0 +1,10 @@
+{
+  "runId": "disc_20261116T204336Z_cbdb00-probe7",
+  "completedAt": "2026-11-16T20:44:36+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "business_outcome",
+  "code": "PERMISSION_DENIED",
+  "atStep": "search",
+  "details": {}
+}

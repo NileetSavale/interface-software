@@ -29,16 +29,11 @@ from interface.replay.result import (
     BusinessOutcome, DriftEvent, EvidenceRef, Failed, FailureClass, InputError, InvalidInput, RecoveryEvent, Success,
 )
 from interface.surface.base import Resolved, SurfaceError
+from interface.surface.terminal import TerminalSurface
 from interface.surface.web import WebSurface
 
 DEFAULT_TIMEOUT_MS = 10_000
 # A control's accessible name, for proposing an override. Never an input's value: that's what the user typed.
-LIVE_NAME_JS = """el => {
-  if (el.matches('input[type=submit],input[type=button],input[type=reset]')) return el.value || '';
-  if (el.matches('input,select,textarea')) return el.getAttribute('aria-label') || (el.labels && el.labels[0]
-    ? el.labels[0].innerText : '');
-  return el.getAttribute('aria-label') || el.innerText || '';
-}"""
 MAX_RECOVERIES_PER_RUN = 3
 
 
@@ -132,7 +127,7 @@ class Replayer:
         self.recovered: list[RecoveryEvent] = []
         self.drift: list[DriftEvent] = []
         self._recoveries: Counter[str] = Counter()
-        self.surface: WebSurface | None = None
+        self.surface: WebSurface | TerminalSurface | None = None
         self.log = RunLog(self.run_id)
         self.session = Session(self.log)
         self._next: Step | None = None
@@ -165,28 +160,26 @@ class Replayer:
                                        error_class="CIRCUIT_OPEN", expected="no recent wrong-record incidents",
                                        observed=f"{Audit.TRIP_AFTER}+ WRONG_RECORD in the last day; re-approve after "
                                                 f"review to reset"))
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=not self.headed)
+        if self.artifact.app.surface == "terminal":
+            self.surface = TerminalSurface(policy=self.artifact.policy)
             try:
-                video = {"record_video_dir": str(self.video_dir), "viewport": {"width": 1280, "height": 720},
-                         "record_video_size": {"width": 1280, "height": 720}} if self.video_dir else {}
-                context = await browser.new_context(**video)
-                self.surface = await WebSurface.open(context, on_human=self._on_human if self.hub else None,
-                                                     policy=self.artifact.policy, masked_view=bool(self.video_dir))
-                result = await self._run_steps()
-                if self.map and self._transitions:
-                    await self._screen_before_act()  # where the last action led
-            except _Stop as stop:
-                result = stop.result
-            except ControlLost as e:
-                # Only an abort takes control away from a replay mid-action: it pauses itself for everything else
-                result = Failed(run_id=self.run_id, completed_at=now(), at_step="control", error_class="OPERATOR_ABORTED",
-                                expected="automation to hold control", observed=str(e), recovered=self.recovered,
-                                drift=self.drift)
+                result = await self._run_all()
             finally:
-                if self.video_dir and self.surface:
-                    await self.surface.page.context.close()  # writes the video file
-                await browser.close()
+                await self.surface.close()
+        else:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=not self.headed)
+                try:
+                    video = {"record_video_dir": str(self.video_dir), "viewport": {"width": 1280, "height": 720},
+                             "record_video_size": {"width": 1280, "height": 720}} if self.video_dir else {}
+                    context = await browser.new_context(**video)
+                    self.surface = await WebSurface.open(context, on_human=self._on_human if self.hub else None,
+                                                         policy=self.artifact.policy, masked_view=bool(self.video_dir))
+                    result = await self._run_all()
+                finally:
+                    if self.video_dir and self.surface:
+                        await self.surface.page.context.close()  # writes the video file
+                    await browser.close()
         if self.map_source is not None and self._transitions:
             # Only a run whose checkpoint passed adds knowledge; any other result lowers what it used (D7)
             self.map_source.learn([t for t in self._transitions if "to" in t] if result.status == "success"
@@ -194,6 +187,20 @@ class Replayer:
             self.map_source.save()
             self.log.event("map_learned", transitions=len(self._transitions), version=self.map_source.version())
         return self._finish(result)
+
+    async def _run_all(self):
+        try:
+            result = await self._run_steps()
+            if self.map and self._transitions:
+                await self._screen_before_act()  # where the last action led
+            return result
+        except _Stop as stop:
+            return stop.result
+        except ControlLost as e:
+            # Only an abort takes control away from a replay mid-action: it pauses itself for everything else
+            return Failed(run_id=self.run_id, completed_at=now(), at_step="control", error_class="OPERATOR_ABORTED",
+                          expected="automation to hold control", observed=str(e), recovered=self.recovered,
+                          drift=self.drift)
 
     def _finish(self, result):
         self.log.event("replay_finished", status=result.status, result=result.model_dump(by_alias=True, exclude_none=True))
@@ -381,7 +388,7 @@ class Replayer:
             if not isinstance(hit, Resolved):
                 raise self._fail(step.id, "TARGET_UNRESOLVED", "a trusted page-map route to the step's control",
                                  f"map edge '{edge['intent']}' found nothing on this screen")
-            live = await hit.handle.evaluate(LIVE_NAME_JS)
+            live = await self.surface.live_name(hit.handle)
             role, _ = target_name(edge["target"])
             try:
                 check_action(self.artifact.policy, edge["action"], role if edge["action"] == "click" else "", live)
@@ -455,7 +462,7 @@ class Replayer:
             return None
         where = "target" if target is step.target else next(
             f"extract.{name}" for name, extractor in step.extract.items() if extractor is target)
-        live = await hit.handle.evaluate(LIVE_NAME_JS)
+        live = await self.surface.live_name(hit.handle)
         ops = overrides.propose(where, [s.model_dump(by_alias=True, exclude_none=True) for s in target.strategies],
                                 hit.rank, live)
         path = overrides.write_pending(self.pending_dir / f"{self.tenant}.json", self.base,
@@ -465,12 +472,12 @@ class Replayer:
     async def _check_policy(self, step: Step, hit: Resolved):
         """The recorded risk class is checked again against the live control, so a relabelled button that now
         reads "Confirm" is still blocked."""
-        name = await hit.handle.evaluate("el => (el.value || el.innerText || el.getAttribute('aria-label') || '').trim()")
+        name = await self.surface.control_name(hit.handle)
         paging = step.action == "pageUntil"
         role = "button" if step.action == "click" else ""
         if paging:
             # Only a real link is a page turn that changes nothing; anything else is judged as a button would be
-            role = "link" if await hit.handle.evaluate("el => el.tagName === 'A' && !!el.href") else "button"
+            role = "link" if await self.surface.is_link(hit.handle) else "button"
         try:
             check_action(self.artifact.policy, step.action, role, name, paging)
         except PolicyViolation as e:

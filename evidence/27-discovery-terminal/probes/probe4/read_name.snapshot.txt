@@ -1,0 +1,9 @@
+- text "CB0300" [ref=e1]
+- heading "MEMBER INQUIRY" [level=1] [ref=e2]
+- text "FIRST BANK" [ref=e3]
+- text "Type a member number." [ref=e4]
+- textbox "Member #" [ref=e5]
+- text "Invalid member number." [ref=e6]
+- button "Search" [ref=e7] (key Enter)
+- button "Exit" [ref=e8] (key F3)
+- button "Cancel" [ref=e9] (key F12)

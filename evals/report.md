@@ -276,3 +276,50 @@ each replay in its own browser. Sub-accounts opened: **0**.
 
 "Own answer" means a success carrying the name of the member that run asked for; "someone else's" must be 0: a
 cookie, session, control token or output leaking between runs would show there or as a WRONG_RECORD.
+
+## 8. The green screen (TerminalSurface)
+_Run 2026-11-16 21:05 UTC at commit `c165732+dirty`._ The artifact Claude recorded on the mock terminal host, replayed with no model over a VT100 emulator.
+
+- **Fault matrix: 31/31.** Bank B relabels the member field and the search key; the grid doesn't move.
+- **Commit guard:** on the review screen (CB0410), F10=Post was pressed and never sent (1 blocked,
+  still on CB0410).
+  Sub-accounts opened across the suite: **0**.
+- **Stability:** 20 replays on rotating members, 100% success, 1 distinct
+  output per member, p50 3.49 s, p95 3.5 s.
+- **Discovery with Claude:** 5/5 recorded, 5/5 replayed on another
+  member, median 5 turns, median $0.018 including probes ($0.10 spent),
+  0 escalated.
+
+| arm | case | expected | actual | drift |  |
+|---|---|---|---|---|---|
+| A | happy | `success` | `success` | – | ✅ |
+| A | not_found | `business_outcome/MEMBER_NOT_FOUND` | `business_outcome/MEMBER_NOT_FOUND` | – | ✅ |
+| A | malformed | `business_outcome/INVALID_MEMBER_NUMBER` | `business_outcome/INVALID_MEMBER_NUMBER` | – | ✅ |
+| A | restricted | `business_outcome/PERMISSION_DENIED` | `business_outcome/PERMISSION_DENIED` | – | ✅ |
+| A | bad_input | `invalid_input` | `invalid_input` | – | ✅ |
+| A | session_timeout | `success+recovered` | `success+recovered` | – | ✅ |
+| A | server_error | `failed/APP_ERROR` | `failed/APP_ERROR` | – | ✅ |
+| A | wrong_record | `failed/WRONG_RECORD` | `failed/WRONG_RECORD` | – | ✅ |
+| A | slow | `success` | `success` | – | ✅ |
+| A | late_fill | `success` | `success` | – | ✅ |
+| B first contact | happy | `success+drift` | `success+drift` | enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | not_found | `business_outcome/MEMBER_NOT_FOUND` | `business_outcome/MEMBER_NOT_FOUND` | enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | malformed | `business_outcome/INVALID_MEMBER_NUMBER` | `business_outcome/INVALID_MEMBER_NUMBER` | enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | restricted | `business_outcome/PERMISSION_DENIED` | `business_outcome/PERMISSION_DENIED` | enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | bad_input | `invalid_input` | `invalid_input` | – | ✅ |
+| B first contact | session_timeout | `success+recovered+drift` | `success+recovered+drift` | enter_member_number:bbox, search:bbox, enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | server_error | `failed/APP_ERROR` | `failed/APP_ERROR` | enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | wrong_record | `failed/WRONG_RECORD` | `failed/WRONG_RECORD` | enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | slow | `success+drift` | `success+drift` | enter_member_number:bbox, search:bbox | ✅ |
+| B first contact | late_fill | `success+drift` | `success+drift` | enter_member_number:bbox, search:bbox | ✅ |
+| B override approved | happy | `success` | `success` | – | ✅ |
+| B override approved | not_found | `business_outcome/MEMBER_NOT_FOUND` | `business_outcome/MEMBER_NOT_FOUND` | – | ✅ |
+| B override approved | malformed | `business_outcome/INVALID_MEMBER_NUMBER` | `business_outcome/INVALID_MEMBER_NUMBER` | – | ✅ |
+| B override approved | restricted | `business_outcome/PERMISSION_DENIED` | `business_outcome/PERMISSION_DENIED` | – | ✅ |
+| B override approved | bad_input | `invalid_input` | `invalid_input` | – | ✅ |
+| B override approved | session_timeout | `success+recovered` | `success+recovered` | – | ✅ |
+| B override approved | server_error | `failed/APP_ERROR` | `failed/APP_ERROR` | – | ✅ |
+| B override approved | wrong_record | `failed/WRONG_RECORD` | `failed/WRONG_RECORD` | – | ✅ |
+| B override approved | slow | `success` | `success` | – | ✅ |
+| B override approved | late_fill | `success` | `success` | – | ✅ |
+| B first contact | override proposed | `two ops` | `enter_member_number, search` | – | ✅ |

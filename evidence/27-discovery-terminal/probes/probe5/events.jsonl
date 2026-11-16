@@ -1,0 +1,12 @@
+{"t": 0.0, "at": "2026-11-16T20:44:26+00:00", "event": "replay_started", "capability": "core_banking_terminal.lookup_member_balance", "version": "1.0.0", "revision": "556c518031d3", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.128, "at": "2026-11-16T20:44:26+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.308, "at": "2026-11-16T20:44:28+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.454, "at": "2026-11-16T20:44:28+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.729, "at": "2026-11-16T20:44:28+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.873, "at": "2026-11-16T20:44:28+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.015, "at": "2026-11-16T20:44:29+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
+{"t": 3.155, "at": "2026-11-16T20:44:29+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.292, "at": "2026-11-16T20:44:29+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.431, "at": "2026-11-16T20:44:29+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.438, "at": "2026-11-16T20:44:29+00:00", "event": "outcome", "code": "INVALID_MEMBER_NUMBER", "kind": "business", "step": "search"}
+{"t": 3.439, "at": "2026-11-16T20:44:29+00:00", "event": "replay_finished", "status": "business_outcome", "result": {"runId": "disc_20261116T204336Z_cbdb00-probe5", "completedAt": "2026-11-16T20:44:29+00:00", "recovered": [], "drift": [], "status": "business_outcome", "code": "INVALID_MEMBER_NUMBER", "atStep": "search", "details": {}}}

@@ -9,6 +9,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 from playwright.async_api import async_playwright
+import anthropic
 from pydantic import ValidationError
 
 from interface.artifact.io import dump_artifact, load_artifact
@@ -23,7 +24,8 @@ from interface.pii import Masker
 from interface.policy import PolicyViolation, check_action, check_url, classify
 from interface.session import Intervention, Session
 from interface.surface.base import Resolved, SurfaceError
-from interface.surface.web import FORM_KEY_JS, WebSurface
+from interface.surface.terminal import TerminalSurface
+from interface.surface.web import WebSurface
 
 SYSTEM = """You operate a bank's back-office web application for an automation system. You see the screen as an \
 accessibility snapshot: one line per element, frames labelled by name, and a ref such as [ref=f2e11] on each element. \
@@ -80,6 +82,13 @@ TOOLS = [
           "'Known actions'), in the order given, in one call. Each is checked and recorded like your own action.",
           ids={"type": "array", "items": {"type": "string"}, "description": "e.g. [\"k1\", \"k2\", \"k3\"]"}),
 ]
+# Added for a green-screen goal ("surface": "terminal"); the web prompt is unchanged
+TERMINAL_NOTE = """
+
+This application is a character-cell terminal (a green screen), read for you as the same kind of snapshot: the \
+screen's code and title come first, a textbox is a field you can type in (named by the label in front of it), and \
+each function key on the bottom line is a button (click it to press the key, e.g. Enter=Search). A menu is answered \
+by typing the option's number in its field and pressing Enter. Messages appear near the bottom of the screen."""
 TEXT_ROLES = {"cell", "text", "generic", "paragraph", "columnheader", "rowheader", "strong", "emphasis"}
 NUDGE_AFTER = 3   # the same action on the same screen this many times in a row
 STOP_AFTER = 5
@@ -111,6 +120,7 @@ class Discovery:
         self.hub = operator_hub
         self.pause_timeout_s = pause_timeout_s
         self._rung = 0
+        self.system = SYSTEM + (TERMINAL_NOTE if goal.get("surface") == "terminal" else "")
         self.tools = [t for t in TOOLS if t["name"] != "next_page" or goal.get("resultsSpanPages")]
         parts = urlsplit(self.base_url)
         self.recorder = Recorder(goal, f"{parts.scheme}://{parts.netloc}", self.run_id, planner.model)
@@ -146,15 +156,24 @@ class Discovery:
         self.log.event("discovery_started", capability=self.goal["capability"], goal=self.goal["goal"],
                        model=self.planner.model, inputs=sorted(self.inputs),
                        page_map=self.map.version() if self.map else None)
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=not self.goal.get("_headed", False))
+        if self.goal.get("surface") == "terminal":
+            self.surface = TerminalSurface(policy=self.policy)
             try:
-                self.surface = await WebSurface.open(await browser.new_context(),
-                                                     on_human=self._on_human if self.hub else None, policy=self.policy)
                 await self.surface.navigate(self.base_url + self.goal.get("entryPath", "/"))
                 outcome = await self._loop()
             finally:
-                await browser.close()
+                await self.surface.close()
+        else:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=not self.goal.get("_headed", False))
+                try:
+                    self.surface = await WebSurface.open(await browser.new_context(),
+                                                         on_human=self._on_human if self.hub else None,
+                                                         policy=self.policy)
+                    await self.surface.navigate(self.base_url + self.goal.get("entryPath", "/"))
+                    outcome = await self._loop()
+                finally:
+                    await browser.close()
         if outcome["status"] == "recorded" and self.goal.get("probes"):
             outcome["probes"] = await self._probe(Path(outcome["artifact"]))
             outcome["cost_usd"] = round(self.cost, 4)
@@ -200,7 +219,7 @@ class Discovery:
     async def _loop(self) -> dict:
         messages: list = [{"role": "user", "content": self._intro(await self._screen())}]
         for turn_no in range(1, self.max_steps + 1):
-            turn = await self.planner.turn(SYSTEM, self.tools, messages)
+            turn = await self.planner.turn(self.system, self.tools, messages)
             turn_cost = turn.usage.cost(self.planner.model)
             self.cost += turn_cost
             calls = turn.tool_calls()
@@ -257,7 +276,14 @@ class Discovery:
             if self.cost >= self.budget:
                 reports.append({"why": spec.get("why", ""), "result": "skipped: budget reached"})
                 continue
-            artifact, report = await prober.probe(artifact, spec)
+            try:
+                artifact, report = await prober.probe(artifact, spec)
+            except anthropic.APIError as e:
+                # A probe only adds outcomes: when the model can't be reached for one, the recording stands without it
+                self.log.event("probe", why=spec.get("why", ""), result="skipped", error=type(e).__name__)
+                reports.append({"why": spec.get("why", ""), "result": f"skipped: the model call failed "
+                                                                       f"({type(e).__name__})"})
+                continue
             self.cost += report.cost_usd
             self.log.event("probe", why=report.why, result=report.result, learned=report.learned, runs=report.run_ids,
                            cost_usd=round(report.cost_usd, 5))
@@ -429,14 +455,13 @@ class Discovery:
                 raise ValueError(f"{kid}'s control isn't on this screen; done so far: {', '.join(done) or 'nothing'}."
                                  f"\n\nCurrent screen:\n{await self._screen()}")
             role, name = target_name(edge["target"])
-            if await hit.handle.evaluate("el => !!(el.form || el.closest('form'))") and \
-                    await hit.handle.evaluate(FORM_KEY_JS) in self._hostile_forms:
+            if (form := await self.surface.form_key(hit.handle)) and form in self._hostile_forms:
                 raise PolicyViolation("blocked by policy: this form asked for credentials after sign-on")
             risk = check_action(self.policy, edge["action"], role if role != "control" else "", name)
             value = edge["value"]
             if value and "{{secrets." in value:
-                await self._credential_page(await hit.handle.evaluate("el => el.ownerDocument.location.pathname"),
-                                            await hit.handle.evaluate(FORM_KEY_JS))
+                await self._credential_page(await self.surface.path_of_handle(hit.handle),
+                                            await self.surface.form_key(hit.handle))
             rendered = render(value, self.inputs, self.env) if value else None
             if rendered is not None and rendered != value:
                 self._mask(rendered, value)

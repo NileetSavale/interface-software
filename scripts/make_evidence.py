@@ -260,6 +260,61 @@ def replays():
             k: f"{{{{outputs.{k}}}}}" for k in body.get("outputs", {})}}, indent=2) + "\n")
 
 
+def terminal_cases():
+    """Item 9: the same thread on a green screen (TerminalSurface, D31)."""
+    from evals import terminal
+    path = terminal.ARTIFACT
+    art = load_artifact(path)
+    run_id = art.provenance.discovery_run_id
+    dest = OUT / "27-discovery-terminal"
+    shutil.copytree(RUNS / run_id, dest)
+    for probe in sorted(RUNS.glob(f"{run_id}-probe*")):
+        shutil.copytree(probe, dest / "probes" / probe.name.split("-")[-1])
+    shutil.copy(path, dest / "artifact.json")
+    finished = next(json.loads(l) for l in (dest / "events.jsonl").read_text().splitlines() if '"discovery_finished"' in l)
+    cases.append({"dir": dest.name, "title": f"Real Claude discovery on a green screen: {art.capability.title}",
+                  "why": f"{art.provenance.model} on a 24x80 VT100 host over telnet: {finished['steps']} steps, "
+                         f"${finished['cost_usd']:.3f} including probes ({'; '.join(p['result'] for p in finished.get('probes', []))}). "
+                         f"Same loop, recorder ideas, masker and schema as the web; every target scoped to its "
+                         f"screen code, with the field's place on the grid as the last strategy.",
+                  "result": finished["status"], "run_id": run_id})
+    print(f"{dest.name:<36} {finished['status']}", flush=True)
+
+    host = terminal.Host()
+    try:
+        subject = terminal.approved(host)
+
+        def case(name, title, why, inputs, fault=None, variant="a", **kw):
+            result, _ = terminal.replay(host, subject, inputs, fault, variant, **kw)
+            keep(name, result.run_id, title, why, result)
+            return result
+
+        case("28-terminal-replay-success", "Green screen, no model: another member", "Signs on, answers the menu "
+             "with 1, searches and reads two values off the grid, checking the member number first.",
+             terminal.HAPPY)
+        pending = Path(tempfile.mkdtemp())
+        case("29-terminal-bank-b-grid", "Green screen, second bank: found by its place on the grid", "Bank B calls "
+             "the field \"Mbr Number\" and the key Enter=Find. Role, label and caption all miss; the bbox strategy (row "
+             "and column in character cells) finds both, the run succeeds with drift, and proposes B's override "
+             "(proposed-override.b.json).", terminal.HAPPY, variant="b", tenant="b", pending_dir=pending)
+        shutil.copy(pending / "b.json", OUT / "29-terminal-bank-b-grid" / "proposed-override.b.json")
+        case("30-terminal-wrong-record", "Green screen: the host shows a different member", "The identity check "
+             "reads the member number off the grid before anything else is read: WRONG_RECORD, structure-only "
+             "evidence.", terminal.HAPPY, fault="wrong_record")
+        guard = terminal.commit_guard(host)
+        dest = OUT / "31-terminal-commit-guard"
+        dest.mkdir()
+        (dest / "result.json").write_text(json.dumps(guard, indent=2) + "\n")
+        cases.append({"dir": dest.name, "title": "Green screen: a commit key is never sent", "why": "A surface "
+                      "signed on as the operator fills the sub-account form and reaches the review screen (CB0410, "
+                      "declared in commitPaths), then presses F10=Post. The key is dropped before it leaves; only "
+                      "exit and cancel keys get through there.", "result": f"blocked, opened {guard['sub_accounts_opened']}",
+                      "run_id": None})
+        print(f"{dest.name:<36} {cases[-1]['result']}", flush=True)
+    finally:
+        host.close()
+
+
 def map_discovery():
     """A real Claude discovery with the bank's page map on, from the latest discovery eval."""
     results = json.loads((ROOT / "evals" / "results" / "discovery.json").read_text())
@@ -334,6 +389,7 @@ def main():
     replays()
     hostile_discovery()
     map_discovery()
+    terminal_cases()
     index()
     (OUT / "cases.json").write_text(json.dumps(cases, indent=2) + "\n")
     if leaks := scan():

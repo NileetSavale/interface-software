@@ -67,6 +67,7 @@
         "surface": {
           "enum": [
             "web",
+            "terminal",
             "desktop"
           ],
           "title": "Surface",

@@ -1,0 +1,449 @@
+{
+  "suite": "terminal",
+  "date": "2026-11-16T21:05:18+00:00",
+  "commit": "c165732+dirty",
+  "fault_matrix": [
+    {
+      "arm": "A",
+      "case": "happy",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.46,
+      "run_id": "replay_20261116T205656Z_c4525f"
+    },
+    {
+      "arm": "A",
+      "case": "not_found",
+      "expected": "business_outcome/MEMBER_NOT_FOUND",
+      "got": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.47,
+      "run_id": "replay_20261116T205659Z_ed86be"
+    },
+    {
+      "arm": "A",
+      "case": "malformed",
+      "expected": "business_outcome/INVALID_MEMBER_NUMBER",
+      "got": "business_outcome/INVALID_MEMBER_NUMBER",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.43,
+      "run_id": "replay_20261116T205703Z_619669"
+    },
+    {
+      "arm": "A",
+      "case": "restricted",
+      "expected": "business_outcome/PERMISSION_DENIED",
+      "got": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.45,
+      "run_id": "replay_20261116T205706Z_be3cce"
+    },
+    {
+      "arm": "A",
+      "case": "bad_input",
+      "expected": "invalid_input",
+      "got": "invalid_input",
+      "pass": true,
+      "drift": [],
+      "seconds": 0.0,
+      "run_id": "replay_20261116T205709Z_4db32d"
+    },
+    {
+      "arm": "A",
+      "case": "session_timeout",
+      "expected": "success+recovered",
+      "got": "success+recovered",
+      "pass": true,
+      "drift": [],
+      "seconds": 4.74,
+      "run_id": "replay_20261116T205709Z_6b6d94"
+    },
+    {
+      "arm": "A",
+      "case": "server_error",
+      "expected": "failed/APP_ERROR",
+      "got": "failed/APP_ERROR",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.43,
+      "run_id": "replay_20261116T205714Z_1ed196"
+    },
+    {
+      "arm": "A",
+      "case": "wrong_record",
+      "expected": "failed/WRONG_RECORD",
+      "got": "failed/WRONG_RECORD",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.47,
+      "run_id": "replay_20261116T205718Z_252be0"
+    },
+    {
+      "arm": "A",
+      "case": "slow",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 5.47,
+      "run_id": "replay_20261116T205721Z_0241d6"
+    },
+    {
+      "arm": "A",
+      "case": "late_fill",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 4.98,
+      "run_id": "replay_20261116T205727Z_7751d1"
+    },
+    {
+      "arm": "B first contact",
+      "case": "happy",
+      "expected": "success+drift",
+      "got": "success+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 3.47,
+      "run_id": "replay_20261116T205731Z_545d23"
+    },
+    {
+      "arm": "B first contact",
+      "case": "not_found",
+      "expected": "business_outcome/MEMBER_NOT_FOUND",
+      "got": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 3.45,
+      "run_id": "replay_20261116T205735Z_400077"
+    },
+    {
+      "arm": "B first contact",
+      "case": "malformed",
+      "expected": "business_outcome/INVALID_MEMBER_NUMBER",
+      "got": "business_outcome/INVALID_MEMBER_NUMBER",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 3.47,
+      "run_id": "replay_20261116T205738Z_ead647"
+    },
+    {
+      "arm": "B first contact",
+      "case": "restricted",
+      "expected": "business_outcome/PERMISSION_DENIED",
+      "got": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 3.43,
+      "run_id": "replay_20261116T205742Z_fbd99c"
+    },
+    {
+      "arm": "B first contact",
+      "case": "bad_input",
+      "expected": "invalid_input",
+      "got": "invalid_input",
+      "pass": true,
+      "drift": [],
+      "seconds": 0.0,
+      "run_id": "replay_20261116T205745Z_e974db"
+    },
+    {
+      "arm": "B first contact",
+      "case": "session_timeout",
+      "expected": "success+recovered+drift",
+      "got": "success+recovered+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox",
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 4.76,
+      "run_id": "replay_20261116T205745Z_a3c93f"
+    },
+    {
+      "arm": "B first contact",
+      "case": "server_error",
+      "expected": "failed/APP_ERROR",
+      "got": "failed/APP_ERROR",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 3.45,
+      "run_id": "replay_20261116T205750Z_663c12"
+    },
+    {
+      "arm": "B first contact",
+      "case": "wrong_record",
+      "expected": "failed/WRONG_RECORD",
+      "got": "failed/WRONG_RECORD",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 3.46,
+      "run_id": "replay_20261116T205754Z_2b045c"
+    },
+    {
+      "arm": "B first contact",
+      "case": "slow",
+      "expected": "success+drift",
+      "got": "success+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 5.5,
+      "run_id": "replay_20261116T205757Z_45a55b"
+    },
+    {
+      "arm": "B first contact",
+      "case": "late_fill",
+      "expected": "success+drift",
+      "got": "success+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 5.0,
+      "run_id": "replay_20261116T205802Z_c778e9"
+    },
+    {
+      "arm": "B override approved",
+      "case": "happy",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.49,
+      "run_id": "replay_20261116T205807Z_352e63"
+    },
+    {
+      "arm": "B override approved",
+      "case": "not_found",
+      "expected": "business_outcome/MEMBER_NOT_FOUND",
+      "got": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.44,
+      "run_id": "replay_20261116T205811Z_8851be"
+    },
+    {
+      "arm": "B override approved",
+      "case": "malformed",
+      "expected": "business_outcome/INVALID_MEMBER_NUMBER",
+      "got": "business_outcome/INVALID_MEMBER_NUMBER",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.47,
+      "run_id": "replay_20261116T205814Z_557dfb"
+    },
+    {
+      "arm": "B override approved",
+      "case": "restricted",
+      "expected": "business_outcome/PERMISSION_DENIED",
+      "got": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.45,
+      "run_id": "replay_20261116T205818Z_f48c6f"
+    },
+    {
+      "arm": "B override approved",
+      "case": "bad_input",
+      "expected": "invalid_input",
+      "got": "invalid_input",
+      "pass": true,
+      "drift": [],
+      "seconds": 0.0,
+      "run_id": "replay_20261116T205821Z_a5cdb0"
+    },
+    {
+      "arm": "B override approved",
+      "case": "session_timeout",
+      "expected": "success+recovered",
+      "got": "success+recovered",
+      "pass": true,
+      "drift": [],
+      "seconds": 4.73,
+      "run_id": "replay_20261116T205821Z_5aad7a"
+    },
+    {
+      "arm": "B override approved",
+      "case": "server_error",
+      "expected": "failed/APP_ERROR",
+      "got": "failed/APP_ERROR",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.46,
+      "run_id": "replay_20261116T205826Z_06200d"
+    },
+    {
+      "arm": "B override approved",
+      "case": "wrong_record",
+      "expected": "failed/WRONG_RECORD",
+      "got": "failed/WRONG_RECORD",
+      "pass": true,
+      "drift": [],
+      "seconds": 3.47,
+      "run_id": "replay_20261116T205830Z_c9f4e0"
+    },
+    {
+      "arm": "B override approved",
+      "case": "slow",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 5.53,
+      "run_id": "replay_20261116T205833Z_58478e"
+    },
+    {
+      "arm": "B override approved",
+      "case": "late_fill",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 4.98,
+      "run_id": "replay_20261116T205839Z_29cbc6"
+    },
+    {
+      "arm": "B first contact",
+      "case": "override proposed",
+      "expected": "two ops",
+      "got": "enter_member_number, search",
+      "pass": true,
+      "drift": [],
+      "seconds": 0,
+      "run_id": "replay_20261116T205652Z_a73f5f"
+    }
+  ],
+  "passed": 31,
+  "cases": 31,
+  "commit_guard": {
+    "review_screen": "CB0410",
+    "after_post": "CB0410",
+    "blocked": [
+      "blocked by policy: F10=Post on CB0410 would commit a change (irreversible). Automation can reach a commit point but never press it; stop here."
+    ],
+    "sub_accounts_opened": 0,
+    "pass": true
+  },
+  "stability": {
+    "n": 20,
+    "results": {
+      "success": 20
+    },
+    "success_rate": 1.0,
+    "distinct_outputs_per_member": 1,
+    "p50_s": 3.49,
+    "p95_s": 3.5
+  },
+  "discovery": {
+    "n": 5,
+    "recorded": 5,
+    "replays_on_other_member": 5,
+    "median_turns": 5,
+    "median_cost_usd": 0.0184,
+    "spent_usd": 0.0975,
+    "escalated_runs": 0,
+    "runs": [
+      {
+        "run": 1,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0238,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261116T205956Z_c60e0f"
+      },
+      {
+        "run": 2,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0184,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261116T210101Z_b82341"
+      },
+      {
+        "run": 3,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0184,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261116T210206Z_bf7432"
+      },
+      {
+        "run": 4,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0184,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261116T210310Z_8afc27"
+      },
+      {
+        "run": 5,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0185,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261116T210414Z_162438"
+      }
+    ]
+  },
+  "sub_accounts_opened": 0
+}

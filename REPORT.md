@@ -2,8 +2,8 @@
 
 Claude discovers a task once against a live legacy UI, and the run becomes a typed, versioned capability. Once a
 person approves it, it replays without the model: same inputs, same steps, same typed result, in about 4 s for $0.
-Numbers come from [`evals/report.md`](evals/report.md) (seven suites, each stamped with its commit, N stated). The full design is in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 30 decisions, including where I overrode the AI I built this
+Numbers come from [`evals/report.md`](evals/report.md) (eight suites, each stamped with its commit, N stated). The full design is in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 31 decisions, including where I overrode the AI I built this
 with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## Architecture
@@ -92,6 +92,10 @@ postcondition, but only exactly: the screen this action is known to lead to here
 - **Surface seam.** Artifacts never contain selectors; a `Surface` (`observe`, `resolve`, `act`, `wait_any`)
   resolves targets. Legacy web is built (framesets, layout tables, unlabelled fields). A desktop app gets a
   `DesktopSurface` over UIA, AX or AT-SPI, as agent-desktop does; artifact, replay and results don't change.
+- **A green screen, built** (D31): `TerminalSurface` reads a 24x80 VT100 host through an emulator and builds the same
+  snapshot from the characters, so discovery, the masker, the schema and replay are shared. Claude recorded it 5/5
+  and each recording replayed on another member; the fault matrix holds 31/31 across two banks, where bank B's
+  renamed controls are found by their place on the grid; a commit key on the review screen is never sent (suite 8).
 - **Tenants.** Artifacts are keyed by vendor product and version range, not bank. A bank specialises one with an
   **override** addressed by **step id**, never array index (indexes shift silently), under a semver `appliesTo`;
   anything that doesn't apply is refused at load.
@@ -157,7 +161,7 @@ postcondition, but only exactly: the screen this action is known to lead to here
 ## Cuts
 
 - **Approval-gated commits** through the handoff channel: designed, deliberately not built.
-- **Desktop surface, real co-browsing console:** designed at their seams.
+- **Desktop surface, TN3270, real co-browsing console:** designed at their seams. No attended handoff on a terminal.
 - **Screenshots for the model** (D2): the tree sufficed in 20/20 discovery runs.
 - **RAG / vector database: deliberately not used.** Every lookup is an exact key or a short list.
 - **Next:** lone first names in free text; per-tenant base URLs as config; sharing learned outcomes across
