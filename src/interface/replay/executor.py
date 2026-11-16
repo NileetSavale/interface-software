@@ -129,6 +129,7 @@ class Replayer:
         self._recoveries: Counter[str] = Counter()
         self.surface: WebSurface | TerminalSurface | None = None
         self.log = RunLog(self.run_id)
+        self.step = "preflight"
         self.session = Session(self.log)
         self._next: Step | None = None
         # Sensitive inputs and every secret the artifact uses are masked wherever they'd be written
@@ -142,6 +143,20 @@ class Replayer:
                             drift=self.drift, **extra))
 
     async def run(self):
+        try:
+            return await self._run()
+        except Exception as e:
+            # A bug or a failure nothing classified still ends as a typed result, and the run log says what and where
+            reason = self.log.crashed(e, step=self.step)
+            return self._finish(Failed(run_id=self.run_id, completed_at=now(), at_step=self.step,
+                                       error_class="INTERNAL_ERROR", expected="the run to finish with a result",
+                                       observed=reason, recovered=self.recovered, drift=self.drift))
+        except BaseException as e:  # cancelled or interrupted: noted, then let through
+            self.log.event("interrupted", error=type(e).__name__, after=self.log.last)
+            self.log.close()
+            raise
+
+    async def _run(self):
         self.log.event("replay_started", capability=self.artifact.capability.id, version=self.artifact.capability.version,
                        revision=self.revision, inputs=sorted(self.inputs), tenant=self.tenant,
                        page_map=self.map.version() if self.map else None)
@@ -247,6 +262,7 @@ class Replayer:
     # ── One step ───────────────────────────────────────────────────────────────────────────────────────────────
 
     async def _run_step(self, step: Step, recovering: bool):
+        self.step = step.id  # where a crash, if one comes, happened
         await self._outcomes(step, "before", recovering)
         timeout = step.wait_for.timeout_ms if step.wait_for else DEFAULT_TIMEOUT_MS
 

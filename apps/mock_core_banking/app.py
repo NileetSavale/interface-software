@@ -25,10 +25,13 @@ import asyncio
 import os
 import random
 import secrets
+import time
 from html import escape
 
 from fastapi import FastAPI, Form, Query, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+
+from interface.serverlog import ServerLog
 
 APP_USER = os.environ.get("APP_USER", "teller01")
 APP_PASSWORD = os.environ.get("APP_PASSWORD", "demo-only-password")
@@ -67,6 +70,7 @@ REVERIFIED: list[bool] = []  # credentials typed into the fake re-login form; mu
 SLOW_SECONDS = float(os.environ.get("SLOW_SECONDS", "3"))
 
 app = FastAPI()
+log = ServerLog("mock-app")
 _sessions: set[str] = set()
 _fault = {"name": os.environ.get("FAULT") or None, "times": -1}  # times -1: every time
 _layout: dict = {"seed": None}
@@ -74,11 +78,27 @@ _variant = {"name": os.environ.get("VARIANT", "a")}
 VARIANTS = {"a", "b", "c"}
 
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    """One line per request: path without its query (which can hold a member number), status, time, and what the
+    test harness had set. A handler that raises is logged with the error before the 500 goes out."""
+    started = time.monotonic()
+    try:
+        response = await call_next(request)
+    except Exception as e:
+        log.error("request_crashed", method=request.method, path=request.url.path, error=f"{type(e).__name__}: {e}")
+        raise
+    log.event("request", method=request.method, path=request.url.path, status=response.status_code,
+              ms=round((time.monotonic() - started) * 1000), variant=_variant["name"])
+    return response
+
+
 @app.post("/__faults")
 def arm_fault(name: str, times: int = 1):
     if name not in FAULTS | ADVERSARIAL:
         return HTMLResponse(f"unknown fault; one of {sorted(FAULTS | ADVERSARIAL)}", status_code=400)
     _fault.update(name=name, times=times)
+    log.event("fault_armed", fault=name, times=times)
     return {"armed": name, "times": times}
 
 
@@ -93,6 +113,7 @@ def set_variant(name: str):
     if name not in VARIANTS:
         return HTMLResponse(f"unknown variant; one of {sorted(VARIANTS)}", status_code=400)
     _variant["name"] = name
+    log.event("variant_set", variant=name)
     return {"variant": name}
 
 
@@ -145,6 +166,7 @@ def take_fault() -> str | None:
     if name and _fault["times"] != 0:
         if _fault["times"] > 0:
             _fault["times"] -= 1
+        log.event("fault_fired", fault=name)
         return name
     return None
 
@@ -450,6 +472,7 @@ def subaccount_confirm(request: Request, id: str = Form(""), type: str = Form(""
     if not signed_in(request):
         return session_expired()
     CONFIRMED.append({"id": id, "type": type, "nickname": nickname, "deposit": deposit})
+    log.error("sub_account_posted", type=type)  # automation must never get here
     return page("<B>Sub-account opened.</B>")
 
 

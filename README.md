@@ -91,6 +91,16 @@ uv run interface replay $A --input memberId=34567   # success, with a SESSION_EX
 
 The other faults are `slow`, `unknown_dialog`, `interstitial` and `wrong_record`.
 
+Every run, discovery or replay, logs to `runs/<run_id>/events.jsonl` (redacted). To read one:
+
+```bash
+uv run interface log                 # the latest run as a timeline
+uv run interface log replay_2026…    # a given run; a crashed one ends with its traceback (redacted)
+```
+
+The MCP server and the mock banks log to `runs/mcp.log`, `runs/mock-terminal.log` and `runs/mock-app.log`
+(JSON lines, masked): calls and how they ended, sessions, screens, keys, faults fired.
+
 **5. Hand the live session to a person.**
 
 ```bash
@@ -206,5 +216,5 @@ apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostil
 apps/mock_terminal/       the green-screen host: the same members and faults on a 24x80 terminal
 goals/        the capabilities' goal specs              artifacts/  the discovered artifacts
 evals/        the eight suites and their results        evidence/   curated runs
-tests/        156 tests                                 docs/       design, decisions, the site
+tests/        160 tests                                 docs/       design, decisions, the site
 ```

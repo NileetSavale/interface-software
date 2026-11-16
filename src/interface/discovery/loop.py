@@ -18,7 +18,7 @@ from interface.artifact.templates import TemplateError, render
 from interface.discovery.planner import ClaudePlanner, Planner
 from interface.discovery.probes import Prober
 from interface.discovery.recorder import Recorder
-from interface.evidence import RunLog, new_run_id, now
+from interface.evidence import RunLog, api_detail, new_run_id, now
 from interface.pagemap import PageMap, Screen, screen_of, target_name
 from interface.pii import Masker
 from interface.policy import PolicyViolation, check_action, check_url, classify
@@ -153,6 +153,20 @@ class Discovery:
         return text
 
     async def run(self) -> dict:
+        try:
+            return await self._run()
+        except Exception as e:
+            # One crashed discovery mustn't take a batch down with it, or leave a log that just stops
+            outcome = self._result("crashed", error=self.log.crashed(e))
+            self.log.event("discovery_finished", **outcome)
+            self.log.close()
+            return outcome
+        except BaseException as e:  # cancelled or interrupted: noted, then let through
+            self.log.event("interrupted", error=type(e).__name__, after=self.log.last)
+            self.log.close()
+            raise
+
+    async def _run(self) -> dict:
         self.log.event("discovery_started", capability=self.goal["capability"], goal=self.goal["goal"],
                        model=self.planner.model, inputs=sorted(self.inputs),
                        page_map=self.map.version() if self.map else None)
@@ -280,7 +294,8 @@ class Discovery:
                 artifact, report = await prober.probe(artifact, spec)
             except anthropic.APIError as e:
                 # A probe only adds outcomes: when the model can't be reached for one, the recording stands without it
-                self.log.event("probe", why=spec.get("why", ""), result="skipped", error=type(e).__name__)
+                self.log.event("probe", why=spec.get("why", ""), result="skipped", error=type(e).__name__,
+                               detail=self.log.redact(str(e))[:300], **api_detail(e))
                 reports.append({"why": spec.get("why", ""), "result": f"skipped: the model call failed "
                                                                        f"({type(e).__name__})"})
                 continue

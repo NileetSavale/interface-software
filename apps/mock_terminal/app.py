@@ -25,6 +25,7 @@ import threading
 from dataclasses import dataclass, field
 
 from apps.mock_core_banking.app import APP_PASSWORD, APP_USER, MEMBERS
+from interface.serverlog import ServerLog
 
 ROWS, COLS = 24, 80
 KEYS = {b"\r": "Enter", b"\x1bOP": "F1", b"\x1bOQ": "F2", b"\x1bOR": "F3", b"\x1bOS": "F4", b"\x1b[15~": "F5",
@@ -65,6 +66,8 @@ class TerminalBank:
         self.confirmed = 0
         self.server: asyncio.base_events.Server | None = None
         self.loop: asyncio.AbstractEventLoop | None = None
+        self.log = ServerLog("mock-terminal")
+        self.sessions = 0
 
     def fault(self, name: str | None, times: int = 1):
         if name is None:
@@ -84,11 +87,13 @@ class TerminalBank:
             return False
         if left > 0:
             self.armed[name] = left - 1
+        self.log.event("fault_fired", fault=name)
         return True
 
     async def serve(self, port: int, host: str = "127.0.0.1"):
         self.loop = asyncio.get_running_loop()
         self.server = await asyncio.start_server(lambda r, w: Session(self, r, w).run(), host, port)
+        self.log.event("started", port=port, variant=self.variant_name, fault=self.always)
         return self.server
 
     def start_in_thread(self, port: int) -> "TerminalBank":
@@ -116,6 +121,8 @@ class Session:
         self.focus = 0
         self.member: str | None = None
         self.draft: dict[str, str] = {}
+        bank.sessions += 1
+        self.id = bank.sessions
 
     @property
     def b(self) -> bool:
@@ -172,6 +179,7 @@ class Session:
 
     async def key(self, name: str):
         s, values = self.screen, {f.name: f.value.strip() for f in self.screen.fields}
+        self.bank.log.event("key", session=self.id, screen=s.code, key=name)  # the key, never the fields
         if name == "F3" and s.code in ("CB0100", "CB0200"):
             self.writer.close()
             return
@@ -199,6 +207,7 @@ class Session:
                 await self.show(self.check_sub_account(values))
             case "CB0410", "F10":
                 self.bank.confirmed += 1
+                self.bank.log.error("sub_account_posted", session=self.id)  # automation must never get here
                 await self.show(Screen("CB0420", "SUB-ACCOUNT OPENED", {6: "The sub-account was opened."}, [],
                                        "Enter=Main menu"))
             case "CB0420", "Enter":
@@ -251,6 +260,8 @@ class Session:
 
     async def show(self, screen: Screen):
         self.screen, self.focus = screen, 0
+        self.bank.log.event("screen", session=self.id, screen=screen.code, variant=self.bank.variant_name,
+                            message=screen.message or None)
         out = ["\x1b[0m\x1b[2J"]
         title = f"{screen.code}  {screen.title}"
         bank = "SECOND BANK" if self.b else "FIRST BANK"
@@ -280,6 +291,8 @@ class Session:
         await self.writer.drain()
 
     async def run(self):
+        peer = self.writer.get_extra_info("peername")
+        self.bank.log.event("connected", session=self.id, peer=f"{peer[0]}:{peer[1]}" if peer else None)
         await self.show(self.sign_on())
         buffer = b""
         try:
@@ -305,10 +318,15 @@ class Session:
                     elif name not in ("Tab", "Backtab", "Erase", "Backspace"):
                         await self.key(name)
                     buffer = buffer[size:]
-        except (ConnectionError, asyncio.IncompleteReadError):
-            pass
+        except (ConnectionError, asyncio.IncompleteReadError) as e:
+            self.bank.log.event("connection_lost", session=self.id, error=type(e).__name__)
+        except Exception as e:  # a bug in the mock: the session dies, the log says why, the server stays up
+            self.bank.log.error("session_crashed", session=self.id, screen=self.screen and self.screen.code,
+                                error=f"{type(e).__name__}: {e}")
+            raise
         finally:
             self.writer.close()
+            self.bank.log.event("disconnected", session=self.id, screen=self.screen and self.screen.code)
 
     async def typed(self, ch: str):
         if not self.screen.fields or not ch.isprintable():
@@ -331,6 +349,7 @@ def _labels(labels: dict[int, str]):
 def main(port: int = 4300, variant: str = "a", fault: str | None = None):
     async def run():
         bank = TerminalBank(variant, always=fault)
+        bank.log.echo()
         server = await bank.serve(port)
         print(f"mock terminal bank {variant} on telnet://127.0.0.1:{port}", flush=True)
         await server.serve_forever()

@@ -794,6 +794,31 @@ grid position) and with B's override approved; F10=Post on the review screen was
 A first attempt at the Claude arm crashed when a probe's API call raised. A probe the model can't answer is now
 skipped and the recording stands (tested).
 
+### As built: crashes leave a record (found by that crash)
+That crashed run's log simply stopped after the model's `done`: no error, no traceback, no final event, so its
+cause couldn't be recovered afterwards. Only `Runs.invoke` caught crashes, and kept just the message. Now the runs
+themselves do. An exception nothing classified becomes a `crashed` event (the step or turn it happened in, the last
+event before it, the error, and for a failed model call its HTTP status and `request_id`) plus `traceback.txt`, both
+passed through the same redaction as everything else. Replay then finishes as `failed/INTERNAL_ERROR` at that step;
+discovery returns `status: crashed`, so one bad run doesn't take an eval batch down. Cancellation and Ctrl-C log
+`interrupted` and still propagate. A skipped probe logs the API error's status and request id too.
+`interface log [run_id]` prints a run as a timeline (the latest run by default), with the traceback when there is
+one, and says so when a log has no `*_finished` event. Tests crash a terminal replay mid-step and a discovery on a
+529 from the API.
+
+The long-running processes log too (`src/interface/serverlog.py`), one JSON line per event in `runs/<server>.log`,
+rotated at 1 MB, through the same PII masker:
+- `mcp.log`: started (with the tools offered), tools listed, each call started and finished (tool, input *names*,
+  run id, status, code, seconds), unknown tools, and every catalog file skipped with the reason. Before, a broken
+  artifact simply wasn't a tool and nothing said why. To stderr as well, never stdout (the MCP channel).
+- `mock-terminal.log`: sessions connecting and dropping, every screen shown, every function key with the screen it
+  was pressed on (never typed characters), faults fired, and an error-level `sub_account_posted`, which must never
+  appear for automation.
+- `mock-app.log`: every request (path without its query, status, ms, variant), faults armed and fired, variant
+  changes, handlers that raised, and the same `sub_account_posted`.
+A run id in `mcp.log` leads to that run's `events.jsonl`, so a caller's report can be traced end to end. Tests check
+each server log says what happened and carries no input values.
+
 ### As built: the drift report (Pass 3 item 7, D29)
 `interface drift` (`src/interface/drift.py`) reads every replay's `events.jsonl`, which is already redacted, and
 reduces each run to how each step's control was found: by the first strategy, by a named fallback, by the page map,

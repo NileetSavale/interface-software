@@ -181,3 +181,62 @@ def test_a_probe_the_model_cant_answer_is_skipped_and_the_recording_stands(host,
     assert outcome["probes"] == [{"why": "a member number that doesn't exist",
                                   "result": "skipped: the model call failed (APIConnectionError)"}]
     assert Path(outcome["artifact"]).exists()
+
+
+def test_a_replay_that_crashes_ends_typed_and_the_log_says_what_and_where(replay, monkeypatch):
+    acted = TerminalSurface.act
+
+    async def act(self, *a, **kw):
+        if getattr(self, "_acts", 0) == 2:  # the third action, past sign-on's first two fields
+            raise RuntimeError("socket went away while member 34567 was on screen")
+        self._acts = getattr(self, "_acts", 0) + 1
+        return await acted(self, *a, **kw)
+    monkeypatch.setattr(TerminalSurface, "act", act)
+    result = replay("34567")
+    assert isinstance(result, Failed) and result.error_class == "INTERNAL_ERROR", result
+    run = RUNS / result.run_id
+    events = [json.loads(line) for line in (run / "events.jsonl").read_text().splitlines()]
+    crashed = next(e for e in events if e["event"] == "crashed")
+    # The step it crashed in, and the last thing logged before it
+    assert crashed["step"] == result.at_step == "sign" and crashed["after"]["step"] == "enter_password"
+    assert "RuntimeError" in crashed["error"]
+    assert events[-1]["event"] == "replay_finished"
+    trace = (run / "traceback.txt").read_text()
+    assert "RuntimeError" in trace and "act" in trace
+    assert "34567" not in trace and "34567" not in result.observed  # redacted like everything else
+
+
+def test_a_discovery_that_crashes_returns_and_keeps_what_support_needs(host, tmp_path):
+    import anthropic
+    import httpx
+
+    class Overloaded(ScriptedPlanner):
+        async def turn(self, system, tools, messages):
+            if len(messages) > 4:
+                response = httpx.Response(529, request=httpx.Request("POST", "https://api.anthropic.com"),
+                                          headers={"request-id": "req_test123"})
+                raise anthropic.APIStatusError("Overloaded", response=response, body=None)
+            return await super().turn(system, tools, messages)
+
+    _, base = host
+    outcome = asyncio.run(discover(GOAL, base, {"memberId": "12345"}, planner=Overloaded(SCRIPT), out_dir=tmp_path,
+                                   env=ENV))
+    assert outcome["status"] == "crashed" and "APIStatusError" in outcome["error"], outcome
+    events = [json.loads(line) for line in (RUNS / outcome["run_id"] / "events.jsonl").read_text().splitlines()]
+    crashed = next(e for e in events if e["event"] == "crashed")
+    assert crashed["status_code"] == 529 and crashed["request_id"] == "req_test123"
+    assert events[-1]["event"] == "discovery_finished" and events[-1]["status"] == "crashed"
+
+
+def test_the_host_logs_screens_keys_and_faults_never_what_was_typed(replay):
+    log = Path("runs", "mock-terminal.log")
+    before = log.read_text().count("\n") if log.exists() else 0
+    replay("34567", fault="wrong_record")
+    lines = log.read_text().splitlines()[before:]
+    events = [json.loads(line) for line in lines]
+    kinds = {e["event"] for e in events}
+    assert {"connected", "screen", "key", "fault_fired", "disconnected"} <= kinds, kinds
+    assert any(e["event"] == "key" and e["screen"] == "CB0300" and e["key"] == "Enter" for e in events)
+    text = "\n".join(lines)
+    for typed in ("34567", "teller01", "demo-only-password"):
+        assert typed not in text, typed

@@ -13,6 +13,7 @@ What a tool is is read from disk on every list and every call: an artifact that'
 deleted stops being callable at once, without restarting the server. A draft is never offered.
 """
 import json
+import time
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -21,6 +22,7 @@ from mcp.server.lowlevel import Server
 
 from interface.artifact.io import load_artifact
 from interface.artifact.schema import Artifact
+from interface.serverlog import ServerLog
 
 _TYPES = {"integer": "integer"}  # everything else travels as a string; replay checks its pattern
 OUTPUT_SCHEMA = {
@@ -50,16 +52,23 @@ def _origin(url: str) -> str:
 class Catalog:
     """The approved artifacts one bank's tools come from."""
 
-    def __init__(self, directory: Path, base_url: str):
+    def __init__(self, directory: Path, base_url: str, log: ServerLog | None = None):
         self.directory, self.base_url = directory, base_url.rstrip("/")
+        self.log = log
+        self._skipped: dict[str, str] = {}  # file -> why, so each is logged once, not on every list
 
     def artifacts(self) -> dict[str, Artifact]:
         found = {}
         for path in sorted(self.directory.glob("*.json")):
             try:
                 artifact = load_artifact(path)
-            except Exception:  # not an artifact, or one that no longer validates: not a tool
+            except Exception as e:  # not an artifact, or one that no longer validates: not a tool
+                why = f"{type(e).__name__}: {str(e).splitlines()[0][:200] if str(e) else ''}"
+                if self.log and self._skipped.get(path.name) != why:
+                    self.log.error("artifact_skipped", file=path.name, why=why)
+                self._skipped[path.name] = why
                 continue
+            self._skipped.pop(path.name, None)
             if artifact.status == "approved" and _origin(self.base_url) in artifact.policy.allowed_origins:
                 found[tool_name(artifact)] = artifact
         return found
@@ -102,7 +111,8 @@ def answer(result) -> types.CallToolResult:
 
 def build(directory: Path, base_url: str, *, tenant: str | None = None, env: dict[str, str] | None = None) -> Server:
     """env: where credentials come from (the process environment unless given)."""
-    catalog = Catalog(directory, base_url)
+    log = ServerLog("mcp")
+    catalog = Catalog(directory, base_url, log)
 
     async def run(artifact, inputs):
         from interface.replay.executor import Replayer
@@ -111,15 +121,26 @@ def build(directory: Path, base_url: str, *, tenant: str | None = None, env: dic
         return await Replayer(artifact, catalog.base_url, inputs, tenant=tenant, env=env, **pending).run()
 
     async def list_tools(ctx, params) -> types.ListToolsResult:
-        return types.ListToolsResult(tools=[describe(a) for a in catalog.artifacts().values()])
+        tools = catalog.artifacts()
+        log.event("tools_listed", tools=sorted(tools))
+        return types.ListToolsResult(tools=[describe(a) for a in tools.values()])
 
     async def call_tool(ctx, params: types.CallToolRequestParams) -> types.CallToolResult:
         artifact = catalog.artifacts().get(params.name)
         if artifact is None:
+            log.error("unknown_tool", tool=params.name)
             return types.CallToolResult(is_error=True, content=[types.TextContent(
                 text=f"no approved capability {params.name!r} for {catalog.base_url}")])
         inputs = {k: str(v) for k, v in (params.arguments or {}).items()}
-        return answer(await run(artifact, inputs))
+        started = time.monotonic()
+        # Input names only: the values are the caller's, and the run log holds them masked
+        log.event("call_started", tool=params.name, inputs=sorted(inputs), tenant=tenant)
+        result = await run(artifact, inputs)
+        (log.error if result.status == "failed" else log.event)(
+            "call_finished", tool=params.name, run_id=result.run_id, status=result.status,
+            code=getattr(result, "code", None) or getattr(result, "error_class", None),
+            seconds=round(time.monotonic() - started, 2))
+        return answer(result)
 
     return Server("interface", version="0.1.0", instructions=(
         "Each tool is a recorded, human-approved procedure in this bank's back-office app, replayed without a model. "
@@ -131,5 +152,14 @@ def build(directory: Path, base_url: str, *, tenant: str | None = None, env: dic
 async def serve(directory: Path, base_url: str, tenant: str | None = None):
     from mcp.server.stdio import stdio_server
     server = build(directory, base_url, tenant=tenant)
-    async with stdio_server() as (read, write):
-        await server.run(read, write, server.create_initialization_options())
+    log = ServerLog("mcp").echo()
+    log.event("started", artifacts=str(directory), base_url=base_url, tenant=tenant,
+              tools=sorted(Catalog(directory, base_url).artifacts()))
+    try:
+        async with stdio_server() as (read, write):
+            await server.run(read, write, server.create_initialization_options())
+    except Exception as e:
+        log.error("crashed", error=f"{type(e).__name__}: {e}")
+        raise
+    finally:
+        log.event("stopped")

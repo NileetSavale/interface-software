@@ -10,6 +10,7 @@
     interface override artifacts/core_banking.lookup_member_balance.json --tenant b --approve
     interface drift                                     (which steps drifted on which bank, across recent runs)
     interface mcp --base-url http://127.0.0.1:4100      (approved artifacts as MCP tools, over stdio)
+    interface log [run_id]                              (one run's events as a timeline; the latest by default)
 """
 import argparse
 import asyncio
@@ -152,6 +153,19 @@ def cmd_drift(args) -> int:
     return 0
 
 
+def cmd_log(args) -> int:
+    from interface.evidence import timeline
+    root = Path(args.runs)
+    runs = sorted((d for d in root.iterdir() if (d / "events.jsonl").exists()), key=lambda d: d.stat().st_mtime) \
+        if root.is_dir() else []
+    run_dir = root / args.run_id if args.run_id else (runs[-1] if runs else None)
+    if run_dir is None or not (run_dir / "events.jsonl").exists():
+        print(f"no run log {'for ' + args.run_id if args.run_id else ''} under {root}", file=sys.stderr)
+        return 1
+    print(timeline(run_dir))
+    return 0
+
+
 def cmd_mcp(args) -> int:
     from interface.mcp_server import serve
     asyncio.run(serve(Path(args.artifacts), args.base_url, args.tenant))
@@ -236,6 +250,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--settle", type=int, default=3, help="consecutive runs on one fallback before it's a change")
     p.add_argument("--json", action="store_true")
     p.set_defaults(fn=cmd_drift)
+
+    p = sub.add_parser("log", help="one run's events as a timeline, with the traceback if it crashed")
+    p.add_argument("run_id", nargs="?", help="disc_… or run_…; the most recent run when left out")
+    p.add_argument("--runs", default="runs")
+    p.set_defaults(fn=cmd_log)
 
     p = sub.add_parser("mcp", help="serve this bank's approved artifacts as MCP tools (stdio)")
     p.add_argument("--artifacts", default="artifacts")

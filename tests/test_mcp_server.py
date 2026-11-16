@@ -1,5 +1,6 @@
 """Approved artifacts as MCP tools, through a real MCP client in process, replaying on the mock app."""
 import asyncio
+import json
 from pathlib import Path
 
 from mcp import Client
@@ -74,3 +75,21 @@ def test_a_capability_withdrawn_after_listing_is_refused(tmp_path, base_url):
     listed, refused = asyncio.run(session(directory, base_url, [lambda c: c.list_tools(), withdraw]))
     assert tool in {t.name for t in listed.tools}
     assert refused.is_error and "no approved capability" in refused.content[0].text
+
+
+def test_the_server_log_says_what_was_skipped_and_how_each_call_ended(tmp_path, base_url):
+    log = Path("runs", "mcp.log")
+    before = log.read_text().count("\n") if log.exists() else 0
+    directory = catalog(tmp_path, base_url)
+    tool = "core_banking__lookup_member_balance"
+    asyncio.run(session(directory, base_url, [lambda c: c.list_tools(),
+                                              lambda c: c.call_tool(tool, {"memberId": "12345"}),
+                                              lambda c: c.call_tool("core_banking__nope", {})]))
+    lines = log.read_text().splitlines()[before:]
+    events = [json.loads(line) for line in lines]
+    skipped = next(e for e in events if e["event"] == "artifact_skipped")
+    assert skipped["file"] == "notes.json" and skipped["why"]  # once, with the reason, no longer silent
+    finished = next(e for e in events if e["event"] == "call_finished")
+    assert finished["tool"] == tool and finished["status"] == "success" and finished["run_id"].startswith("replay_")
+    assert any(e["event"] == "unknown_tool" for e in events)
+    assert "12345" not in "\n".join(lines) and "Jane Doe" not in "\n".join(lines)  # names of inputs, never values
