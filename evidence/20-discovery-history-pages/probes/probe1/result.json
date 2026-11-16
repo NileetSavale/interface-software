@@ -1,0 +1,21 @@
+{
+  "runId": "disc_20261116T091435Z_3dd6a1-probe1",
+  "completedAt": "2026-11-16T09:15:14+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "open_history",
+  "errorClass": "TARGET_UNRESOLVED",
+  "expected": "exactly one match for: role, text",
+  "observed": "role: TARGET_UNRESOLVED; text: TARGET_UNRESOLVED",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/disc_20261116T091435Z_3dd6a1-probe1/open_history.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/disc_20261116T091435Z_3dd6a1-probe1/open_history.png"
+    }
+  ]
+}

@@ -53,7 +53,7 @@ reviewer as a spec.
 
 - Waits are on conditions, never sleeps. Strategies go in rank order; several matches fail as ambiguous, never
   pick one. Inputs are validated before the UI is touched.
-- **Measured:** 80/80 stability replays (normal and slow app) read identical values; across 60 shuffled layouts,
+- **Measured:** 80/80 stability replays (normal and slow app) read identical values; across 120 shuffled layouts (four flows),
   **no step ever found the wrong control.**
 
 **Five results:** `success` with outputs; `business_outcome` (an answer, not a crash); `invalid_input`;
@@ -79,7 +79,7 @@ wording, the expected code, the probe now ending in it, and the happy path still
 Birth = `{{inputs.dob}}`"); two matches fail `AMBIGUOUS_TARGET`, never the first. A row pages away is reached by
 `pageUntil`, the only loop an artifact can hold: Next until that row is on screen, at most `maxPages` times (D28).
 
-**Fault matrix: 85/85 across three banks**, 0 accounts opened. A fallback hit succeeds and is reported as drift.
+**Fault matrix: 97/97 across three banks**, 0 accounts opened. A fallback hit succeeds and is reported as drift.
 
 **When no strategy survives, the bank's page map** may stand in: at most two trusted edges from this bank's
 verified runs, `read` only when unattended, ending in the step's own action with the next control then present,
@@ -105,7 +105,7 @@ postcondition, but only exactly: the screen this action is known to lead to here
   identical buttons, an onload focus move that misplaced typed text, results lists (D27), and values filled in after
   load, which raised a false `WRONG_RECORD` in 2 of 20 replays. Each is fixed and tested, and its stability is now
   a suite of its own: **40/40** replays on ParaBank, one distinct output per account.
-- **Discovery with a map** cut median turns 4 → 3 (lookup) and 8 → 6 (sub-account), Claude running 6 known actions
+- **Discovery with a map** cut median turns 4 → 3 (lookup) and 8 → 5 (sub-account), Claude running 6 known actions
   per run, and median cost $0.017 → $0.011 and $0.029 → $0.023. In an earlier run the sub-account flow got slightly
   dearer with the map, as the known-actions list adds tokens to every turn. N=5 per arm: a direction, not a rate.
 - **At scale**, drift per tenant and step says when to approve an override or re-record.

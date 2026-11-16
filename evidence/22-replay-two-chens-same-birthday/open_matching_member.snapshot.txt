@@ -1,0 +1,52 @@
+- generic [ref=f6e1]:
+  - iframe "nav" [ref=f6e2]:
+    - generic [ref=f7e2]:
+      - table [ref=f7e3]:
+        - rowgroup [ref=f7e4]:
+          - row [ref=f7e5]:
+            - cell "CU*Core" [ref=f7e6]
+      - table [ref=f7e8]:
+        - rowgroup [ref=f7e9]:
+          - row [ref=f7e10]:
+            - cell "Teller Functions" [ref=f7e11]
+          - row [ref=f7e12]:
+            - cell [ref=f7e13]:
+              - link "Member Inquiry" [ref=f7e14] [cursor=pointer]:
+                - /url: /inquiry
+          - row [ref=f7e15]:
+            - cell [ref=f7e16]:
+              - link "Sign Off" [ref=f7e17] [cursor=pointer]:
+                - /url: /signoff
+  - iframe "main" [active] [ref=f6e3]:
+    - generic [ref=f8e2]:
+      - text: Search Results
+      - table [ref=f8e3]:
+        - rowgroup [ref=f8e4]:
+          - row [ref=f8e5]:
+            - 'columnheader "Member #" [ref=f8e6]'
+            - columnheader "Name" [ref=f8e7]
+            - columnheader "Date of Birth" [ref=f8e8]
+            - columnheader "Action" [ref=f8e9]
+          - row [ref=f8e10]:
+            - cell "⟨ACCT_1⟩" [ref=f8e11]
+            - cell "⟨NAME_1⟩" [ref=f8e12]
+            - cell "⟨DATE_1⟩" [ref=f8e13]
+            - cell [ref=f8e14]:
+              - link "Select" [ref=f8e15] [cursor=pointer]:
+                - /url: /member?id=⟨ACCT_1⟩
+          - row [ref=f8e16]:
+            - cell "⟨ACCT_2⟩" [ref=f8e17]
+            - cell "⟨NAME_2⟩" [ref=f8e18]
+            - cell "{{inputs.dob}}" [ref=f8e19]
+            - cell [ref=f8e20]:
+              - link "Select" [ref=f8e21] [cursor=pointer]:
+                - /url: /member?id=⟨ACCT_2⟩
+          - row [ref=f8e22]:
+            - cell "⟨ACCT_3⟩" [ref=f8e23]
+            - cell "⟨NAME_3⟩" [ref=f8e24]
+            - cell "{{inputs.dob}}" [ref=f8e25]
+            - cell [ref=f8e26]:
+              - link "Select" [ref=f8e27] [cursor=pointer]:
+                - /url: /member?id=⟨ACCT_3⟩
+      - link "New search" [ref=f8e28] [cursor=pointer]:
+        - /url: /inquiry

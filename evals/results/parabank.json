@@ -1,7 +1,7 @@
 {
   "suite": "parabank",
-  "date": "2026-11-16T09:02:08+00:00",
-  "commit": "57bfc8d",
+  "date": "2026-11-16T10:13:34+00:00",
+  "commit": "e6893f9",
   "n_per_account": 10,
   "site": "https://parabank.parasoft.com/parabank",
   "database_resets": 0,
@@ -14,9 +14,9 @@
         "success": 20
       },
       "distinct_outputs": 1,
-      "p50_s": 4.6,
-      "p95_s": 4.81,
-      "max_s": 4.93
+      "p50_s": 4.67,
+      "p95_s": 4.83,
+      "max_s": 4.88
     },
     {
       "flow": "find_transaction",
@@ -26,8 +26,8 @@
         "success": 20
       },
       "distinct_outputs": 1,
-      "p50_s": 5.11,
-      "p95_s": 5.33,
+      "p50_s": 5.0,
+      "p95_s": 5.23,
       "max_s": 5.35
     }
   ]

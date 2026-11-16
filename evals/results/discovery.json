@@ -1,11 +1,11 @@
 {
   "suite": "discovery",
-  "date": "2026-11-16T08:56:10+00:00",
-  "commit": "57bfc8d",
+  "date": "2026-11-16T09:59:29+00:00",
+  "commit": "e6893f9",
   "n_per_arm": 5,
   "budget_usd": 4.0,
-  "spent_usd": 0.4936,
-  "map_seed": "0b8af5dcc946",
+  "spent_usd": 0.4884,
+  "map_seed": "45446f243ba4",
   "arms": [
     {
       "flow": "lookup",
@@ -17,7 +17,7 @@
       "replays_on_other_member": 5,
       "median_turns": 4,
       "median_cost_usd": 0.0173,
-      "total_cost_usd": 0.098,
+      "total_cost_usd": 0.0984,
       "nudged_runs": 0,
       "escalated_runs": 0,
       "runs": [
@@ -27,7 +27,7 @@
           "replay_other_member": "success",
           "steps": 8,
           "turns": 4,
-          "cost_usd": 0.0288,
+          "cost_usd": 0.0291,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 0,
@@ -37,7 +37,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 0,
-          "run_id": "disc_20261116T083147Z_800de1"
+          "run_id": "disc_20261116T093458Z_544ee6"
         },
         {
           "run": 2,
@@ -45,7 +45,7 @@
           "replay_other_member": "success",
           "steps": 8,
           "turns": 4,
-          "cost_usd": 0.0173,
+          "cost_usd": 0.0174,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 0,
@@ -55,7 +55,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 0,
-          "run_id": "disc_20261116T083301Z_bc8499"
+          "run_id": "disc_20261116T093611Z_ce86e6"
         },
         {
           "run": 3,
@@ -73,7 +73,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 0,
-          "run_id": "disc_20261116T083413Z_7f9a5a"
+          "run_id": "disc_20261116T093724Z_d1f969"
         },
         {
           "run": 4,
@@ -91,7 +91,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 0,
-          "run_id": "disc_20261116T083527Z_8ba227"
+          "run_id": "disc_20261116T093838Z_87aca0"
         },
         {
           "run": 5,
@@ -109,7 +109,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 0,
-          "run_id": "disc_20261116T083640Z_38ca24"
+          "run_id": "disc_20261116T093952Z_2d4106"
         }
       ]
     },
@@ -122,8 +122,8 @@
       "recorded": 5,
       "replays_on_other_member": 5,
       "median_turns": 3,
-      "median_cost_usd": 0.0112,
-      "total_cost_usd": 0.0668,
+      "median_cost_usd": 0.0114,
+      "total_cost_usd": 0.0676,
       "nudged_runs": 0,
       "escalated_runs": 0,
       "runs": [
@@ -133,7 +133,7 @@
           "replay_other_member": "success",
           "steps": 8,
           "turns": 3,
-          "cost_usd": 0.0219,
+          "cost_usd": 0.0222,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 0,
@@ -143,7 +143,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T083754Z_0e5732"
+          "run_id": "disc_20261116T094106Z_df0447"
         },
         {
           "run": 2,
@@ -151,7 +151,7 @@
           "replay_other_member": "success",
           "steps": 8,
           "turns": 3,
-          "cost_usd": 0.0112,
+          "cost_usd": 0.0114,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 0,
@@ -161,7 +161,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T083904Z_632411"
+          "run_id": "disc_20261116T094219Z_355f18"
         },
         {
           "run": 3,
@@ -169,7 +169,7 @@
           "replay_other_member": "success",
           "steps": 8,
           "turns": 3,
-          "cost_usd": 0.0112,
+          "cost_usd": 0.0114,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 0,
@@ -179,7 +179,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T084015Z_eadbbb"
+          "run_id": "disc_20261116T094330Z_8ff298"
         },
         {
           "run": 4,
@@ -197,7 +197,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T084124Z_8d1419"
+          "run_id": "disc_20261116T094443Z_dec09a"
         },
         {
           "run": 5,
@@ -205,7 +205,7 @@
           "replay_other_member": "success",
           "steps": 8,
           "turns": 3,
-          "cost_usd": 0.0112,
+          "cost_usd": 0.0113,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 0,
@@ -215,7 +215,7 @@
             "already handled as PERMISSION_DENIED"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T084235Z_6974c6"
+          "run_id": "disc_20261116T094555Z_961979"
         }
       ]
     },
@@ -229,7 +229,7 @@
       "replays_on_other_member": 5,
       "median_turns": 8,
       "median_cost_usd": 0.0287,
-      "total_cost_usd": 0.1851,
+      "total_cost_usd": 0.1853,
       "nudged_runs": 0,
       "escalated_runs": 0,
       "runs": [
@@ -239,7 +239,7 @@
           "replay_other_member": "success",
           "steps": 11,
           "turns": 8,
-          "cost_usd": 0.0709,
+          "cost_usd": 0.0712,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 2,
@@ -248,61 +248,10 @@
             "learned DEPOSIT_BELOW_MINIMUM"
           ],
           "known_actions_used": 0,
-          "run_id": "disc_20261116T084346Z_f95b26"
+          "run_id": "disc_20261116T094708Z_b91a8e"
         },
         {
           "run": 2,
-          "status": "recorded",
-          "replay_other_member": "success",
-          "steps": 11,
-          "turns": 8,
-          "cost_usd": 0.0287,
-          "nudges": 0,
-          "escalations": 0,
-          "tool_errors": 2,
-          "probes": [
-            "learned MEMBER_NOT_FOUND",
-            "learned DEPOSIT_BELOW_MINIMUM"
-          ],
-          "known_actions_used": 0,
-          "run_id": "disc_20261116T084501Z_31524b"
-        },
-        {
-          "run": 3,
-          "status": "recorded",
-          "replay_other_member": "success",
-          "steps": 11,
-          "turns": 8,
-          "cost_usd": 0.0287,
-          "nudges": 0,
-          "escalations": 0,
-          "tool_errors": 2,
-          "probes": [
-            "learned MEMBER_NOT_FOUND",
-            "learned DEPOSIT_BELOW_MINIMUM"
-          ],
-          "known_actions_used": 0,
-          "run_id": "disc_20261116T084614Z_deab4b"
-        },
-        {
-          "run": 4,
-          "status": "recorded",
-          "replay_other_member": "success",
-          "steps": 11,
-          "turns": 7,
-          "cost_usd": 0.0282,
-          "nudges": 0,
-          "escalations": 0,
-          "tool_errors": 1,
-          "probes": [
-            "learned MEMBER_NOT_FOUND",
-            "learned DEPOSIT_BELOW_MINIMUM"
-          ],
-          "known_actions_used": 0,
-          "run_id": "disc_20261116T084730Z_d90bc4"
-        },
-        {
-          "run": 5,
           "status": "recorded",
           "replay_other_member": "success",
           "steps": 11,
@@ -316,7 +265,58 @@
             "learned DEPOSIT_BELOW_MINIMUM"
           ],
           "known_actions_used": 0,
-          "run_id": "disc_20261116T084843Z_ad27e3"
+          "run_id": "disc_20261116T094823Z_2d46e7"
+        },
+        {
+          "run": 3,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 8,
+          "cost_usd": 0.0287,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 2,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned DEPOSIT_BELOW_MINIMUM"
+          ],
+          "known_actions_used": 0,
+          "run_id": "disc_20261116T094938Z_20284d"
+        },
+        {
+          "run": 4,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 7,
+          "cost_usd": 0.0281,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 1,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned DEPOSIT_BELOW_MINIMUM"
+          ],
+          "known_actions_used": 0,
+          "run_id": "disc_20261116T095054Z_eb5ba1"
+        },
+        {
+          "run": 5,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 8,
+          "cost_usd": 0.0287,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 2,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned DEPOSIT_BELOW_MINIMUM"
+          ],
+          "known_actions_used": 0,
+          "run_id": "disc_20261116T095209Z_04d87f"
         }
       ]
     },
@@ -328,9 +328,9 @@
       "median_known_actions": 6,
       "recorded": 5,
       "replays_on_other_member": 5,
-      "median_turns": 6,
-      "median_cost_usd": 0.023,
-      "total_cost_usd": 0.1437,
+      "median_turns": 5,
+      "median_cost_usd": 0.0232,
+      "total_cost_usd": 0.1371,
       "nudged_runs": 0,
       "escalated_runs": 0,
       "runs": [
@@ -340,7 +340,7 @@
           "replay_other_member": "success",
           "steps": 11,
           "turns": 5,
-          "cost_usd": 0.0444,
+          "cost_usd": 0.0446,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 1,
@@ -349,7 +349,7 @@
             "learned DEPOSIT_BELOW_MINIMUM"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T084958Z_ff6819"
+          "run_id": "disc_20261116T095325Z_85adbe"
         },
         {
           "run": 2,
@@ -357,7 +357,7 @@
           "replay_other_member": "success",
           "steps": 11,
           "turns": 6,
-          "cost_usd": 0.032,
+          "cost_usd": 0.0278,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 2,
@@ -366,49 +366,15 @@
             "learned DEPOSIT_BELOW_MINIMUM"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T085111Z_1a3c37"
+          "run_id": "disc_20261116T095436Z_c6783b"
         },
         {
           "run": 3,
           "status": "recorded",
           "replay_other_member": "success",
           "steps": 11,
-          "turns": 6,
-          "cost_usd": 0.023,
-          "nudges": 0,
-          "escalations": 0,
-          "tool_errors": 2,
-          "probes": [
-            "learned MEMBER_NOT_FOUND",
-            "learned DEPOSIT_BELOW_MINIMUM"
-          ],
-          "known_actions_used": 6,
-          "run_id": "disc_20261116T085226Z_311b96"
-        },
-        {
-          "run": 4,
-          "status": "recorded",
-          "replay_other_member": "success",
-          "steps": 11,
-          "turns": 6,
-          "cost_usd": 0.0229,
-          "nudges": 0,
-          "escalations": 0,
-          "tool_errors": 2,
-          "probes": [
-            "learned MEMBER_NOT_FOUND",
-            "learned DEPOSIT_BELOW_MINIMUM"
-          ],
-          "known_actions_used": 6,
-          "run_id": "disc_20261116T085341Z_277088"
-        },
-        {
-          "run": 5,
-          "status": "recorded",
-          "replay_other_member": "success",
-          "steps": 11,
           "turns": 5,
-          "cost_usd": 0.0214,
+          "cost_usd": 0.0216,
           "nudges": 0,
           "escalations": 0,
           "tool_errors": 1,
@@ -417,7 +383,41 @@
             "learned DEPOSIT_BELOW_MINIMUM"
           ],
           "known_actions_used": 6,
-          "run_id": "disc_20261116T085457Z_3e827b"
+          "run_id": "disc_20261116T095552Z_022a32"
+        },
+        {
+          "run": 4,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 6,
+          "cost_usd": 0.0232,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 2,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned DEPOSIT_BELOW_MINIMUM"
+          ],
+          "known_actions_used": 6,
+          "run_id": "disc_20261116T095705Z_818cbf"
+        },
+        {
+          "run": 5,
+          "status": "recorded",
+          "replay_other_member": "success",
+          "steps": 11,
+          "turns": 5,
+          "cost_usd": 0.0199,
+          "nudges": 0,
+          "escalations": 0,
+          "tool_errors": 1,
+          "probes": [
+            "learned MEMBER_NOT_FOUND",
+            "learned DEPOSIT_BELOW_MINIMUM"
+          ],
+          "known_actions_used": 6,
+          "run_id": "disc_20261116T095817Z_1a4fb0"
         }
       ]
     }

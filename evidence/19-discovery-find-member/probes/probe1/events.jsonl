@@ -1,0 +1,10 @@
+{"t": 0.0, "at": "2026-11-16T09:11:00+00:00", "event": "replay_started", "capability": "core_banking.find_member_by_name", "version": "1.0.0", "inputs": ["dob", "lastName"], "tenant": null, "page_map": null}
+{"t": 0.29, "at": "2026-11-16T09:11:00+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.379, "at": "2026-11-16T09:11:02+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.443, "at": "2026-11-16T09:11:02+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.498, "at": "2026-11-16T09:11:02+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.903, "at": "2026-11-16T09:11:03+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.326, "at": "2026-11-16T09:11:03+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.387, "at": "2026-11-16T09:11:03+00:00", "event": "acted", "step": "enter_last_name", "action": "type", "value": "{{inputs.lastName}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.774, "at": "2026-11-16T09:11:04+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 15.522, "at": "2026-11-16T09:11:15+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "disc_20261116T091044Z_2ecd52-probe1", "completedAt": "2026-11-16T09:11:15+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "open_matching_member", "errorClass": "TARGET_UNRESOLVED", "expected": "exactly one match for: tableCell", "observed": "tableCell: TARGET_UNRESOLVED", "evidence": [{"kind": "a11y_snapshot", "path": "runs/disc_20261116T091044Z_2ecd52-probe1/open_matching_member.snapshot.txt"}, {"kind": "screenshot", "path": "runs/disc_20261116T091044Z_2ecd52-probe1/open_matching_member.png"}]}}

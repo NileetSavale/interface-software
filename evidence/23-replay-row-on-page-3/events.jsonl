@@ -1,0 +1,17 @@
+{"t": 0.0, "at": "2026-11-16T10:16:07+00:00", "event": "replay_started", "capability": "core_banking.find_transaction_by_reference", "version": "1.0.0", "inputs": ["memberId", "reference"], "tenant": null, "page_map": null}
+{"t": 0.266, "at": "2026-11-16T10:16:07+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.357, "at": "2026-11-16T10:16:09+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.428, "at": "2026-11-16T10:16:10+00:00", "event": "acted", "step": "enter_user", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.48, "at": "2026-11-16T10:16:10+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.882, "at": "2026-11-16T10:16:10+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.285, "at": "2026-11-16T10:16:10+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.348, "at": "2026-11-16T10:16:10+00:00", "event": "acted", "step": "member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.738, "at": "2026-11-16T10:16:11+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.14, "at": "2026-11-16T10:16:11+00:00", "event": "acted", "step": "open_history", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 6.109, "at": "2026-11-16T10:16:13+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 2}
+{"t": 8.073, "at": "2026-11-16T10:16:15+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 3}
+{"t": 8.082, "at": "2026-11-16T10:16:15+00:00", "event": "page_found", "step": "look_for_reference_next_page", "page": 3, "pages_turned": 2}
+{"t": 8.129, "at": "2026-11-16T10:16:15+00:00", "event": "extracted", "step": "date", "outputs": ["transactionDate"]}
+{"t": 8.15, "at": "2026-11-16T10:16:15+00:00", "event": "extracted", "step": "amount", "outputs": ["amount"]}
+{"t": 8.158, "at": "2026-11-16T10:16:15+00:00", "event": "checkpoint_passed"}
+{"t": 8.181, "at": "2026-11-16T10:16:15+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261116T101607Z_e09fb5", "completedAt": "2026-11-16T10:16:15+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"transactionDate": "{{outputs.transactionDate}}", "amount": "{{outputs.amount}}"}}}

@@ -1,0 +1,14 @@
+{"t": 0.0, "at": "2026-11-16T09:11:23+00:00", "event": "replay_started", "capability": "core_banking.find_member_by_name", "version": "1.0.0", "inputs": ["dob", "lastName"], "tenant": null, "page_map": null}
+{"t": 0.237, "at": "2026-11-16T09:11:23+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.325, "at": "2026-11-16T09:11:25+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.399, "at": "2026-11-16T09:11:25+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.452, "at": "2026-11-16T09:11:25+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.848, "at": "2026-11-16T09:11:26+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.273, "at": "2026-11-16T09:11:26+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.341, "at": "2026-11-16T09:11:26+00:00", "event": "acted", "step": "enter_last_name", "action": "type", "value": "{{inputs.lastName}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.72, "at": "2026-11-16T09:11:27+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.12, "at": "2026-11-16T09:11:27+00:00", "event": "acted", "step": "open_matching_member", "action": "click", "value": null, "rank": 0, "strategy": "tableCell"}
+{"t": 4.175, "at": "2026-11-16T09:11:27+00:00", "event": "extracted", "step": "read_member_number", "outputs": ["memberNumber"]}
+{"t": 4.196, "at": "2026-11-16T09:11:27+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 4.204, "at": "2026-11-16T09:11:27+00:00", "event": "checkpoint_passed"}
+{"t": 4.226, "at": "2026-11-16T09:11:27+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "disc_20261116T091044Z_2ecd52-probe3", "completedAt": "2026-11-16T09:11:27+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberNumber": "{{outputs.memberNumber}}", "memberName": "{{outputs.memberName}}"}}}

@@ -1,0 +1,14 @@
+{"t": 0.0, "at": "2026-11-16T10:15:48+00:00", "event": "replay_started", "capability": "core_banking.find_member_by_name", "version": "1.0.0", "inputs": ["dob", "lastName"], "tenant": null, "page_map": null}
+{"t": 0.3, "at": "2026-11-16T10:15:49+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.37, "at": "2026-11-16T10:15:51+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.436, "at": "2026-11-16T10:15:51+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.482, "at": "2026-11-16T10:15:51+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.881, "at": "2026-11-16T10:15:51+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.317, "at": "2026-11-16T10:15:52+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.378, "at": "2026-11-16T10:15:52+00:00", "event": "acted", "step": "enter_last_name", "action": "type", "value": "{{inputs.lastName}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.766, "at": "2026-11-16T10:15:52+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.17, "at": "2026-11-16T10:15:53+00:00", "event": "acted", "step": "open_matching_member", "action": "click", "value": null, "rank": 0, "strategy": "tableCell"}
+{"t": 4.226, "at": "2026-11-16T10:15:53+00:00", "event": "extracted", "step": "read_member_number", "outputs": ["memberNumber"]}
+{"t": 4.247, "at": "2026-11-16T10:15:53+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 4.255, "at": "2026-11-16T10:15:53+00:00", "event": "checkpoint_passed"}
+{"t": 4.276, "at": "2026-11-16T10:15:53+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261116T101548Z_eaed3f", "completedAt": "2026-11-16T10:15:53+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberNumber": "{{outputs.memberNumber}}", "memberName": "{{outputs.memberName}}"}}}

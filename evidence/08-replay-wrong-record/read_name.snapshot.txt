@@ -29,6 +29,9 @@
           - row [ref=f#e##]:
             - cell "Name:" [ref=f#e##]
             - cell "⟨ACCT_1⟩" [ref=f#e##]
+          - row [ref=f#e##]:
+            - cell "Date of Birth:" [ref=f#e##]
+            - cell "⟨ACCT_1⟩" [ref=f#e##]
       - text: ⟨ACCT_1⟩
       - table [ref=f#e##]:
         - rowgroup [ref=f#e##]:
@@ -46,5 +49,7 @@
                 - /url: /account?no=####-#####-##
       - link "Open Sub-Account" [ref=f#e##] [cursor=pointer]:
         - /url: /subaccount/new?id=#####
+      - link "Transaction History" [ref=f#e##] [cursor=pointer]:
+        - /url: /history?id=#####
       - link "New search" [ref=f#e##] [cursor=pointer]:
         - /url: /inquiry

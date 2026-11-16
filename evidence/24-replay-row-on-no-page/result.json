@@ -1,0 +1,21 @@
+{
+  "runId": "replay_20261116T101615Z_4d09c7",
+  "completedAt": "2026-11-16T10:16:29+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "look_for_reference_next_page",
+  "errorClass": "TARGET_UNRESOLVED",
+  "expected": "the row on one of the pages",
+  "observed": "not on any of the 4 pages, and there's no next page",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261116T101615Z_4d09c7/look_for_reference_next_page.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261116T101615Z_4d09c7/look_for_reference_next_page.png"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{"t": 0.0, "at": "2026-11-16T09:11:19+00:00", "event": "replay_started", "capability": "core_banking.find_member_by_name", "version": "1.0.0", "inputs": ["dob", "lastName"], "tenant": null, "page_map": null}
+{"t": 0.298, "at": "2026-11-16T09:11:19+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.386, "at": "2026-11-16T09:11:21+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.453, "at": "2026-11-16T09:11:22+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.499, "at": "2026-11-16T09:11:22+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.897, "at": "2026-11-16T09:11:22+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.333, "at": "2026-11-16T09:11:22+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.395, "at": "2026-11-16T09:11:22+00:00", "event": "acted", "step": "enter_last_name", "action": "type", "value": "{{inputs.lastName}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.787, "at": "2026-11-16T09:11:23+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.803, "at": "2026-11-16T09:11:23+00:00", "event": "outcome", "code": "MEMBER_NOT_FOUND", "kind": "business", "step": "search"}
+{"t": 3.827, "at": "2026-11-16T09:11:23+00:00", "event": "replay_finished", "status": "business_outcome", "result": {"runId": "disc_20261116T091044Z_2ecd52-probe2", "completedAt": "2026-11-16T09:11:23+00:00", "recovered": [], "drift": [], "status": "business_outcome", "code": "MEMBER_NOT_FOUND", "atStep": "search", "details": {}}}

@@ -42,7 +42,7 @@
    ],
    "seen": 4
   },
-  "8a49f9c469fa": {
+  "ff74865e4a4e": {
    "labels": [
     "Account",
     "Account Summary",
@@ -50,6 +50,7 @@
     "Balance",
     "CU*Core",
     "Checking",
+    "Date of Birth:",
     "Member #:",
     "Member Detail",
     "Member Lookup",
@@ -59,6 +60,7 @@
     "Savings",
     "Sign Off",
     "Teller Functions",
+    "Transaction History",
     "Type",
     "View",
     "main",
@@ -108,7 +110,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794819818.472814,
+     "at": 1794824101.912713,
      "ok": true
     }
    ]
@@ -153,7 +155,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794819818.472814,
+     "at": 1794824101.912713,
      "ok": true
     }
    ]
@@ -192,7 +194,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794819818.472814,
+     "at": 1794824101.912713,
      "ok": true
     }
    ]
@@ -225,7 +227,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794819818.472814,
+     "at": 1794824101.912713,
      "ok": true
     }
    ]
@@ -261,7 +263,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794819818.472814,
+     "at": 1794824101.912713,
      "ok": true
     }
    ]
@@ -269,7 +271,7 @@
   "5b5f5c71af71": {
    "key": "5b5f5c71af71",
    "from": "42b75111cfd8",
-   "to": "8a49f9c469fa",
+   "to": "ff74865e4a4e",
    "action": "click",
    "target": {
     "frame": [
@@ -300,7 +302,7 @@
    "seen": [
     {
      "source": "discovery",
-     "at": 1794819818.472814,
+     "at": 1794824101.912713,
      "ok": true
     }
    ]

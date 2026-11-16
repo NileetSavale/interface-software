@@ -217,15 +217,23 @@ window.SITE = {
    "chose": "<strong>A narrow <code>row: first</code> on a table cell: reading only, never acting; recorded only when the goal declares it wants the first result; on a table found by its own label and header; an empty table finds nothing</strong>",
    "why": "D8 is about choosing between same-named controls, where an index silently picks the wrong one. \"The first result\" is what the caller asked for, so the position is the meaning, not a guess. Keeping it off controls means nothing is ever clicked by position, and an empty table failing is what turns \"no transactions\" from a hollow success into an answer.",
    "kind": "agreed"
+  },
+  {
+   "id": "D28",
+   "topic": "Results that span pages",
+   "proposed": "(Pass 3 item 5) An artifact was a straight list of steps, so a row on page 3 couldn't be reached by a capability recorded with the row on page 1, and \"press Next\" recorded twice only works when the row is on page 3. The AI recommended one bounded loop, or none",
+   "chose": "<strong>A <code>pageUntil</code> step, the only loop an artifact can hold: press the Next control until <code>until</code> (the row the next step uses) finds exactly one element, at most <code>maxPages</code> times. Recorded only from the model's <code>next_page</code> tool, which is offered only when the goal declares <code>resultsSpanPages</code>. A page turn is classed like a click; only a real link named Next is read</strong>",
+   "why": "Without it, capabilities stop at whatever fits on one page, which a bank's histories never do. Bounded and with a declared exit, replay stays deterministic: same inputs, same pages turned, each logged. Several matching rows fail as ambiguous at once, running out fails saying how many pages were searched, and the goal, not the model, decides that results can span pages.",
+   "kind": "agreed"
   }
  ],
  "evals": {
   "fault_matrix": {
-   "passed": 85,
-   "runs": 85,
+   "passed": 97,
+   "runs": 97,
    "opened": 0,
-   "date": "2026-11-16T08:45:34+00:00",
-   "commit": "57bfc8d",
+   "date": "2026-11-16T09:50:32+00:00",
+   "commit": "e6893f9",
    "misses": []
   },
   "stability": {
@@ -233,15 +241,15 @@ window.SITE = {
    "runs": 80,
    "distinct": 1,
    "p50": 3.83,
-   "date": "2026-11-16T08:53:06+00:00",
-   "commit": "57bfc8d"
+   "date": "2026-11-16T09:58:05+00:00",
+   "commit": "e6893f9"
   },
   "robustness": {
-   "ok": 60,
-   "runs": 60,
+   "ok": 120,
+   "runs": 120,
    "wrong": 0,
-   "date": "2026-11-16T08:57:31+00:00",
-   "commit": "57bfc8d"
+   "date": "2026-11-16T10:08:57+00:00",
+   "commit": "e6893f9"
   },
   "safety": {
    "passed": 18,
@@ -249,10 +257,10 @@ window.SITE = {
    "gaps": 0,
    "llm_passed": 12,
    "llm_total": 12,
-   "llm_spent": 0.3945,
+   "llm_spent": 0.4251,
    "harm": 0,
-   "date": "2026-11-16T08:31:38+00:00",
-   "commit": "57bfc8d"
+   "date": "2026-11-16T09:34:49+00:00",
+   "commit": "e6893f9"
   },
   "discovery": {
    "recorded": 20,
@@ -260,11 +268,11 @@ window.SITE = {
    "replays": 20,
    "median_cost": [
     0.0173,
-    0.0112,
+    0.0114,
     0.0287,
-    0.023
+    0.0232
    ],
-   "spent": 0.4936,
+   "spent": 0.4884,
    "arms": [
     {
      "flow": "lookup",
@@ -281,7 +289,7 @@ window.SITE = {
      "recorded": 5,
      "replays_on_other_member": 5,
      "median_turns": 3,
-     "median_cost_usd": 0.0112,
+     "median_cost_usd": 0.0114,
      "escalated_runs": 0
     },
     {
@@ -298,21 +306,21 @@ window.SITE = {
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 6,
-     "median_cost_usd": 0.023,
+     "median_turns": 5,
+     "median_cost_usd": 0.0232,
      "escalated_runs": 0
     }
    ],
-   "date": "2026-11-16T08:56:10+00:00",
-   "commit": "57bfc8d"
+   "date": "2026-11-16T09:59:29+00:00",
+   "commit": "e6893f9"
   },
   "parabank": {
    "ok": 40,
    "runs": 40,
    "distinct": 1,
    "resets": 0,
-   "date": "2026-11-16T09:02:08+00:00",
-   "commit": "57bfc8d"
+   "date": "2026-11-16T10:13:34+00:00",
+   "commit": "e6893f9"
   }
  },
  "commits": [
@@ -465,7 +473,19 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "An empty value is 'not shown yet', not someone else's record",
    "body": "Found by the ParaBank stability suite: its account page fills its cells\n~150 ms after load, and 2/20 replays read the account number empty and\nraised a false WRONG_RECORD (opening the circuit breaker). Identifiers and\noutputs are now waited for until they have text, then compared once; a\nmismatch is still WRONG_RECORD at once, one that never appears a TIMEOUT.\nMock faults late_fill and late_wrong_record put both in the fault matrix."
+  },
+  {
+   "sha": "a951d59",
+   "date": "2026-11-16",
+   "subject": "Eval results at 57bfc8d, regenerated evidence, site and REPORT numbers",
+   "body": "All six suites: fault matrix 85/85 over banks A-C, safety 18/18 + 12/12\nwith Claude, discovery 20/20, stability 80/80, robustness 60/60, and\nParaBank 40/40 with one distinct output per account."
+  },
+  {
+   "sha": "e6893f9",
+   "date": "2026-11-16",
+   "subject": "Several matches and pages (D28)",
+   "body": "A row no label names is picked by the cell showing an input ('Select\nwhere Date of Birth = {{inputs.dob}}'); two matches fail AMBIGUOUS_TARGET,\nnone TARGET_UNRESOLVED, never the first. pageUntil, the only loop an\nartifact can hold, presses Next until that row is on screen, at most\nmaxPages times; recorded from next_page, offered only when the goal says\nresults span pages. A page turn is classed like a click: only a real link\nnamed Next is read.\n\nTwo capabilities discovered by Claude on the mock (three Chens, two born\nthe same day; a 4-page transaction history), 12 fault-matrix cases on\nbank A, both flows in the robustness suite, evidence 19-24."
   }
  ],
- "tests": 101
+ "tests": 105
 };

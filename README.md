@@ -178,7 +178,7 @@ src/interface/
   session.py   the control token                                operator.py  the operator page
   evidence.py  run logs, redaction, audit and circuit breaker   runs.py      invoke with a deadline
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
-goals/        the capabilities. goal specs              artifacts/  the discovered artifacts
+goals/        the capabilities' goal specs              artifacts/  the discovered artifacts
 evals/        the five suites and their results         evidence/   curated runs
 tests/        138 tests                                 docs/       design, decisions, the site
 ```

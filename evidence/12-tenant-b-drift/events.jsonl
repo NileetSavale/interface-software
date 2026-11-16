@@ -1,15 +1,15 @@
-{"t": 0.0, "at": "2026-11-16T09:03:18+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "inputs": ["memberId"], "tenant": "b", "page_map": null}
-{"t": 0.298, "at": "2026-11-16T09:03:18+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.372, "at": "2026-11-16T09:03:20+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.438, "at": "2026-11-16T09:03:20+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.483, "at": "2026-11-16T09:03:21+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.877, "at": "2026-11-16T09:03:21+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.32, "at": "2026-11-16T09:03:21+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.509, "at": "2026-11-16T09:03:22+00:00", "event": "drift", "step": "enter_member_number", "rank": 2, "strategy": "anchor", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmprdg79w9w/b.json"}
-{"t": 3.514, "at": "2026-11-16T09:03:22+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 2, "strategy": "anchor"}
-{"t": 3.711, "at": "2026-11-16T09:03:22+00:00", "event": "drift", "step": "search_member", "rank": 2, "strategy": "onlyInRegion", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmprdg79w9w/b.json"}
-{"t": 4.078, "at": "2026-11-16T09:03:22+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 2, "strategy": "onlyInRegion"}
-{"t": 4.144, "at": "2026-11-16T09:03:22+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
-{"t": 4.173, "at": "2026-11-16T09:03:22+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
-{"t": 4.183, "at": "2026-11-16T09:03:22+00:00", "event": "checkpoint_passed"}
-{"t": 4.208, "at": "2026-11-16T09:03:22+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261116T090318Z_7f3e88", "completedAt": "2026-11-16T09:03:22+00:00", "recovered": [], "drift": [{"stepId": "enter_member_number", "hitRank": 2, "strategy": "anchor", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmprdg79w9w/b.json"}, {"stepId": "search_member", "hitRank": 2, "strategy": "onlyInRegion", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmprdg79w9w/b.json"}], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}
+{"t": 0.0, "at": "2026-11-16T10:14:41+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "inputs": ["memberId"], "tenant": "b", "page_map": null}
+{"t": 0.265, "at": "2026-11-16T10:14:42+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.356, "at": "2026-11-16T10:14:44+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.424, "at": "2026-11-16T10:14:44+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.472, "at": "2026-11-16T10:14:44+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.88, "at": "2026-11-16T10:14:44+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.322, "at": "2026-11-16T10:14:45+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.536, "at": "2026-11-16T10:14:45+00:00", "event": "drift", "step": "enter_member_number", "rank": 2, "strategy": "anchor", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpztbz70w_/b.json"}
+{"t": 3.541, "at": "2026-11-16T10:14:45+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 2, "strategy": "anchor"}
+{"t": 3.743, "at": "2026-11-16T10:14:45+00:00", "event": "drift", "step": "search_member", "rank": 2, "strategy": "onlyInRegion", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpztbz70w_/b.json"}
+{"t": 4.102, "at": "2026-11-16T10:14:45+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 2, "strategy": "onlyInRegion"}
+{"t": 4.14, "at": "2026-11-16T10:14:45+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 4.162, "at": "2026-11-16T10:14:45+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
+{"t": 4.171, "at": "2026-11-16T10:14:45+00:00", "event": "checkpoint_passed"}
+{"t": 4.189, "at": "2026-11-16T10:14:46+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261116T101441Z_d8fb8b", "completedAt": "2026-11-16T10:14:45+00:00", "recovered": [], "drift": [{"stepId": "enter_member_number", "hitRank": 2, "strategy": "anchor", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpztbz70w_/b.json"}, {"stepId": "search_member", "hitRank": 2, "strategy": "onlyInRegion", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpztbz70w_/b.json"}], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

@@ -1,0 +1,21 @@
+{
+  "runId": "replay_20261116T101553Z_80fee1",
+  "completedAt": "2026-11-16T10:16:07+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "open_matching_member",
+  "errorClass": "AMBIGUOUS_TARGET",
+  "expected": "exactly one match for: tableCell",
+  "observed": "tableCell: AMBIGUOUS_TARGET",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261116T101553Z_80fee1/open_matching_member.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261116T101553Z_80fee1/open_matching_member.png"
+    }
+  ]
+}

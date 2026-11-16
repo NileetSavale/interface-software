@@ -1,6 +1,6 @@
 {
-  "runId": "replay_20261116T090326Z_d618b1",
-  "completedAt": "2026-11-16T09:03:32+00:00",
+  "runId": "replay_20261116T101449Z_4956a1",
+  "completedAt": "2026-11-16T10:14:55+00:00",
   "recovered": [],
   "drift": [],
   "status": "failed",
@@ -11,11 +11,11 @@
   "evidence": [
     {
       "kind": "a11y_snapshot",
-      "path": "runs/replay_20261116T090326Z_d618b1/press_ok.snapshot.txt"
+      "path": "runs/replay_20261116T101449Z_4956a1/press_ok.snapshot.txt"
     },
     {
       "kind": "screenshot",
-      "path": "runs/replay_20261116T090326Z_d618b1/press_ok.png"
+      "path": "runs/replay_20261116T101449Z_4956a1/press_ok.png"
     }
   ]
 }
