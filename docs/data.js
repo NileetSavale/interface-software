@@ -185,6 +185,14 @@ window.SITE = {
    "chose": "<strong>The AI's addition, open for review: the page map may confirm a postcondition or the precondition check, but only exactly: the screen now showing must be where this same action is known, from trusted edges, to lead on this bank. Reported as <code>MAP_FALLBACK</code> with the pinned map version</strong>",
    "why": "The check still asks \"did we reach the right screen?\", answered from the bank's own verified history instead of another bank's label. It's deterministic for a given map version, and it adds no way through that a verified run on that bank hasn't already taken.",
    "kind": "ai proposal"
+  },
+  {
+   "id": "D24",
+   "topic": "Names that only free text mentions",
+   "proposed": "(the one known gap in the safety eval) The AI offered a fail-closed rule, a spaCy NER model, or both, and recommended the rule",
+   "chose": "<strong>The rule: in prose only, hide every run of two or more capitalised words, or a title and a name, unless the page uses it as a label</strong>",
+   "why": "A bank needs a guarantee, not a probability. The rule is deterministic, adds no dependency, and errs toward hiding: at worst a phrase that isn't a name is hidden. A statistical model catches lone first names but can miss names outright, and it ties what the model sees to a model version. Lone first names stay a stated limit.",
+   "kind": "agreed"
   }
  ],
  "evals": {
@@ -192,55 +200,55 @@ window.SITE = {
    "passed": 73,
    "runs": 73,
    "opened": 0,
-   "date": "2026-11-15T17:54:30+00:00",
-   "commit": "0dd358f",
+   "date": "2026-11-16T05:24:57+00:00",
+   "commit": "70e2687",
    "misses": []
   },
   "stability": {
    "ok": 80,
    "runs": 80,
    "distinct": 1,
-   "p50": 3.81,
-   "date": "2026-11-15T18:02:02+00:00",
-   "commit": "0dd358f"
+   "p50": 3.8,
+   "date": "2026-11-16T05:32:30+00:00",
+   "commit": "70e2687"
   },
   "robustness": {
    "ok": 60,
    "runs": 60,
    "wrong": 0,
-   "date": "2026-11-15T18:06:27+00:00",
-   "commit": "0dd358f"
+   "date": "2026-11-16T05:36:55+00:00",
+   "commit": "70e2687"
   },
   "safety": {
-   "passed": 15,
-   "total": 16,
-   "gaps": 1,
+   "passed": 17,
+   "total": 17,
+   "gaps": 0,
    "llm_passed": 12,
    "llm_total": 12,
-   "llm_spent": 0.4059,
+   "llm_spent": 0.3947,
    "harm": 0,
-   "date": "2026-11-15T17:43:21+00:00",
-   "commit": "0dd358f"
+   "date": "2026-11-16T05:13:05+00:00",
+   "commit": "70e2687"
   },
   "discovery": {
    "recorded": 20,
    "runs": 20,
    "replays": 20,
    "median_cost": [
-    0.0173,
+    0.019,
     0.0113,
-    0.0281,
-    0.0263
+    0.0282,
+    0.0321
    ],
-   "spent": 0.4967,
+   "spent": 0.525,
    "arms": [
     {
      "flow": "lookup",
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 4,
-     "median_cost_usd": 0.0173,
+     "median_turns": 5,
+     "median_cost_usd": 0.019,
      "escalated_runs": 0
     },
     {
@@ -258,7 +266,7 @@ window.SITE = {
      "recorded": 5,
      "replays_on_other_member": 5,
      "median_turns": 7,
-     "median_cost_usd": 0.0281,
+     "median_cost_usd": 0.0282,
      "escalated_runs": 0
     },
     {
@@ -266,13 +274,13 @@ window.SITE = {
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 5,
-     "median_cost_usd": 0.0263,
+     "median_turns": 6,
+     "median_cost_usd": 0.0321,
      "escalated_runs": 0
     }
    ],
-   "date": "2026-11-15T18:07:52+00:00",
-   "commit": "0dd358f"
+   "date": "2026-11-16T05:37:03+00:00",
+   "commit": "70e2687"
   }
  },
  "commits": [
@@ -365,7 +373,19 @@ window.SITE = {
    "date": "2026-11-15",
    "subject": "Rename the project from interfaze to interface",
    "body": ""
+  },
+  {
+   "sha": "f41e633",
+   "date": "2026-11-15",
+   "subject": "Eval results at 0dd358f, regenerated evidence, REPORT numbers",
+   "body": "All five suites on the renamed commit: fault matrix 73/73 over banks A-C,\ndiscovery 20/20 with the map off/on comparison, stability 80/80, robustness\n60/60, safety 15/16 + 12/12 with Claude. The confusion matrix now counts\nsuccess* rows; the Claude client is closed inside the event loop."
+  },
+  {
+   "sha": "70e2687",
+   "date": "2026-11-16",
+   "subject": "Hide names that only free text mentions (D24)",
+   "body": "A fail-closed rule in the masker: in prose only, every run of two or more\ncapitalised words, or a title and a name, becomes a NAME placeholder unless\nthe page uses it as a label. A guess from a note never hides a label on a\nlater screen. The safety eval's known gap is now a passing case, and the\nrun log is checked for the free-text name too."
   }
  ],
- "tests": 87
+ "tests": 92
 };

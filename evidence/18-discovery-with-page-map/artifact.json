@@ -14,8 +14,8 @@
   },
   "status": "draft",
   "provenance": {
-    "discoveryRunId": "disc_20261115T180138Z_58f83b",
-    "recordedAt": "2026-11-15T18:02:14+00:00",
+    "discoveryRunId": "disc_20261116T053058Z_32b0e9",
+    "recordedAt": "2026-11-16T05:31:17+00:00",
     "model": "claude-sonnet-5-5"
   },
   "inputs": {
@@ -140,12 +140,12 @@
           "matches": "(?i)Minimum opening deposit is"
         }
       },
-      "description": "The Open Sub-Account form came back with a message giving the minimum opening deposit. The form was not advanced to the review screen, so the deposit was rejected as below the minimum. (learned from probe: an opening deposit below the minimum)"
+      "description": "The Open Sub-Account form came back with a message stating the minimum opening deposit, so the app rejected the deposit as too low and did not go on to the review screen. (learned from probe: an opening deposit below the minimum)"
     }
   ],
   "policy": {
     "allowedOrigins": [
-      "http://127.0.0.1:65534"
+      "http://127.0.0.1:53980"
     ],
     "allowedPaths": [
       "/*"

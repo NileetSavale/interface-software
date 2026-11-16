@@ -1,240 +1,148 @@
 # interface — design write-up
 
 Claude discovers a task once against a live legacy UI, and the run becomes a typed, versioned capability. Once a
-person approves it, it replays without the model: the same inputs give the same steps and the same typed result,
-in about 4 s for $0. The numbers here come from [`evals/report.md`](evals/report.md) (five suites, a clean commit, N
-stated). The full design is [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). The 22 decisions, including where I
-overrode the AI I built this with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
+person approves it, it replays without the model: same inputs, same steps, same typed result, in about 4 s for $0.
+Numbers come from [`evals/report.md`](evals/report.md) (five suites, a clean commit, N stated). The full design is in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 24 decisions, including where I overrode the AI I built this
+with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## Architecture
 
-**One process, no infrastructure; the seams are interfaces.** It's built on Python 3.13, Playwright, Pydantic and
-FastAPI.
+**One process, no infrastructure; the seams are interfaces** (Python 3.13, Playwright, Pydantic, FastAPI).
 
-- **Discovery**: an observe → decide → act loop. Claude Sonnet 5.5 reads an accessibility-tree snapshot with refs
-  and acts by tool call. When it's stuck, Opus 5.5 takes over the same conversation, then a person. The model only
-  asks; code validates and policy-checks every call, and errors go back to the model.
-- **Recorder**: describes each live action as a surface-neutral target, from the live page, never from the
-  transcript.
-- **Artifact**: the contract, with an exported JSON Schema.
-- **Replay**: runs an approved artifact with no model.
-- **Shared by both**: the surface, the policy gate, the PII masker, a control token for handoff, a redacted
-  evidence log, and each bank's **page map**: a graph of screens and actions learned from verified runs (D3/D4).
+- **Discovery**: Claude Sonnet 5.5 reads an accessibility-tree snapshot with refs and acts by tool call. When stuck,
+  Opus 5.5 takes over the same conversation, then a person. The model only asks; code validates and policy-checks
+  every call.
+- **Recorder**: turns each live action into a surface-neutral target, described from the live page.
+- **Artifact**: the contract, with an exported JSON Schema. **Replay** runs an approved one with no model.
+- **Shared**: the surface, the policy gate, the PII masker, a control token for handoff, a redacted evidence log,
+  and each bank's **page map** of screens and actions learned from verified runs (D3/D4).
 
-**Decisions and trade-offs**
-- **The accessibility tree, not screenshots and coordinates.** This is the perception model of Vercel Labs'
-  agent-desktop (v1.0.2, 30 Oct 2026): exact, cheap, and robust to layout. The cost: an app with no accessibility
-  tree is invisible. That's why bbox strategies stay in the schema, and why D2 (a screenshot to the model on a
-  screen's first visit) is designed, though not yet built.
-- **Model choice.** Discovery's cost is spread over every free replay, so first-try success matters more than token
-  price (D12). Over 20 real runs: median $0.017 for lookup and $0.028 for the sub-account flow (probes included),
-  every one recorded and replayed on another member, with no escalation needed.
-- **History.** It's append-only, with old snapshots cleared server-side. Claude 5.5 binds its thinking to the exact
-  conversation, so editing earlier turns would break it (D17).
-- **A real Claude run → artifact → replay first** (D10), then each part deepened.
-- **Reused from my agent Loop Runner** (the system behind *When Tests Lie*, submitted to AGENT 2027 @ ICSE): the tool
-  gate, stuck detection, model cascades, redaction, and the eval method.
+**Trade-offs**
+- **The accessibility tree, not screenshots and coordinates**, as in Vercel Labs' agent-desktop (v1.0.2, 30 Oct
+  2026): exact, cheap, layout-proof. An app with no tree is invisible, so bbox strategies stay in the schema and D2
+  (a screenshot on a screen's first visit) is designed.
+- **Model choice.** Discovery's cost is spread over every free replay, so first-try success beats token price
+  (D12). Over 20 real runs: median $0.019 (lookup) and $0.028 (sub-account), probes included, all recorded and
+  replayed on another member, no escalation.
+- **History** is append-only with old snapshots cleared server-side: Claude 5.5 binds its thinking to the exact
+  conversation (D17).
+- **Reused from Loop Runner**, my agent behind *When Tests Lie* (submitted to AGENT 2027 @ ICSE): the tool gate,
+  stuck detection, model cascades, redaction and the eval method.
 
 ## Artifact schema
 
-`src/interface/artifact/schema.py`; the real artifacts are in `artifacts/`.
+`src/interface/artifact/schema.py`; real artifacts in `artifacts/`. A calling agent reads it as a tool signature, a
+reviewer as a spec.
 
-- **The contract**:
-  - `capability`: id, semver, title, description;
-  - `app`: vendor product, version range, entry path;
-  - typed **`inputs`**: pattern, enum, `sensitive`, and `identifies: member`;
-  - typed **`outputs`**: string, money, integer or date;
-  - named **`outcomes`**, each classified as business, recoverable, escalate or fatal, with a detector;
-  - `status`: draft or approved, with provenance.
-
-  A calling agent can read it as a tool signature; a reviewer can read it as a spec.
-- **Steps** carry an intent, an action, a target, and a value template (`{{inputs.memberId}}`,
-  `{{secrets.APP_USER}}`, never a literal). They also carry a risk class, condition waits, and a postcondition.
-  Sign-on is a **subflow**, run as a precondition and reused to recover from an expired session.
-- **Targets** are surface-neutral: a frame path, an optional region scope, and **ranked strategies**.
-
-  | Rank | Strategy |
-  |---|---|
-  | 1 | role + name |
-  | 2 | label |
-  | 3 | anchor text ("right of `Name:`"), table cell ("Balance where Type = Savings"), or visible text |
-  | 4 | `onlyInRegion` ("the only button in the Member Inquiry fieldset") |
-  | 5 | structural path, bbox |
-
-  - Each strategy is checked to be unique on the live page when recorded.
-  - Duplicates are told apart by a labelled region, never by index.
-  - Anything with a digit is data, and never an anchor.
-- **`success.checkpoint`**: a heading or label is visible, every output was read, and an **identity check** confirms
-  this is the record asked for. The identity check is mandatory for any input marked `identifies` (D16).
-- **`overrides`** per tenant, by step id (next section).
-- **Validation** rejects:
-  - irreversible steps;
-  - unknown step ids;
-  - undeclared templates;
-  - an output with no extractor, or two;
-  - a restart recovery on a capability that changes data.
+- **Contract**: `capability` (id, semver), `app` (vendor product, version range), typed **`inputs`** (pattern, enum,
+  `sensitive`, `identifies: member`), typed **`outputs`**, named **`outcomes`** (business, recoverable, escalate,
+  fatal, each with a detector), and `status` (draft or approved, with provenance).
+- **Steps**: intent, action, target, a value template (`{{inputs.memberId}}`, `{{secrets.APP_USER}}`, never a
+  literal), a risk class, condition waits and a postcondition. Sign-on is a **subflow**, reused for recovery.
+- **Targets**: a frame path, an optional region, and **ranked strategies**: role + name › label › anchor text,
+  table cell or text › `onlyInRegion` ("the only button in the Member Inquiry fieldset") › structural path, bbox.
+  Each is checked unique when recorded; duplicates are told apart by region, never index; digits are data, never
+  anchors.
+- **`success.checkpoint`**: a visible landmark, every output read, and a mandatory **identity check** that this is
+  the record asked for (D16).
+- **`overrides`** per tenant by step id. **Validation rejects** irreversible steps, unknown ids, undeclared
+  templates, ambiguous extractors, and restart recovery on a flow that changes data.
 
 ## Determinism & error handling
 
-**Determinism**
-- Every wait is on a condition, never a sleep.
-- Strategies are tried in rank order. Several matches count as ambiguous and the run fails; it never picks one.
-- Inputs are validated before the UI is touched.
-- Measured: in 80/80 stability replays (normal and slow app), every run read the same values. Across 60 shuffled
-  layouts (frames, fieldsets, rows, columns, nesting), **no step ever found the wrong control.**
+- Waits are on conditions, never sleeps. Strategies go in rank order; several matches fail as ambiguous, never
+  pick one. Inputs are validated before the UI is touched.
+- **Measured:** 80/80 stability replays (normal and slow app) read identical values; across 60 shuffled layouts,
+  **no step ever found the wrong control.**
 
-**Five result types**
-- `success` with outputs.
-- `business_outcome`: an answer, not a crash.
-- `invalid_input`.
-- `needs_human` with a run handle.
-- `failed`: the step, what was expected, what was observed, and evidence (a masked screenshot and an accessibility
-  snapshot).
+**Five results:** `success` with outputs; `business_outcome` (an answer, not a crash); `invalid_input`;
+`needs_human` with a run handle; `failed` with the step, expected vs observed, and masked evidence.
 
-**Runtime conditions are declared outcomes that race every wait**, so an error page is named as soon as it shows.
-They're also re-checked on the screen where a control resolves, right before acting: the fault matrix caught a
-non-modal dialog being clicked past without that check.
+**Runtime conditions are declared outcomes that race every wait**, and are re-checked where a control resolves
+(the fault matrix caught a non-modal dialog being clicked past without that).
 
 | Condition | Handling |
 |---|---|
 | Not found, malformed, restricted, deposit below minimum | `business_outcome` |
-| Session expired | Re-sign-on and restart on read-only capabilities. On ones that change data, escalate: a step that changed state must not run twice |
+| Session expired | Re-sign-on and restart if read-only; escalate on a flow that changes data |
 | Slow page | Absorbed by the waits |
-| Unknown dialog or notice | Escalate to a person if one is attached, otherwise `failed` |
+| Unknown dialog or notice | A person if attached, else `failed` |
 | App error | Fatal |
-| A different member shown | `WRONG_RECORD`, caught before anything is read; structure-only evidence; a circuit breaker after two in 24 h (D19) |
+| A different member shown | `WRONG_RECORD` before anything is read; structure-only evidence; circuit breaker after two in 24 h (D19) |
 
-**Flow-specific outcomes aren't hand-written** (D18, D22). The goal lists probe inputs and the code each should give
-(`99999` → `MEMBER_NOT_FOUND`). After recording, each probe is replayed and the model names the screen. The outcome
-is kept only if:
-- its phrase is fixed wording;
-- its code is the expected one;
-- the probe now ends in it;
-- the happy path still succeeds.
+**Flow-specific outcomes aren't hand-written** (D18, D22). The goal lists probe inputs and their expected codes
+(`99999` → `MEMBER_NOT_FOUND`); each is replayed and the model names the screen. An outcome is kept only with fixed
+wording, the expected code, the probe now ending in it, and the happy path still succeeding.
 
-**Fault matrix: 73/73 across three banks**, with 0 accounts opened.
+**Fault matrix: 73/73 across three banks**, 0 accounts opened. A fallback hit succeeds and is reported as drift.
 
-**Drift** is secondary here, because these UIs are stable. A fallback hit still succeeds and is reported as drift.
-On a tenant, it also proposes an override.
-
-**When no strategy survives, the bank's page map** can stand in, within strict bounds:
-- at most two trusted edges, learned from this bank's verified runs;
-- `read` only when nobody's attending;
-- the route must end in the step's own action, and the next step's control must then be there;
-- it reads a **frozen copy**, whose version is recorded, so the same map version gives the same steps;
-- it's reported as `MAP_FALLBACK`, and proposed as an override.
-
-The map can also confirm a postcondition, exactly: "this is the screen this action is known to lead to here"
-(D23).
+**When no strategy survives, the bank's page map** may stand in: at most two trusted edges from this bank's
+verified runs, `read` only when unattended, ending in the step's own action with the next control then present,
+from a **frozen, recorded version**, reported as `MAP_FALLBACK` and proposed as an override. It may also confirm a
+postcondition, but only exactly: the screen this action is known to lead to here (D23).
 
 ## Heterogeneity & multi-tenant
 
-- **Surface seam.** Artifacts never contain selectors. A `Surface` (`observe`, `describe`, `resolve`, `act`,
-  `wait_any`) resolves targets.
-  - **Legacy web is the case built:** framesets, layout tables, unlabelled fields and duplicate names, handled by
-    frame paths, anchors, table cells and region scopes.
-  - **A desktop app** gets a `DesktopSurface` over UIA (Windows), AX (macOS) or AT-SPI (Linux), as agent-desktop
-    does. Role and name work natively, and bbox matters more where trees are thin.
-  - The artifact, the replay engine and the result contract don't change.
-- **Reuse across tenants.** Artifacts are keyed by vendor product and version range, not by bank.
-  - A tenant specialises one with an **override**: `set` and insert/remove ops addressed by **step id**, never by
-    array index. Indexes shift silently and edit the wrong control.
-  - Each override declares a semver `appliesTo` range.
-  - A missing id, an empty path, or a base version outside the range is refused at load.
-- **Measured.** Variant B is a second bank on the same product: it says "Find Member" instead of "Search", and has
-  no `<label>` on Member #. The artifact recorded on bank A replays on B:
-  - it **succeeds**: the anchor and `onlyInRegion` fallbacks find both controls;
-  - it reports drift and **writes a pending override for B**, either the new name or the working strategy moved
-    first;
-  - after approval (`interface override --tenant b --approve`), B runs with no drift, the whole contract holds on B,
-    and A is untouched.
-- **When there's no override yet, the bank's own page map carries it.** Bank C is B with the menu's "Member
-  Inquiry" renamed "Member Lookup", which no recorded strategy survives.
-  - Without a map, both flows stop at sign-on: even sign-on was proved by that link.
-  - With C's map, learned from **one** verified lookup run on C, the whole fault matrix holds on C. That includes the
-    sub-account flow, which the map never saw.
-  - The map is per bank and never shared (D5): it's learned without review, while artifacts are curated.
-  - In discovery, a map seeded from one approved replay cut median turns from 4 to 3 (lookup) and 7 to 5 (sub-account),
-    with Claude running 6 known actions per run. N=5 per arm, so read it as a direction, not a rate.
-- **At scale**, drift events per tenant and step are the signal for when to approve an override and when to
-  re-record. Weights in each bank's map show which paths still work there.
+- **Surface seam.** Artifacts never contain selectors; a `Surface` (`observe`, `resolve`, `act`, `wait_any`)
+  resolves targets. Legacy web is built (framesets, layout tables, unlabelled fields). A desktop app gets a
+  `DesktopSurface` over UIA, AX or AT-SPI, as agent-desktop does; artifact, replay and results don't change.
+- **Tenants.** Artifacts are keyed by vendor product and version range, not bank. A bank specialises one with an
+  **override** addressed by **step id**, never array index (indexes shift silently), under a semver `appliesTo`;
+  anything that doesn't apply is refused at load.
+- **Bank B** says "Find Member" and has no `<label>` on Member #. Bank A's artifact **succeeds** there via fallbacks,
+  reports drift and **writes a pending override**; once approved, B runs clean and A is untouched.
+- **Bank C** also renames "Member Inquiry", which no strategy survives. Without a map both flows stop at sign-on.
+  With C's map, learned from **one** verified lookup, the whole fault matrix holds on C, including the sub-account
+  flow the map never saw. Maps are per bank, never shared (D5): learned without review, unlike curated artifacts.
+- **Discovery with a map** cut median turns 5 → 3 (lookup) and 7 → 6 (sub-account), Claude running 6 known actions
+  per run. Lookup got cheaper ($0.019 → $0.011); the sub-account flow didn't ($0.028 → $0.032), as the known-actions
+  list adds tokens to every turn. N=5 per arm: a direction, not a rate.
+- **At scale**, drift per tenant and step says when to approve an override or re-record.
 
 ## Escalation & handoff
 
-**Detecting "stuck"**
-- **Discovery:** the same action on an unchanged screen (by page fingerprint) triggers one nudge, then Opus, then a
-  person.
-- **Replay:** an unknown screen, an unresolvable control, a failed postcondition, or an `escalate` outcome. With no
-  operator attached, the run fails cleanly (`ESCALATION_UNATTENDED`).
-
-**Control model**
-- **States:** `AUTOMATION → PAUSED_FOR_HUMAN → HUMAN → RESUMING → AUTOMATION`, and `ABORTED` from any state.
-- **The token:** a holder, an epoch and an expiry.
-  - The epoch rises on every transfer and is checked just before input is dispatched, so a click decided before a
-    handoff can't land after it (D9).
-  - An operator who goes quiet loses the token when it expires.
-
-**The handoff**
-1. The intervention carries the capability, step, reason, a redacted snapshot and a screenshot.
-2. The operator page shows it with a live view and Take control, Hand back and Abort.
-3. The person works in **the automation's own headed browser**: the same session.
-4. Injected listeners record their actions.
-5. On hand-back, automation re-observes and decides: the problem is gone; the step already happened; retry the
-   step; skip to the next one; or pause again.
-
-In discovery, a person's actions become steps flagged `needsReview`, and approval waits for a reviewer.
-
-**The caller** gets `needs_human` and a run handle by its deadline, while the run continues; the late result is kept
-for 15 minutes (D11).
-
-**Mocked.** The console is a minimal local page; the production design is a CDP screencast with input relay through
-the same token. [`evidence/11-handoff-unknown-notice/`](evidence/11-handoff-unknown-notice/) has the log and a
-screen recording, with PII masked throughout.
+- **Stuck in discovery:** the same action on an unchanged screen → one nudge → Opus → a person. **In replay:** an
+  unknown screen, unresolvable control, failed postcondition or `escalate` outcome; unattended, it fails cleanly
+  (`ESCALATION_UNATTENDED`).
+- **Control:** `AUTOMATION → PAUSED_FOR_HUMAN → HUMAN → RESUMING → AUTOMATION` (`ABORTED` from any). A token with a
+  holder, epoch and expiry: the epoch rises on every transfer and is checked just before input is dispatched, so a
+  click decided before a handoff can't land after it (D9); a silent operator loses it on expiry.
+- **Handoff:** the intervention carries capability, step, reason, a redacted snapshot and a screenshot. The operator
+  page offers Take control, Hand back and Abort; the person works in **the automation's own browser**, recorded by
+  injected listeners. On hand-back, automation re-observes and decides: resolved, already done, retry, skip, or
+  pause again. In discovery, a person's actions become steps flagged for review.
+- **The caller** gets `needs_human` and a run handle at its deadline while the run continues; the late result is
+  kept 15 minutes (D11).
+- **Mocked:** the console is a minimal local page (production: a CDP screencast through the same token).
+  [`evidence/11-handoff-unknown-notice/`](evidence/11-handoff-unknown-notice/) has the log and a masked recording.
 
 ## Safety
 
-- **The allowlist is enforced below the page.** Each artifact's policy lists allowed origins and paths, a `maxRisk`
-  (`read` or `reversible`), and declared **commit paths**. Every browser request goes through it: off-origin
-  requests and posts to a commit path are aborted before they leave the browser, whatever the button says. The
-  safety eval found that a tampered artifact pressing a commit button labelled "OK", and a link leaving the site,
-  got through until this gate existed (D20).
-- **Risk classes.** Each click is classed `read`, `reversible` or `irreversible` from the live control, and unclear
-  cases are classed up.
-  - Irreversible actions are **never executed by automation**: discovery is refused, the schema rejects them, and
-    replay re-checks the live control.
-  - Capabilities reach the commit point and stop. Every eval suite checks the mock's opened-accounts counter, and it
-    stayed at 0.
-  - Committing money-moving changes is a decision for the agent product and a person (D1).
-- **Data handling.**
-  - **The model sees** `{{placeholders}}` for inputs and secrets, and stable `⟨NAME_1⟩` tokens for names, account
-    numbers, amounts, SSNs, phones and emails. It can't type a value it read off the page.
-  - **Names in free text** (a note: "spoke with her son Carlos Mendes") have no label to give them away. A rule
-    hides every run of two or more capitalised words, or a title and a name, unless the page uses it as a label
-    (D24). It fails closed and is deterministic: a model-based NER would catch more, but it can miss, and replay
-    would then depend on a model version.
-  - **Credentials** come from the environment, are typed by code, and only on the sign-on page. A form that asks
-    later is blocked, and later steps need review.
-  - **On disk,** everything is redacted at the write boundary. Screenshots are masked in the page and fail closed.
-  - **Wrong-record evidence** keeps structure only.
-  - **Measured:** 17/17 safety cases without the LLM, and 12/12 with Claude on hostile pages (injection, a fake
-    password form, an off-site link, an "OK" commit), with zero harm.
-- **Limits.**
-  - The risk classifier is name-based, and commit paths must be declared per app.
-  - In free text, a lone first name ("ask Carlos") or a name in lower case still reaches the model.
-  - Masking depends on accessibility-tree coverage.
+- **The allowlist is enforced below the page.** Allowed origins and paths, a `maxRisk`, and declared **commit
+  paths** gate every browser request: off-origin requests and commit posts are aborted whatever the button says.
+  Until this existed, the safety eval got a commit button labelled "OK" and an off-site link through (D20).
+- **Irreversible actions are never executed by automation**: discovery refuses them, the schema rejects them, replay
+  re-checks the live control. Capabilities stop at the commit point; every suite checks the opened-accounts counter
+  stays 0. Committing is for the agent product and a person (D1).
+- **Data.** The model sees `{{placeholders}}` for inputs and secrets and stable `⟨NAME_1⟩` tokens for names,
+  accounts, amounts, SSNs, phones and emails, and can't type a value it read off the page. **Names in free text**
+  ("spoke with her son Carlos Mendes") are caught by a deterministic, fail-closed rule: capitalised runs in prose
+  that the page doesn't use as labels (D24); a model-based NER can miss, and would tie replay to a model version.
+  Credentials come from the environment, typed by code on the sign-on page only. Everything on disk is redacted at
+  the write boundary; screenshots are masked in-page and fail closed.
+- **Measured:** 17/17 safety cases without the LLM, and 12/12 with Claude on hostile pages (injection, a fake
+  password form, an off-site link, an "OK" commit), zero harm.
+- **Limits:** the risk classifier is name-based and commit paths are declared per app; a lone first name or a
+  lower-case name in free text still reaches the model; masking depends on accessibility-tree coverage.
 
 ## Cuts
 
-- **Approval-gated commits** through the handoff channel, logging the approver and the token epoch. Designed, and
-  deliberately not built.
-- **Capability catalog / tool interface** (D15). The contract is already a tool signature.
-- **Desktop surface and a real co-browsing console.** Designed at their seams.
-- **Screenshots for the model** (D2). The tree was enough for every flow here: 20/20 discovery runs.
-- **RAG or a vector database: deliberately not used.** Every lookup is an exact key or a short list; similarity search
-  would only add ways to be wrong.
-- **Next:**
-  - a lone-first-name check in free text, against a names list;
-  - per-tenant base URLs and allowlists as configuration;
-  - sharing learned outcomes across an app's capabilities;
-  - racing the "already signed in?" check, which costs about 2 s of each ~4 s replay.
-- **Time:** built in priority order inside a 5-day time-box (D15). The commits span 14–15 Nov 2026.
+- **Approval-gated commits** through the handoff channel: designed, deliberately not built.
+- **Capability catalog** (D15): the contract is already a tool signature.
+- **Desktop surface, real co-browsing console:** designed at their seams.
+- **Screenshots for the model** (D2): the tree sufficed in 20/20 discovery runs.
+- **RAG / vector database: deliberately not used.** Every lookup is an exact key or a short list.
+- **Next:** lone first names in free text; per-tenant base URLs as config; sharing learned outcomes across
+  capabilities; racing the "already signed in?" check (about 2 s of each ~4 s replay).
+- **Time:** built in priority order inside a 5-day time-box (D15); commits span 14–16 Nov 2026.
