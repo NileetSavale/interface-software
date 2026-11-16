@@ -172,6 +172,9 @@ stdio: one tool each, its input schema from the artifact, its answer the result 
                                                      "--base-url", "http://127.0.0.1:4100"]}}}
 ```
 
+`uv run python scripts/agent_demo.py` has Claude answer a teller's question with only these tools (about $0.02;
+→ `evidence/agent-mcp/`).
+
 Exit codes: 0 for success or a business outcome, 2 for invalid input, 3 for needs human, 1 for a failure.
 
 ## Layout

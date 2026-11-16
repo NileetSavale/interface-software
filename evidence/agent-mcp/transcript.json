@@ -1,0 +1,48 @@
+{
+  "model": "claude-sonnet-5-5",
+  "system": "You help a credit-union teller. Use the tools to look things up in the core banking system; never guess a value. Answer in two or three short sentences.",
+  "transcript": [
+    {
+      "role": "user",
+      "text": "A member on the phone gives member number {{inputs.memberId}} and asks for their savings balance. A second caller gives member number {{inputs.memberId}}. What do I tell each of them?"
+    },
+    {
+      "role": "tool_call",
+      "tool": "core_banking__lookup_member_balance",
+      "input": {
+        "memberId": "{{inputs.memberId}}"
+      },
+      "result": {
+        "runId": "replay_20261116T201659Z_5d3647",
+        "status": "success",
+        "outputs": {
+          "memberName": "{{outputs.memberName}}",
+          "savingsBalance": "{{outputs.savingsBalance}}"
+        }
+      },
+      "isError": false
+    },
+    {
+      "role": "tool_call",
+      "tool": "core_banking__lookup_member_balance",
+      "input": {
+        "memberId": "{{inputs.memberId}}"
+      },
+      "result": {
+        "runId": "replay_20261116T201704Z_6c9177",
+        "status": "business_outcome",
+        "code": "MEMBER_NOT_FOUND",
+        "atStep": "search_member"
+      },
+      "isError": false
+    },
+    {
+      "role": "claude",
+      "text": "**Member {{inputs.memberId}}:** The account belongs to {{outputs.memberName}}, and the savings balance is ⟨MONEY_1⟩. Verify the caller's identity before you share it.\n\n**Member {{inputs.memberId}}:** No member exists under that number. Ask the caller to confirm the number. If they're unsure of it, you can look them up by last name and date of birth."
+    }
+  ],
+  "tokens": {
+    "input": 4933,
+    "output": 224
+  }
+}

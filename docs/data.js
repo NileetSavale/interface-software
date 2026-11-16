@@ -534,6 +534,12 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Item 7: interface drift, the per-bank drift report (D29)",
    "body": "Reads the run logs and gives each capability, bank and step a verdict over\nits latest revision's recent runs: stable, watch, approve override (3 runs\non one fallback) or re-record (3 misses, a fallback that keeps changing, or\ndrift with no tenant). Each replay now logs a revision hash so an approved\noverride starts afresh. Evidence case 25, tests, docs."
+  },
+  {
+   "sha": "acfbe35",
+   "date": "2026-11-16",
+   "subject": "Item 8: interface mcp, approved artifacts as MCP tools (D30)",
+   "body": "One stdio server per bank: each approved artifact allowed on the bank's\norigin is a tool, its input schema from the artifact's inputs, its answer\nthe result contract as structured content, with read-only and stop-before-\ncommit hints. A call is a replay with no model. The catalog is read from\ndisk on every list and call, so withdrawing approval takes effect at once.\nTests through a real MCP client, evidence case 26, docs."
   }
  ],
  "tests": 117

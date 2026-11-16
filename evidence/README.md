@@ -42,4 +42,7 @@ for the mock's names, balances, member numbers and credentials, and fails if it 
 **On an app we didn't write:** [`parabank/`](parabank/README.md) has two capabilities Claude discovered on ParaBank,
 Parasoft's public demo bank, replayed with no model, and what that app found that the mock hadn't.
 
+**An agent calling the tools:** [`agent-mcp/`](agent-mcp/README.md) has Claude answering a teller's question using
+only the MCP tools `interface mcp` serves: two calls, two replays, no model in either.
+
 Aggregate numbers across many runs are in [`evals/report.md`](../evals/report.md).

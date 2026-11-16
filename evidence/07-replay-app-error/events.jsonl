@@ -1,11 +1,11 @@
-{"t": 0.0, "at": "2026-11-16T20:12:11+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b0ed439db19c", "inputs": ["memberId"], "tenant": null, "page_map": null}
-{"t": 0.226, "at": "2026-11-16T20:12:11+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.28, "at": "2026-11-16T20:12:13+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.344, "at": "2026-11-16T20:12:13+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.39, "at": "2026-11-16T20:12:14+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.798, "at": "2026-11-16T20:12:14+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.236, "at": "2026-11-16T20:12:14+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.297, "at": "2026-11-16T20:12:14+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.686, "at": "2026-11-16T20:12:15+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.703, "at": "2026-11-16T20:12:15+00:00", "event": "outcome", "code": "APP_ERROR", "kind": "fatal", "step": "search_member"}
-{"t": 4.29, "at": "2026-11-16T20:12:15+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261116T201211Z_e9b019", "completedAt": "2026-11-16T20:12:15+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "search_member", "errorClass": "FATAL_OUTCOME", "expected": "no error state", "observed": "APP_ERROR", "outcomeCode": "APP_ERROR", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261116T201211Z_e9b019/search_member.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261116T201211Z_e9b019/search_member.png"}]}}
+{"t": 0.0, "at": "2026-11-16T20:17:39+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b0ed439db19c", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.23, "at": "2026-11-16T20:17:39+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.278, "at": "2026-11-16T20:17:41+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.343, "at": "2026-11-16T20:17:41+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.387, "at": "2026-11-16T20:17:41+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.795, "at": "2026-11-16T20:17:42+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.219, "at": "2026-11-16T20:17:42+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.28, "at": "2026-11-16T20:17:42+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.667, "at": "2026-11-16T20:17:43+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.693, "at": "2026-11-16T20:17:43+00:00", "event": "outcome", "code": "APP_ERROR", "kind": "fatal", "step": "search_member"}
+{"t": 4.286, "at": "2026-11-16T20:17:43+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261116T201739Z_2ca30d", "completedAt": "2026-11-16T20:17:43+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "search_member", "errorClass": "FATAL_OUTCOME", "expected": "no error state", "observed": "APP_ERROR", "outcomeCode": "APP_ERROR", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261116T201739Z_2ca30d/search_member.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261116T201739Z_2ca30d/search_member.png"}]}}
