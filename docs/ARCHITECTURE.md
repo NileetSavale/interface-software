@@ -483,6 +483,12 @@ the real app found, and the changes it led to:
 - **Goals declare their outputs**; `done` is refused until each is extracted, so the answer is always something
   replay reads, never the model's summary.
 - **`row: first`** for reading the first result (D27). An empty results table finds nothing and the run fails.
+- **Values filled in after load.** ParaBank's account page arrives with empty cells and fills them ~150 ms later from
+  a background call. Found by the ParaBank stability suite: 2 of 20 replays read the account number empty and raised
+  a **false `WRONG_RECORD`**, which also opened the circuit breaker. Now an empty identifier or output is "not shown
+  yet" and is waited for (up to 5 s); once there it's compared once, and a mismatch is still `WRONG_RECORD`
+  immediately. One that never appears is a `TIMEOUT`, not a security incident. The mock's `late_fill` and
+  `late_wrong_record` faults (1.5 s) put both cases in the fault matrix.
 - **The masker**: any paragraph is prose ("Welcome Avery Quill"), refs before a colon are allowed, and a value that
   is a link inside an empty cell of a sensitive column is hidden. All three were caught by the evidence scan.
 - **Commits**: ParaBank's transfer and bill pay commit at once through JSON `POST`s. Every non-GET request is

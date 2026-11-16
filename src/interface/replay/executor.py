@@ -243,7 +243,7 @@ class Replayer:
             for name, extractor in step.extract.items():
                 hit = await self._resolve(step, extractor, timeout, recovering)
                 await self._identity_gate(step.id)
-                text = await self.surface.read_text(hit.handle)
+                text = await self._filled(hit.handle, min(timeout, 5_000))
                 self.outputs[name] = parse_value(text, extractor.parse)
                 # The caller gets the value; the run log and evidence on disk only the placeholder
                 for shown in {text.strip(), str(self.outputs[name])}:
@@ -565,7 +565,9 @@ class Replayer:
                     if not isinstance(hit, Resolved):
                         raise self._fail("checkpoint", "CHECKPOINT_FAILED", f"the {assertion.input} on screen",
                                          "not found", evidence=await self._evidence("checkpoint"))
-                    shown = await self.surface.read_text(hit.handle)
+                    shown = await self._filled(hit.handle, 5_000)
+                    if not shown.strip():
+                        raise self._fail("checkpoint", "TIMEOUT", f"the {assertion.input} on screen", "never filled in")
                     if shown.strip() != self._render("checkpoint", assertion.equals).strip():
                         await self._wrong_record("checkpoint", assertion, shown)
         self.log.event("checkpoint_passed")
@@ -580,9 +582,21 @@ class Replayer:
             hit = await self._find(assertion.target, 0)
             if not isinstance(hit, Resolved):
                 continue
-            shown = await self.surface.read_text(hit.handle)
+            # Empty is "not shown yet", not "someone else": ParaBank fills its detail cells by a background call
+            # ~150 ms after the page loads, and reading too early raised a false WRONG_RECORD
+            shown = await self._filled(hit.handle, 5_000)
+            if not shown.strip():
+                raise self._fail(step_id, "TIMEOUT", f"the {assertion.input} on screen", "never filled in")
             if shown.strip() != self._render(step_id, assertion.equals).strip():
                 await self._wrong_record(step_id, assertion, shown)
+
+    async def _filled(self, handle, timeout_ms: int) -> str:
+        """The element's text once it has any: a value a page fills in after loading is waited for, not read empty.
+        Once there, it's read once; nothing here waits for it to become the value we want."""
+        deadline = asyncio.get_running_loop().time() + timeout_ms / 1000
+        while not (text := await self.surface.read_text(handle)).strip() and asyncio.get_running_loop().time() < deadline:
+            await asyncio.sleep(0.1)
+        return text
 
     async def _wrong_record(self, step_id: str, assertion: IdentityMatches, shown: str):
         """Someone else's record is on screen: a security incident, not a retryable fault. Nothing read from it is

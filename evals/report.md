@@ -194,3 +194,16 @@ wrong values: **0**.
 | enter_user_id | 30 | · | · | · | 0:role ×30 |
 | enter_password | 30 | · | · | · | 0:role ×30 |
 | sign | 30 | · | · | · | 0:role ×30 |
+
+## 6. Replay stability on an app we didn't write (no LLM, network)
+_Run 2026-11-16 08:18 UTC at commit `cd82b5b`._ [ParaBank](https://parabank.parasoft.com/parabank/index.htm), Parasoft's public demo bank: the two artifacts Claude discovered there
+([`evidence/parabank/`](../evidence/parabank/README.md)), 10 replays on each of a fictional
+customer's two accounts, spaced out. Public database resets during the run: **0**.
+
+| flow | N | success | distinct outputs per account | p50 s | p95 s | results |
+|---|---|---|---|---|---|---|
+| account_balance | 20 | 50% | 1 | 4.58 | 9.6 | success ×10, failed/WRONG_RECORD ×2, failed/CIRCUIT_OPEN ×8 |
+| find_transaction | 20 | 100% | 1 | 4.99 | 5.23 | success ×20 |
+
+A public server's data can change between runs and it resets now and then, so this is a separate arm, not part of
+`all`: the suites above run on the mock, where every condition is staged.

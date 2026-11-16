@@ -48,6 +48,11 @@ def cases() -> list[dict]:
                  expect="failed/UNEXPECTED_DIALOG"),
             dict(flow=flow, case="app serves the wrong member", inputs=happy, fault="wrong_record",
                  expect="failed/WRONG_RECORD"),
+            # Found on ParaBank: values filled in by a background call after load. Empty isn't someone else
+            dict(flow=flow, case="values filled in after the page loads", inputs=happy, fault="late_fill",
+                 expect="success*"),
+            dict(flow=flow, case="the wrong member, filled in after load", inputs=happy, fault="late_wrong_record",
+                 expect="failed/WRONG_RECORD"),
         ]
     out += [
         dict(flow="lookup", case="number starting with 0", inputs={"memberId": "01234"}, fault=None,
