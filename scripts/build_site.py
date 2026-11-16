@@ -89,6 +89,12 @@ def summary(results: dict) -> dict:
                           "arms": [{k: a[k] for k in ("flow", "n", "recorded", "replays_on_other_member", "median_turns",
                                                       "median_cost_usd", "escalated_runs")} for a in arms],
                           "date": dc["date"], "commit": dc["commit"]}
+    if cc := results.get("concurrency"):
+        top = max(cc["arms"], key=lambda a: a["concurrency"])
+        s["concurrency"] = {"ok": sum(a["own_answer"] for a in cc["arms"]), "runs": sum(a["runs"] for a in cc["arms"]),
+                            "crossed": sum(a["someone_elses"] for a in cc["arms"]), "top": top["concurrency"],
+                            "speedup": round(top["per_minute"] / cc["arms"][0]["per_minute"], 1),
+                            "date": cc["date"], "commit": cc["commit"]}
     if pb := results.get("parabank"):
         s["parabank"] = {"ok": sum(a["results"].get("success", 0) for a in pb["arms"]), "runs": sum(a["n"] for a in pb["arms"]),
                          "distinct": max(a["distinct_outputs"] for a in pb["arms"]), "resets": pb["database_resets"],

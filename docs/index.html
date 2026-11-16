@@ -655,6 +655,8 @@ if (E.safety) cards.push({ nm: "Safety · adversarial", num: `${E.safety.passed}
   p: `Tampered artifacts, PII in free text, hostile forms. ${E.safety.gaps ? `${E.safety.gaps} known gap.` : "No known gaps: even a name only free text mentions is hidden."}${E.safety.llm_total ? ` With Claude on hostile pages: ${E.safety.llm_passed}/${E.safety.llm_total}, harm done: ${E.safety.harm}.` : ""}`, x: E.safety });
 if (E.parabank) cards.push({ nm: "Real third-party app", num: `${E.parabank.ok}<small>/${E.parabank.runs}</small>`, bar: pct(E.parabank.ok, E.parabank.runs),
   p: `Replays with no model on ParaBank, a public demo bank we didn't write. ${E.parabank.distinct} distinct output per account. Its first run found a false wrong-record alarm, now fixed.`, x: E.parabank });
+if (E.concurrency) cards.push({ nm: "Concurrent replays", num: `${E.concurrency.ok}<small>/${E.concurrency.runs}</small>`, bar: pct(E.concurrency.ok, E.concurrency.runs),
+  p: `Two banks, each its own server, up to ${E.concurrency.top} replays at once. Answers that crossed between runs: ${E.concurrency.crossed}. ${E.concurrency.top} at once ran ${E.concurrency.speedup}× the throughput of one.`, x: E.concurrency });
 if (E.robustness) cards.push({ nm: "Recorder robustness", num: `${E.robustness.ok}<small>/${E.robustness.runs}</small>`, bar: pct(E.robustness.ok, E.robustness.runs),
   p: `Shuffled frames, fieldsets, rows, columns and nesting. Times a step found the wrong control: ${E.robustness.wrong}.`, x: E.robustness });
 $("#suites").innerHTML = cards.map((c) => `<div class="card suite">${c.llm ? '<span class="tag llm llmtag">Claude</span>' : ""}<div class="num">${c.num}</div>

@@ -454,6 +454,15 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
+### As built: concurrent replays (Pass 3 item 6, suite 7)
+- `evals/concurrency.py`: two banks, each a mock-app **server process** of its own (A on the base artifact, B on
+  its approved override and its own operator), lookup for four members, at 1, 4 and 8 replays at once in one
+  process, each in its own browser. A result counts only if it carries the name of the member that run asked for,
+  so a shared cookie, session, control token or output would show as someone else's answer or a WRONG_RECORD.
+- No queue or pool was built: a semaphore is the whole of it. What's measured is that the replay engine itself has
+  no shared state between runs, and how throughput scales on one machine. At scale the same unit runs behind a
+  queue per bank, with per-bank concurrency limits (the bank's app, not ours, is usually the bottleneck).
+
 ### As built: several matches and pages (Pass 3 item 5, D28)
 - **A row is named by what it shows.** When no static label names a table row, the recorder looks for a cell in it
   whose text is exactly an input's value and records the row by it: "the Select link in the row where Date of

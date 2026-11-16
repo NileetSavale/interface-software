@@ -67,6 +67,22 @@ A public server's data can change between runs and it resets now and then, so th
 """
 
 
+def concurrency(d: dict) -> str:
+    rows = [[a["concurrency"], a["runs"], f"{a['own_answer']}/{a['runs']}", a["someone_elses"],
+             ", ".join(f"{k} ×{v}" for k, v in a["results"].items()), a["per_minute"], a["p50_s"], a["p95_s"]]
+            for a in d["arms"]]
+    return f"""## 7. Concurrent replays (no LLM)
+{_stamp(d)} Lookup for {d['members']} members on banks {", ".join(b.upper() for b in d['banks'])} (each its own server
+process; B on its approved override and its own operator), ×{d['rounds']}, run at each concurrency level in one process,
+each replay in its own browser. Sub-accounts opened: **{d['sub_accounts_opened']}**.
+
+{_table(["at once", "runs", "own answer", "someone else's", "results", "replays/min", "p50 s", "p95 s"], rows)}
+
+"Own answer" means a success carrying the name of the member that run asked for; "someone else's" must be 0: a
+cookie, session, control token or output leaking between runs would show there or as a WRONG_RECORD.
+"""
+
+
 def robustness(d: dict) -> str:
     parts = [f"""## 5. Recorder robustness (no LLM)
 {_stamp(d)} {d['seeds']} shuffled layouts per flow (frames, fieldsets, rows, columns and nesting reordered; labels kept).
@@ -122,7 +138,8 @@ between arms is noise.
 
 def write() -> str:
     sections = [(s, fn) for s, fn in (("fault_matrix", fault_matrix), ("discovery", discovery), ("stability", stability),
-                                      ("safety", safety), ("robustness", robustness), ("parabank", parabank))]
+                                      ("safety", safety), ("robustness", robustness), ("parabank", parabank),
+                                      ("concurrency", concurrency))]
     body = [fn(data) for s, fn in sections if (data := _load(s))]
     missing = [s for s, _ in sections if not _load(s)]
     text = f"""# Evaluation report
