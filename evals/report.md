@@ -278,16 +278,16 @@ each replay in its own browser. Sub-accounts opened: **0**.
 cookie, session, control token or output leaking between runs would show there or as a WRONG_RECORD.
 
 ## 8. The green screen (TerminalSurface)
-_Run 2026-11-16 21:05 UTC at commit `c165732+dirty`._ The artifact Claude recorded on the mock terminal host, replayed with no model over a VT100 emulator.
+_Run 2026-11-16 21:27 UTC at commit `8237219`._ The artifact Claude recorded on the mock terminal host, replayed with no model over a VT100 emulator.
 
 - **Fault matrix: 31/31.** Bank B relabels the member field and the search key; the grid doesn't move.
 - **Commit guard:** on the review screen (CB0410), F10=Post was pressed and never sent (1 blocked,
   still on CB0410).
   Sub-accounts opened across the suite: **0**.
 - **Stability:** 20 replays on rotating members, 100% success, 1 distinct
-  output per member, p50 3.49 s, p95 3.5 s.
+  output per member, p50 3.59 s, p95 3.61 s.
 - **Discovery with Claude:** 5/5 recorded, 5/5 replayed on another
-  member, median 5 turns, median $0.018 including probes ($0.10 spent),
+  member, median 5 turns, median $0.018 including probes ($0.11 spent),
   0 escalated.
 
 | arm | case | expected | actual | drift |  |

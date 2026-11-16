@@ -241,6 +241,14 @@ window.SITE = {
    "chose": "<strong>Agreed: <code>interface mcp</code> serves each approved artifact as one MCP tool. One server per bank: only artifacts whose allowlist holds that bank's origin are listed. The input schema is the artifact's inputs, the output is the result contract, and annotations say read-only or \"stops before commit\". The catalog is read from disk on every list and call; drafts are never offered. Unattended only</strong>",
    "why": "The artifact already is a typed tool signature, so a catalog would only copy it. MCP is what agent hosts already speak. Scoping by origin keeps one bank's server from offering, or running, another bank's procedures. Reading from disk each time means withdrawing approval takes effect on the next call, with no cache to forget. An attended server (the D11 deadline and run handle as tool results) is the next step, not built.",
    "kind": "agreed"
+  },
+  {
+   "id": "D31",
+   "topic": "A surface with no accessibility tree",
+   "proposed": "(Pass 3 item 9) The user asked whether this works beyond the web, and chose to build a green screen: VT100 over a pseudo-terminal, with Claude discovering on it. The AI proposed building a tree from the characters, so the loop, recorder, masker, schema and replay are shared, not forked",
+   "chose": "<strong>Agreed: <code>TerminalSurface</code> reads a 24x80 VT100 grid (pyte) over telnet-style TCP and builds the same snapshot: row 1 is the screen code and title, reverse-video runs are fields named by the caption before them, the key line's keys are buttons. Every target is scoped to its screen code. The last strategy is the grid position (<code>bbox</code> in character cells). The commit guard sits at the input: on a commitPaths screen only exit and cancel keys are sent</strong>",
+   "why": "A terminal grid doesn't move, so position is a real fallback here, not the guess it is on the web, and scoping to the screen code keeps it from ever landing on another screen. Building the tree from the screen keeps one discovery loop and one artifact format: what was learned about masking, identity and probes applies unchanged. The transport changed from the agreed local pseudo-terminal to telnet-style TCP, since real green-screen hosts are reached over the network; the emulator is the same. Not built: TN3270/5250 field attributes, and attended handoff on a terminal (the operator page is browser-based).",
+   "kind": "agreed"
   }
  ],
  "evals": {
@@ -338,6 +346,17 @@ window.SITE = {
    "speedup": 4.8,
    "date": "2026-11-16T10:24:49+00:00",
    "commit": "63d3183"
+  },
+  "terminal": {
+   "passed": 31,
+   "cases": 31,
+   "guard": true,
+   "stable": 20,
+   "stable_n": 20,
+   "recorded": 5,
+   "disc_n": 5,
+   "date": "2026-11-16T21:27:52+00:00",
+   "commit": "8237219"
   },
   "parabank": {
    "ok": 40,
@@ -540,7 +559,19 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Item 8: interface mcp, approved artifacts as MCP tools (D30)",
    "body": "One stdio server per bank: each approved artifact allowed on the bank's\norigin is a tool, its input schema from the artifact's inputs, its answer\nthe result contract as structured content, with read-only and stop-before-\ncommit hints. A call is a replay with no model. The catalog is read from\ndisk on every list and call, so withdrawing approval takes effect at once.\nTests through a real MCP client, evidence case 26, docs."
+  },
+  {
+   "sha": "c165732",
+   "date": "2026-11-16",
+   "subject": "Claude as the calling agent over MCP: evidence/agent-mcp",
+   "body": "scripts/agent_demo.py gives Claude only the tools interface mcp serves and a\nteller's question; each tool call is a replay with no model. Transcript and\nreplay logs with inputs and returned values as placeholders, leak-scanned."
+  },
+  {
+   "sha": "8237219",
+   "date": "2026-11-16",
+   "subject": "Item 9: TerminalSurface, the same thread on a green screen (D31)",
+   "body": "A second Surface for a 24x80 VT100 host over telnet-style TCP, read through\npyte: the screen code and title, reverse-video fields named by their\ncaptions and the function-key line become the same snapshot the model\nreads, so discovery, masking, schema and replay are shared. Targets are\nscoped to their screen code, with the grid position as the last strategy;\non a commitPaths screen only exit and cancel keys are sent. The executor\nand discovery loop pick the surface from the artifact or goal; what they\nread off DOM handles became Surface methods.\n\nMock terminal host, an artifact Claude recorded there, suite 8 (fault\nmatrix on two banks, commit guard, stability, Claude discovery), evidence\n27-31, tests. A probe whose model call fails is now skipped instead of\nending the discovery."
   }
  ],
- "tests": 117
+ "tests": 123
 };
