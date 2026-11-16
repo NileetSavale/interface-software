@@ -1,0 +1,11 @@
+{
+  "runId": "replay_20261116T071654Z_39fbbb",
+  "completedAt": "2026-11-16T07:16:59+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "success",
+  "outputs": {
+    "accountType": "{{outputs.accountType}}",
+    "currentBalance": "{{outputs.currentBalance}}"
+  }
+}

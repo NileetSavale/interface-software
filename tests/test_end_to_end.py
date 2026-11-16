@@ -241,8 +241,10 @@ def test_a_second_bank_drifts_proposes_an_override_and_runs_clean_once_approved(
     try:
         drifted = on_b(approved)
         assert isinstance(drifted, Success) and drifted.outputs["memberName"] == "Mei Chen", drifted
+        # Both found by position: the field by the text beside it, the relabelled button by the text before it
+        # (rank 3, above onlyInRegion, which stays as the last resort)
         assert {d.step_id: d.strategy for d in drifted.drift} == {"enter_member_number": "anchor",
-                                                                  "submit_member_search": "onlyInRegion"}
+                                                                  "submit_member_search": "anchor"}
         proposal = Override.model_validate_json((pending / "b.json").read_text())
         assert {op.step for op in proposal.ops} == {"enter_member_number", "submit_member_search"}
         # The relabelled button keeps role+name first, with B's name; the unlabelled field leads with its anchor

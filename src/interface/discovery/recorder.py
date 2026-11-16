@@ -37,13 +37,17 @@ class Recorder:
         self.identity: list[IdentityMatches] = []
         self._ids: set[str] = set()
         # Set once the page has shown something hostile: every step recorded after it needs a person's look
+        self.landed: dict[str, Visible] = {}  # step id -> a heading on the screen it led to
         self.review_from: str | None = None
 
     def act(self, intent: str, action: str, target: Target, value: str | None, risk: str, recorded_by: str = "model",
-            needs_review: bool = False):
+            needs_review: bool = False, landed: Visible | None = None):
+        """landed: a heading on the screen the action led to, if it named one."""
         self.steps.append(Step(id=step_id(intent, self._ids), intent=intent, action=action, target=target, value=value,
                                risk=risk, recorded_by=recorded_by,
                                needs_review=needs_review or self.review_from is not None))
+        if landed:
+            self.landed[self.steps[-1].id] = landed
 
     def extract(self, intent: str, output: str, kind: str, target: Target):
         if output in self.outputs:
@@ -64,7 +68,12 @@ class Recorder:
         submit = next((i for i, s in enumerate(self.steps) if secret and i > secret[-1] and s.action == "click"), None)
         if submit is None or submit + 1 >= len(self.steps):
             return {}, [], self.steps
-        signed_on = _seen(self.steps[submit + 1].target)
+        # Proof of being signed on: the next step's control, unless that depends on the request (the link to account
+        # {{inputs.accountId}} isn't there for an account that doesn't exist, which isn't a failed sign-on). Then the
+        # heading the sign-on landed on
+        after = self.steps[submit + 1].target
+        depends = after is not None and "{{inputs." in after.model_dump_json()
+        signed_on = (self.landed.get(self.steps[submit].id) if depends else None) or _seen(after)
         sign_on = [Step(id="open_sign_on_page", intent="open the sign-on page", action="navigate", value=entry_path,
                         risk="read", recorded_by="author"),
                    *self.steps[:submit],

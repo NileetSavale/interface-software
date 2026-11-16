@@ -248,14 +248,19 @@ for the mock's names, balances, member numbers and credentials, and fails if it 
 |---|---|---|---|
 {rows}
 
+**On an app we didn't write:** [`parabank/`](parabank/README.md) has two capabilities Claude discovered on ParaBank,
+Parasoft's public demo bank, replayed with no model, and what that app found that the mock hadn't.
+
 Aggregate numbers across many runs are in [`evals/report.md`](../evals/report.md).
 """)
 
 
 def main():
-    if OUT.exists():
-        shutil.rmtree(OUT)
-    OUT.mkdir()
+    OUT.mkdir(exist_ok=True)
+    # Everything but evidence/parabank/, which needs the network and has its own script (parabank_evidence.py)
+    for path in OUT.iterdir():
+        if path.name != "parabank":
+            shutil.rmtree(path) if path.is_dir() else path.unlink()
     discoveries()
     replays()
     hostile_discovery()

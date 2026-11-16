@@ -40,7 +40,7 @@ _PLACEHOLDER = re.compile(r"⟨[A-Z]+_\d+(?: \*{4}\d{4})?⟩|\{\{(?:inputs|secre
 # One line of an aria snapshot: indent, role, and a quoted name (YAML-quoted when it holds a #)
 _LINE = re.compile(r'^(?P<indent>\s*)- \'?(?P<role>[a-z]+) "(?P<name>(?:[^"\\]|\\.)*)"')
 # Text without a name in quotes: `- text: Account Summary`, `- paragraph: Called from…`
-_PLAIN = re.compile(r"^(?P<indent>\s*)- (?P<role>[a-z]+): (?P<name>.+)$")
+_PLAIN = re.compile(r"^(?P<indent>\s*)- (?P<role>[a-z]+)(?: \[[^\]]*\])*: (?P<name>.+)$")
 # Where prose lives, as opposed to the names of controls, headings and columns, which are the page's own vocabulary
 PROSE_ROLES = {"cell", "gridcell", "text", "paragraph", "generic", "listitem", "note", "blockquote", "caption",
                "definition", "status", "alert", "log", "group"}
@@ -97,6 +97,18 @@ class Masker:
         return self.text("\n".join(lines), keep)
 
     def _swap(self, lines: list[str], i: int, kind: str):
+        if not _LINE.match(lines[i]):
+            # A cell with no text of its own whose value is a control inside it (ParaBank: the account number is
+            # the link in the cell): the first named line under it holds the value
+            indent = len(lines[i]) - len(lines[i].lstrip())
+            for j in range(i + 1, len(lines)):
+                if len(lines[j]) - len(lines[j].lstrip()) <= indent:
+                    return
+                if _LINE.match(lines[j]):
+                    i = j
+                    break
+            else:
+                return
         m = _LINE.match(lines[i])
         name = m.group("name").replace('\\"', '"') if m else ""
         if not m or not name.strip() or _PLACEHOLDER.fullmatch(name.strip()) or name.rstrip().endswith(":"):
@@ -119,7 +131,10 @@ class Masker:
             m = _LINE.match(line) or _PLAIN.match(line)
             if not m or _PLACEHOLDER.fullmatch(m.group("name").strip()):
                 continue
-            if m.group("role") in PROSE_ROLES and len(m.group("name").split()) >= PROSE_MIN_WORDS:
+            # A paragraph is prose however short ("Welcome Avery Quill", found on ParaBank); a cell or loose text is
+            # prose from five words, below which it's a label or a value the other detectors handle
+            role = m.group("role")
+            if role in PROSE_ROLES and (role == "paragraph" or len(m.group("name").split()) >= PROSE_MIN_WORDS):
                 prose.append((i, m))
             elif m.group("role") not in PROSE_ROLES or m.group("role") == "text":
                 vocabulary.append(m.group("name").lower())

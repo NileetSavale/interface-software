@@ -1,0 +1,10 @@
+{
+  "runId": "disc_20261116T071607Z_807eea-probe3",
+  "completedAt": "2026-11-16T07:16:54+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "business_outcome",
+  "code": "NO_TRANSACTIONS",
+  "atStep": "search_by_amount",
+  "details": {}
+}

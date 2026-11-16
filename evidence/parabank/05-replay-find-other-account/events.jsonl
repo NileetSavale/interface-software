@@ -1,0 +1,14 @@
+{"t": 0.0, "at": "2026-11-16T07:17:14+00:00", "event": "replay_started", "capability": "parabank.find_transaction_by_amount", "version": "1.0.0", "inputs": ["accountId", "amount"], "tenant": null, "page_map": null}
+{"t": 0.772, "at": "2026-11-16T07:17:14+00:00", "event": "navigated", "step": "preflight", "path": "/index.htm"}
+{"t": 3.204, "at": "2026-11-16T07:17:17+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/index.htm"}
+{"t": 3.245, "at": "2026-11-16T07:17:17+00:00", "event": "acted", "step": "enter_username", "action": "type", "value": "{{secrets.PARABANK_USER}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.279, "at": "2026-11-16T07:17:17+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.PARABANK_PASSWORD}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.895, "at": "2026-11-16T07:17:18+00:00", "event": "acted", "step": "log_in", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.447, "at": "2026-11-16T07:17:18+00:00", "event": "acted", "step": "open_find_transactions", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.489, "at": "2026-11-16T07:17:18+00:00", "event": "acted", "step": "select_account", "action": "select", "value": "{{inputs.accountId}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.504, "at": "2026-11-16T07:17:18+00:00", "event": "acted", "step": "enter_amount", "action": "type", "value": "{{inputs.amount}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.886, "at": "2026-11-16T07:17:19+00:00", "event": "acted", "step": "search_by_amount", "action": "click", "value": null, "rank": 0, "strategy": "anchor"}
+{"t": 4.92, "at": "2026-11-16T07:17:19+00:00", "event": "extracted", "step": "read_date", "outputs": ["transactionDate"]}
+{"t": 4.933, "at": "2026-11-16T07:17:19+00:00", "event": "extracted", "step": "read_description_cell", "outputs": ["transactionDescription"]}
+{"t": 4.938, "at": "2026-11-16T07:17:19+00:00", "event": "checkpoint_passed"}
+{"t": 4.961, "at": "2026-11-16T07:17:19+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261116T071714Z_66b921", "completedAt": "2026-11-16T07:17:19+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"transactionDate": "{{outputs.transactionDate}}", "transactionDescription": "{{outputs.transactionDescription}}"}}}

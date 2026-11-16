@@ -45,3 +45,28 @@ def test_controls_and_short_cells_are_not_free_text():
     out = Masker().snapshot('- button "Open Sub Account" [ref=e1]\n- cell "Mei Chen" [ref=e2]\n- text: Quick Find')
     # A short cell holding a name is the label detectors' job (Name: or a Name column), not this one's
     assert out.count("⟨") == 0
+
+
+def test_a_short_greeting_paragraph_is_prose():
+    # Found on ParaBank: the signed-in customer's name in a three-word paragraph
+    out = Masker().snapshot('- paragraph: Welcome Avery Quill\n- heading "Account Services" [level=2]')
+    assert "Avery Quill" not in out and 'heading "Account Services"' in out
+
+
+def test_paragraphs_with_refs_and_values_inside_links_are_masked():
+    # Found by the evidence scan on ParaBank: the snapshot written to disk carries refs, and the account number is a
+    # link inside an otherwise empty cell of the Account column
+    snapshot = """- paragraph [ref=e1]: Welcome Avery Quill
+- table [ref=e2]:
+  - rowgroup [ref=e3]:
+    - row "Account Balance*" [ref=e4]:
+      - columnheader "Account" [ref=e5]
+      - columnheader "Balance*" [ref=e6]
+    - row "16230 $75.00" [ref=e7]:
+      - cell [ref=e8]:
+        - link "16230" [ref=e9] [cursor=pointer]:
+          - /url: activity.htm?id=16230
+      - cell "$75.00" [ref=e10]"""
+    out = Masker().snapshot(snapshot)
+    for raw in ("Avery", "Quill", "16230", "75.00"):
+        assert raw not in out, raw

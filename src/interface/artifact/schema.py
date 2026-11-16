@@ -60,10 +60,11 @@ class LabelStrategy(Model):
 
 
 class AnchorStrategy(Model):
-    """Rank 3: a control positioned relative to visible text. The legacy case: no labels, only a neighbouring cell."""
+    """Rank 3: a control positioned relative to visible text. The legacy case: no labels, only a neighbouring cell,
+    or a caption the control follows ("after": the nearest text before it in reading order is this one)."""
     kind: Literal["anchor"] = "anchor"
     anchor_text: TextMatch
-    relation: Literal["right-of", "left-of", "above", "below"]
+    relation: Literal["right-of", "left-of", "above", "below", "after"]
     role: str | None = None
 
 
@@ -73,13 +74,24 @@ class RowWhere(Model):
 
 
 class TableCellStrategy(Model):
-    """Rank 3: a cell picked by values, not position: the Balance column of the row where Type = Savings."""
+    """Rank 3: a cell picked by values, not position: the Balance column of the row where Type = Savings.
+    The one exception is row "first" (D27): the first result in a results table, for reading only, and only when
+    the goal asks for the first result. An empty table finds nothing; nothing else is read instead."""
     kind: Literal["tableCell"] = "tableCell"
     table_anchor: TextMatch = Field(description="Caption or heading text that identifies the table.")
-    row_where: RowWhere
+    row_where: RowWhere | None = None
+    row: Literal["first"] | None = Field(default=None, description="The first data row; reading only (D27).")
     column: str
     role: str | None = Field(default=None, description="Set for a control in the cell (the row's View link); "
                                                        "unset reads the cell itself.")
+
+    @model_validator(mode="after")
+    def _one_way_to_pick_the_row(self):
+        if (self.row_where is None) == (self.row is None):
+            raise ValueError("a table cell picks its row by rowWhere or row: first, exactly one")
+        if self.row and self.role:
+            raise ValueError("row: first is for reading a cell, never for acting on a control (D27)")
+        return self
 
 
 class TextStrategy(Model):
@@ -437,11 +449,13 @@ class Artifact(Model):
     def _check_templates(self, steps: list[Step]) -> list[str]:
         texts = [s.value for s in steps if s.value]
         texts += [c.equals for c in self.success.checkpoint if isinstance(c, IdentityMatches)]
-        for s in steps:
-            for t in [s.target, *(s.extract or {}).values()]:
-                texts += [st.row_where.equals for st in (t.strategies if t else []) if isinstance(st, TableCellStrategy)]
+        # Targets may name an input (the link {{inputs.accountId}}), filled in at replay; never a secret
+        targets = [t.model_dump_json(by_alias=True) for s in steps for t in [s.target, *(s.extract or {}).values()] if t]
+        texts += targets
         missing = {name for text in texts for scope, name in TEMPLATE.findall(text) if scope == "inputs" and name not in self.inputs}
-        return [f"template refers to undeclared input {name}" for name in sorted(missing)]
+        secret = sorted({name for text in targets for scope, name in TEMPLATE.findall(text) if scope == "secrets"})
+        return ([f"template refers to undeclared input {name}" for name in sorted(missing)]
+                + [f"a target may not contain secret {name}" for name in secret])
 
     def _check_outputs(self, steps: list[Step]) -> list[str]:
         """Every declared output has exactly one extractor, and nothing is extracted that isn't declared."""

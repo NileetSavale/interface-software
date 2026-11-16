@@ -184,8 +184,11 @@ class Discovery:
     def _intro(self, screen: str) -> str:
         inputs = "\n".join(f"- {{{{inputs.{n}}}}}: {s['description']}" for n, s in self.goal.get("inputs", {}).items())
         secrets = "\n".join(f"- {{{{secrets.{s}}}}}" for s in self.goal.get("secrets", []))
+        outputs = "\n".join(f"- {n} ({s['type']}): {s['description']}" for n, s in self.goal.get("outputs", {}).items())
         return (f"Goal: {self.goal['goal']}\n\nInputs (type these placeholders):\n{inputs or '- none'}\n\n"
-                f"Credentials available:\n{secrets or '- none'}\n\nCurrent screen:\n{screen}")
+                f"Credentials available:\n{secrets or '- none'}\n\n"
+                + (f"Outputs to extract, with these names (done is refused until each is):\n{outputs}\n\n" if outputs else "")
+                + f"Current screen:\n{screen}")
 
     async def _loop(self) -> dict:
         messages: list = [{"role": "user", "content": self._intro(await self._screen())}]
@@ -371,7 +374,7 @@ class Discovery:
                                   "is used (not its fields, not its buttons). Leave it alone; call give_up if the goal "
                                   "can't be reached without it.")
         risk = check_action(self.policy, action, role, label)
-        target = await self.surface.describe(ref, "act")
+        target = await self.surface.describe(ref, "act", self.inputs)
         value = args.get("text", args.get("option"))
         if value is not None and re.search(r"⟨[A-Z]+_\d+", value):
             # A ⟨NAME_1⟩ stands for data read off the page; typing it would put that data in the artifact
@@ -385,11 +388,14 @@ class Discovery:
         epoch = self.session.epoch
         mark = len(self.surface.blocked)
         before = self._here
+        headings = await self.surface.headings() if action == "click" else []
         await self.surface.act_on_ref(ref, action, rendered, guard=lambda: self.session.check(epoch))
         if refusals := self.surface.refusals_since(mark):
             raise PolicyViolation(f"{refusals[0]} (the browser was stopped before the request left)")
-        self.recorder.act(args["intent"], action, target, value, risk)
         screen = await self._screen()
+        # Where a click landed, as a heading that wasn't on the screen before it: proof it got somewhere new
+        landed = next((h for h in await self.surface.headings() if h not in headings), None) if action == "click" else None
+        self.recorder.act(args["intent"], action, target, value, risk, landed=landed)
         self._transition(before, action, target, value, args["intent"], risk)
         return f"Done: {action} {role} {self.for_model(label)!r}.\n\nCurrent screen:\n{screen}"
 
@@ -449,7 +455,8 @@ class Discovery:
                                   f"the session really needs signing on again, say so with give_up.")
 
     async def _extract(self, args: dict) -> str:
-        target = await self.surface.describe(args["ref"], "read")
+        # The first row of a results table is a way to read only when the goal asks for the first result (D27)
+        target = await self.surface.describe(args["ref"], "read", first_result=bool(self.goal.get("firstResult")))
         value = await self.surface.read_ref(args["ref"])
         self.recorder.extract(args["intent"], args["output"], args["type"], target)
         # The model may see the value (it judges whether it read the right thing); the run log never keeps it
@@ -470,6 +477,10 @@ class Discovery:
         return f"Verified: the record on screen is {{{{inputs.{input_name}}}}}."
 
     async def _done(self, args: dict) -> tuple[str, bool, dict | None]:
+        # The answer must come from extractions replay will repeat, never from the model's own summary of the screen
+        if missing := [n for n in self.goal.get("outputs", {}) if n not in self.recorder.outputs]:
+            return (f"Not recorded yet: extract {', '.join(missing)} first; a value you read yourself isn't part of "
+                    f"the capability"), True, None
         ref = args["success_ref"]
         role, label = self.surface.ref_line(ref)
         if not label or any(ch.isdigit() for ch in label):

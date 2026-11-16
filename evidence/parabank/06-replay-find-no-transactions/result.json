@@ -1,0 +1,21 @@
+{
+  "runId": "replay_20261116T071719Z_3e015b",
+  "completedAt": "2026-11-16T07:17:35+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "read_date",
+  "errorClass": "TARGET_UNRESOLVED",
+  "expected": "exactly one match for: tableCell",
+  "observed": "tableCell: TARGET_UNRESOLVED",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261116T071719Z_3e015b/read_date.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261116T071719Z_3e015b/read_date.png"
+    }
+  ]
+}

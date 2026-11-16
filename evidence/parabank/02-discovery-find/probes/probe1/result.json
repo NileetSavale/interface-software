@@ -1,0 +1,21 @@
+{
+  "runId": "disc_20261116T071607Z_807eea-probe1",
+  "completedAt": "2026-11-16T07:16:41+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "read_date",
+  "errorClass": "TARGET_UNRESOLVED",
+  "expected": "exactly one match for: tableCell",
+  "observed": "tableCell: TARGET_UNRESOLVED",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/disc_20261116T071607Z_807eea-probe1/read_date.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/disc_20261116T071607Z_807eea-probe1/read_date.png"
+    }
+  ]
+}

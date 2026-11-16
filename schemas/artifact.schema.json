@@ -2,7 +2,7 @@
   "$defs": {
     "AnchorStrategy": {
       "additionalProperties": false,
-      "description": "Rank 3: a control positioned relative to visible text. The legacy case: no labels, only a neighbouring cell.",
+      "description": "Rank 3: a control positioned relative to visible text. The legacy case: no labels, only a neighbouring cell,\nor a caption the control follows (\"after\": the nearest text before it in reading order is this one).",
       "properties": {
         "kind": {
           "const": "anchor",
@@ -26,7 +26,8 @@
             "right-of",
             "left-of",
             "above",
-            "below"
+            "below",
+            "after"
           ],
           "title": "Relation",
           "type": "string"
@@ -1164,7 +1165,7 @@
     },
     "TableCellStrategy": {
       "additionalProperties": false,
-      "description": "Rank 3: a cell picked by values, not position: the Balance column of the row where Type = Savings.",
+      "description": "Rank 3: a cell picked by values, not position: the Balance column of the row where Type = Savings.\nThe one exception is row \"first\" (D27): the first result in a results table, for reading only, and only when\nthe goal asks for the first result. An empty table finds nothing; nothing else is read instead.",
       "properties": {
         "kind": {
           "const": "tableCell",
@@ -1185,7 +1186,29 @@
           "title": "Tableanchor"
         },
         "rowWhere": {
-          "$ref": "#/$defs/RowWhere"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RowWhere"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "row": {
+          "anyOf": [
+            {
+              "const": "first",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The first data row; reading only (D27).",
+          "title": "Row"
         },
         "column": {
           "title": "Column",
@@ -1207,7 +1230,6 @@
       },
       "required": [
         "tableAnchor",
-        "rowWhere",
         "column"
       ],
       "title": "TableCellStrategy",

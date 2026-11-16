@@ -20,6 +20,7 @@ from interface.artifact.schema import (
     TextStrategy, Visible,
 )
 from interface.pii import LABELS, PATTERNS
+from interface.artifact.templates import bind
 from interface.policy import refused
 from interface.surface.base import ErrorCode, Observation, Resolved, Surface, SurfaceError, Unresolved
 
@@ -229,20 +230,28 @@ class WebSurface(Surface):
         """The URL path of the document the ref is in (its frame's, not the top page's)."""
         return await (await self._ref_handle(ref)).evaluate("el => el.ownerDocument.location.pathname")
 
-    async def describe(self, ref: str, purpose: Literal["act", "read"] = "act") -> Target:
+    async def describe(self, ref: str, purpose: Literal["act", "read"] = "act",
+                       inputs: dict[str, str] | None = None, first_result: bool = False) -> Target:
         role, name = self.ref_line(ref)
         handle = await self._ref_handle(ref)
         frame = await handle.owner_frame()
         path = frame_path(frame)
         candidates: list[Strategy] = []
-        # A name with a digit in it is data (a member number on a results link), not a label: never record it
-        if purpose == "act" and name and not re.search(r"\d", name):
+        # A name with a digit in it is data (a member number on a results link), not a label: never record it. Unless
+        # it's exactly what the caller asked for (the link to account 13899 when accountId=13899): then it's recorded
+        # as the input, {{inputs.accountId}}, and filled in with whatever account the next run asks for
+        inputs = inputs or {}
+        given = next((n for n, v in inputs.items() if v and v.strip() == name.strip()), None) if name else None
+        if given:
+            name = f"{{{{inputs.{given}}}}}"
+        if purpose == "act" and name and (given or not re.search(r"\d", name)):
             candidates.append(RoleStrategy(role=role, name=name))
             if role in {"textbox", "combobox", "checkbox", "radio", "spinbutton"}:
                 candidates.append(LabelStrategy(label=name))
             if role in {"link", "button"}:
                 candidates.append(TextStrategy(text=name))
-        found = await frame.evaluate("el => window.__ifz.describeValue(el)", handle)
+        found = await frame.evaluate("([el, first]) => window.__ifz.describeValue(el, first)",
+                                     [handle, purpose == "read" and first_result])
         as_control = {"role": role} if purpose == "act" else {}
         candidates += [TableCellStrategy.model_validate({**c, **as_control}) if c["kind"] == "tableCell" else
                        AnchorStrategy.model_validate({**c, **as_control}) for c in found]
@@ -250,22 +259,32 @@ class WebSurface(Surface):
         # Keep only strategies that find exactly this element, checked against the live page. When none does on the
         # whole frame (two "Search" buttons), try again inside the element's labelled region.
         target = Target(frame=path, strategies=candidates or [RoleStrategy(role=role, name=name)])
-        kept = await self._unique(target, candidates, handle)
-        if not kept and (region := await frame.evaluate("el => window.__ifz.regionOf(el)", handle)):
+        kept = await self._unique(target, candidates, handle, inputs)
+        # "The <role> after this text" is the weakest way to find a control: when that's all that's unique on the
+        # frame, a labelled region with the control's own name in it is preferred, the "after" kept below it
+        only_after = all(isinstance(k, AnchorStrategy) and k.relation == "after" for k in kept)
+        if only_after and (region := await frame.evaluate("el => window.__ifz.regionOf(el)", handle)):
             target = target.model_copy(update={"within": RegionScope(role=region["role"], name=region["name"])})
             # Inside a region, "its only <role>" is a fallback that survives a tenant relabelling the control
             if purpose == "act":
                 candidates.append(OnlyInRegionStrategy(role=role))
-            kept = await self._unique(target, candidates, handle)
+            scoped = await self._unique(target, candidates, handle, inputs)
+            if scoped:
+                kept = scoped
+            else:
+                target = target.model_copy(update={"within": None})
         if not kept:
             raise SurfaceError("TARGET_UNRESOLVED", f"no stable way to find {role} {name!r} again; pick a labelled "
                                                     f"control or a value in a labelled row or table")
         return target.model_copy(update={"strategies": kept})
 
-    async def _unique(self, target: Target, candidates: list[Strategy], handle: ElementHandle) -> list[Strategy]:
+    async def _unique(self, target: Target, candidates: list[Strategy], handle: ElementHandle,
+                      inputs: dict[str, str]) -> list[Strategy]:
         kept = []
         for strategy in candidates:
-            hits = await self._hits(target, strategy)
+            # Checked the way replay will find it: with this run's inputs filled in
+            bound = bind(target.model_copy(update={"strategies": [strategy]}), inputs)
+            hits = await self._hits(bound, bound.strategies[0])
             if len(hits) == 1 and await hits[0].evaluate("(a, b) => a === b", handle):
                 kept.append(strategy)
         return kept
@@ -337,10 +356,11 @@ class WebSurface(Surface):
                     found = await frame.evaluate_handle("([a, r, role]) => window.__ifz.anchor(a, r, role)",
                                                         [js_pattern(strategy.anchor_text), strategy.relation, strategy.role])
                 case TableCellStrategy():
+                    where = strategy.row_where
                     found = await frame.evaluate_handle(
-                        "([t, c, rc, re, role]) => window.__ifz.tableCell(t, c, rc, re, role)",
-                        [js_pattern(strategy.table_anchor), strategy.column, strategy.row_where.column,
-                         strategy.row_where.equals, strategy.role])
+                        "([t, c, rc, re, role, first]) => window.__ifz.tableCell(t, c, rc, re, role, first)",
+                        [js_pattern(strategy.table_anchor), strategy.column, where.column if where else None,
+                         where.equals if where else None, strategy.role, strategy.row == "first"])
                 case _:
                     return []  # structural and bbox: not implemented on the web surface yet
             items = await found.get_properties()
@@ -360,13 +380,15 @@ class WebSurface(Surface):
                 if action in ("click", "check", "uncheck"):
                     await handle.click(trial=True, timeout=5_000)
                 guard()
+            if action in ("click", "press"):
+                await self._keep_typed()
             match action:
                 case "click":
                     sent = self._documents[0] if self._documents else 0
                     await handle.click(timeout=5_000)
                     await self._settle(sent)
                 case "type":
-                    await handle.fill(value or "", timeout=5_000)
+                    await self._type(handle, value or "")
                 case "select":
                     await handle.select_option(label=value, timeout=5_000)
                 case "check":
@@ -381,6 +403,37 @@ class WebSurface(Surface):
             message = str(e).splitlines()[0]
             code: ErrorCode = "TIMEOUT" if "Timeout" in message else "NOT_ACTIONABLE"
             raise SurfaceError(code, message, retry="safe") from e
+
+    async def _type(self, handle: ElementHandle, value: str):
+        """Fill, then check the field holds exactly that. A legacy page's onload script can move focus while text is
+        going in (ParaBank focuses the username box on load), and the rest lands in another field: a secret in the
+        wrong place. One more try, then a failure that names no value."""
+        for _ in range(2):
+            await handle.fill(value, timeout=5_000)
+            if await handle.input_value() == value:
+                kept = []
+                for h, v in getattr(self, "_typed", []):
+                    try:
+                        if not await h.evaluate("(a, b) => a === b", handle):
+                            kept.append((h, v))
+                    except PlaywrightError:
+                        pass
+                self._typed = [*kept, (handle, value)]
+                return
+        raise SurfaceError("NOT_ACTIONABLE", "the field didn't keep what was typed into it", retry="safe")
+
+    async def _keep_typed(self):
+        """Before a click submits anything, every field typed on this page must still hold what was typed: text that
+        moved into another field is put back, so it's never sent."""
+        kept = []
+        for handle, value in getattr(self, "_typed", []):
+            try:
+                if await handle.input_value() != value:
+                    await handle.fill(value, timeout=5_000)
+                kept.append((handle, value))
+            except PlaywrightError:
+                pass  # its page is gone; nothing of it can be sent now
+        self._typed = kept
 
     async def _settle(self, sent: int, window_s: float = 0.3):
         """A click's page load or form post can leave after click() returns. Wait briefly for one to start, and then
@@ -409,6 +462,19 @@ class WebSurface(Surface):
         if condition.label:
             return frame.get_by_label(py_pattern(condition.label), exact=True)
         return frame.get_by_text(py_pattern(condition.text or condition.name), exact=isinstance(condition.text or condition.name, str))
+
+    async def headings(self) -> list[Visible]:
+        """The visible headings that hold no data: what a screen is called, whatever record it shows."""
+        out = []
+        for frame in self.page.frames:
+            try:
+                for heading in await frame.get_by_role("heading").all():
+                    name = (await heading.inner_text()).strip()
+                    if name and len(name) <= 60 and not re.search(r"\d", name) and await heading.is_visible():
+                        out.append(Visible(frame=frame_path(frame), role="heading", name=name))
+            except PlaywrightError:
+                continue
+        return out
 
     async def holds(self, condition: Visible) -> bool:
         frames = self.page.frames if condition.frame is None else [f for f in [self._frame(condition.frame)] if f]
@@ -444,7 +510,8 @@ class WebSurface(Surface):
 
     async def navigate(self, url: str) -> None:
         try:
-            await self.page.goto(url, wait_until="domcontentloaded")
+            # "load", not just parsed: onload scripts (focus moves, form resets) have run before anything is typed
+            await self.page.goto(url, wait_until="load")
         except PlaywrightError as e:
             raise SurfaceError("TIMEOUT", str(e).splitlines()[0], retry="safe") from e
 

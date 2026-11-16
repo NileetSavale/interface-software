@@ -1,0 +1,21 @@
+{
+  "runId": "replay_20261116T071659Z_3b9b23",
+  "completedAt": "2026-11-16T07:17:14+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "open_account_details",
+  "errorClass": "TARGET_UNRESOLVED",
+  "expected": "exactly one match for: role, text",
+  "observed": "role: TARGET_UNRESOLVED; text: TARGET_UNRESOLVED",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261116T071659Z_3b9b23/open_account_details.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261116T071659Z_3b9b23/open_account_details.png"
+    }
+  ]
+}

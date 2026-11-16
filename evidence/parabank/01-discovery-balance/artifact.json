@@ -1,0 +1,334 @@
+{
+  "schemaVersion": "1",
+  "capability": {
+    "id": "parabank.account_balance",
+    "version": "1.0.0",
+    "title": "Read an account's type and balance",
+    "description": "Signs on to ParaBank and returns the type and current balance of one of the customer's accounts."
+  },
+  "app": {
+    "product": "parabank",
+    "versionRange": ">=1.0 <2.0",
+    "surface": "web",
+    "entryPath": "/index.htm"
+  },
+  "status": "draft",
+  "provenance": {
+    "discoveryRunId": "disc_20261116T071535Z_d1caa5",
+    "recordedAt": "2026-11-16T07:15:48+00:00",
+    "model": "claude-sonnet-5-5"
+  },
+  "inputs": {
+    "accountId": {
+      "type": "string",
+      "description": "5-digit ParaBank account number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "account"
+    }
+  },
+  "outputs": {
+    "accountType": {
+      "type": "string",
+      "redact": "none"
+    },
+    "currentBalance": {
+      "type": "money",
+      "redact": "none"
+    }
+  },
+  "outcomes": [
+    {
+      "code": "APP_ERROR",
+      "kind": "fatal",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)internal server error|an unexpected error|service unavailable"
+        }
+      },
+      "description": "The application failed. Stop and keep the evidence."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)not authori[sz]ed|access denied|insufficient (privileges|permissions)"
+        }
+      },
+      "description": "The operator account may not do this. An answer for the caller, not a fault."
+    },
+    {
+      "code": "UNEXPECTED_DIALOG",
+      "kind": "escalate",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "role": "dialog"
+      },
+      "description": "A dialog the capability doesn't know. A person decides."
+    },
+    {
+      "code": "SLOW_LOAD",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)^\\s*(loading|please wait)\\b"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "wait",
+          "timeoutMs": 5000
+        },
+        "maxAttempts": 2,
+        "resume": "step"
+      },
+      "description": "The app shows a wait message. Wait longer, then carry on."
+    },
+    {
+      "code": "SESSION_EXPIRED",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)session (has )?(expired|timed out)"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "subflow",
+          "subflow": "sign_on"
+        },
+        "maxAttempts": 1,
+        "resume": "start"
+      },
+      "description": "Sign on again and run the steps from the first."
+    }
+  ],
+  "policy": {
+    "allowedOrigins": [
+      "https://parabank.parasoft.com"
+    ],
+    "allowedPaths": [
+      "/*"
+    ],
+    "maxRisk": "read",
+    "commitPaths": [
+      "/parabank/services_proxy/*",
+      "/parabank/services/*",
+      "/parabank/register.htm*",
+      "/parabank/lookup.htm*",
+      "/parabank/admin.htm*",
+      "/parabank/initializeDB.htm*",
+      "/parabank/cleanDB.htm*"
+    ]
+  },
+  "subflows": {
+    "sign_on": [
+      {
+        "id": "open_sign_on_page",
+        "intent": "open the sign-on page",
+        "action": "navigate",
+        "value": "/index.htm",
+        "risk": "read",
+        "recordedBy": "author",
+        "needsReview": false
+      },
+      {
+        "id": "enter_username",
+        "intent": "enter username",
+        "action": "type",
+        "target": {
+          "frame": [],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Username",
+              "relation": "after",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.PARABANK_USER}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "enter_password",
+        "intent": "enter password",
+        "action": "type",
+        "target": {
+          "frame": [],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Password",
+              "relation": "after",
+              "role": "textbox"
+            }
+          ]
+        },
+        "value": "{{secrets.PARABANK_PASSWORD}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "log_in",
+        "intent": "log in",
+        "action": "click",
+        "target": {
+          "frame": [],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "button",
+              "name": "Log In"
+            },
+            {
+              "kind": "text",
+              "text": "Log In"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "Password",
+              "relation": "after",
+              "role": "button"
+            }
+          ]
+        },
+        "risk": "read",
+        "expect": {
+          "kind": "visible",
+          "frame": [],
+          "role": "heading",
+          "name": "Account Services"
+        },
+        "recordedBy": "model",
+        "needsReview": false
+      }
+    ]
+  },
+  "preconditions": [
+    {
+      "use": "sign_on",
+      "unless": {
+        "kind": "visible",
+        "frame": [],
+        "role": "heading",
+        "name": "Account Services"
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "open_account_details",
+      "intent": "open account details",
+      "action": "click",
+      "target": {
+        "frame": [],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "link",
+            "name": "{{inputs.accountId}}"
+          },
+          {
+            "kind": "text",
+            "text": "{{inputs.accountId}}"
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "read_type",
+      "intent": "read type",
+      "action": "extract",
+      "extract": {
+        "accountType": {
+          "frame": [],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Account Type:",
+              "relation": "right-of"
+            }
+          ],
+          "parse": "text"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "read_balance",
+      "intent": "read balance",
+      "action": "extract",
+      "extract": {
+        "currentBalance": {
+          "frame": [],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Balance:",
+              "relation": "right-of"
+            }
+          ],
+          "parse": "money"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    }
+  ],
+  "success": {
+    "checkpoint": [
+      {
+        "kind": "visible",
+        "frame": [],
+        "role": "heading",
+        "name": "Account Details"
+      },
+      {
+        "kind": "output",
+        "output": "accountType",
+        "notEmpty": true
+      },
+      {
+        "kind": "output",
+        "output": "currentBalance",
+        "notEmpty": true
+      },
+      {
+        "kind": "identity",
+        "input": "accountId",
+        "target": {
+          "frame": [],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Account Number:",
+              "relation": "right-of"
+            }
+          ]
+        },
+        "equals": "{{inputs.accountId}}"
+      }
+    ]
+  },
+  "overrides": {}
+}

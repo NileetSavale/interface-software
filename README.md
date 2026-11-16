@@ -14,7 +14,8 @@ mid-run, and nothing automated can ever press "Confirm".
   decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md).
 - **Evidence of real runs:** [`evidence/`](evidence/README.md): four real Claude discoveries, and 14 replays covering
   success, business outcomes, recovery, hard failures, a handoff with a screen recording, a second bank, a blocked
-  commit, and a third bank run without and with its page map.
+  commit, and a third bank run without and with its page map. Plus [`evidence/parabank/`](evidence/parabank/README.md):
+  two capabilities discovered and replayed on ParaBank, a public demo bank we didn't write.
 - **Measured:** [`evals/report.md`](evals/report.md): five suites, N and commit stated.
 - **Visual tour:** <https://nileetsavale.github.io/interface-software/>: interactive architecture, decisions, numbers.
 
@@ -39,7 +40,7 @@ The mock app holds only made-up members, so these are not real credentials. Arti
 Nothing below needs an API key except discovery itself.
 
 ```bash
-uv run pytest                              # 120 tests; discovery is driven by a scripted planner, not Claude
+uv run pytest                              # 124 tests; discovery is driven by a scripted planner, not Claude
 uv run python -m evals all                 # the four eval suites that need no LLM (~15 min)
 uv run python scripts/make_evidence.py     # rebuilds evidence/ (replays run fresh; no model)
 ```
@@ -146,6 +147,13 @@ uv run interface replay $S $IN --tenant c --map maps/c.json  # success, with MAP
 
 The second discovery on a bank with a map runs the known actions several per turn (`follow_known`).
 
+**9. An app we didn't write.** ParaBank, Parasoft's public demo bank: registers a fictional customer, has Claude
+discover two read-only capabilities, and replays them with no model (about $0.20; needs the network).
+
+```bash
+uv run python scripts/parabank_evidence.py   # → evidence/parabank/
+```
+
 Exit codes: 0 for success or a business outcome, 2 for invalid input, 3 for needs human, 1 for a failure.
 
 ## Layout
@@ -163,5 +171,5 @@ src/interface/
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
 goals/        the two capabilities' goal specs          artifacts/  the discovered artifacts
 evals/        the five suites and their results         evidence/   curated runs
-tests/        120 tests                                 docs/       design, decisions, the site
+tests/        124 tests                                 docs/       design, decisions, the site
 ```

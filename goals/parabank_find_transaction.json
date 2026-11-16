@@ -1,0 +1,56 @@
+{
+  "capability": "parabank.find_transaction_by_amount",
+  "title": "Find a transaction on an account by its amount",
+  "description": "Signs on to ParaBank, searches one account's transactions for an exact amount, and returns the first match's date and description.",
+  "product": "parabank",
+  "versionRange": ">=1.0 <2.0",
+  "entryPath": "/index.htm",
+  "goal": "Sign on, find the transactions of exactly {{inputs.amount}} on account {{inputs.accountId}}, and read the date and description of the first one found.",
+  "inputs": {
+    "accountId": {
+      "type": "string",
+      "description": "5-digit ParaBank account number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true
+    },
+    "amount": {
+      "type": "string",
+      "description": "an amount in dollars and cents, without the $",
+      "pattern": "^[0-9]{1,7}\\.[0-9]{2}$"
+    }
+  },
+  "outputs": {
+    "transactionDate": {
+      "type": "string",
+      "description": "the date of the first transaction found"
+    },
+    "transactionDescription": {
+      "type": "string",
+      "description": "the description of the first transaction found"
+    }
+  },
+  "firstResult": true,
+  "secrets": [
+    "PARABANK_USER",
+    "PARABANK_PASSWORD"
+  ],
+  "commitPaths": [
+    "/parabank/services_proxy/*",
+    "/parabank/services/*",
+    "/parabank/register.htm*",
+    "/parabank/lookup.htm*",
+    "/parabank/admin.htm*",
+    "/parabank/initializeDB.htm*",
+    "/parabank/cleanDB.htm*"
+  ],
+  "maxRisk": "read",
+  "probes": [
+    {
+      "inputs": {
+        "amount": "9999.99"
+      },
+      "why": "an amount with no transactions on this account",
+      "expect": "NO_TRANSACTIONS"
+    }
+  ]
+}

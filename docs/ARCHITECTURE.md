@@ -454,6 +454,31 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
+### As built: a third-party app, ParaBank (Pass 3 item 4)
+`scripts/parabank_evidence.py` registers a fictional customer on Parasoft's public demo bank, has Claude discover two
+read-only capabilities and replays them with no model; [`evidence/parabank/`](../evidence/parabank/README.md). What
+the real app found, and the changes it led to:
+- **Captions over fields** (`<p><b>Username</b></p>` then the box): an `after` anchor, "the control after the text a
+  reader meets before it", read as a line (`<b>Find by Amount</b>: [ ]` is "Find by Amount:"), and on the control's
+  own line only the text since the previous control. Ranked last of the anchors; when it's the only unique strategy
+  the recorder still tries a labelled region first. It also tells apart ParaBank's four identical "Find
+  Transactions" buttons.
+- **Targets can name an input.** A control whose name is exactly an input's value (the link "13899" when
+  `accountId=13899`) is recorded as `{{inputs.accountId}}`; replay fills targets and conditions with the run's
+  inputs (never secrets: the schema refuses a secret in a target). Anything else with a digit is still data.
+- **Typed fields are checked.** An onload focus move sent part of the password into the username box in about one
+  replay in three. Navigation now waits for `load`; each typed field must hold exactly what was typed (one retry);
+  before any click, every field typed on the page is checked and put back.
+- **Proof of sign-on can't depend on the request**: when the next control names an input, the recorder uses a
+  heading that appeared when the sign-on click landed (and wasn't there before it).
+- **Goals declare their outputs**; `done` is refused until each is extracted, so the answer is always something
+  replay reads, never the model's summary.
+- **`row: first`** for reading the first result (D27). An empty results table finds nothing and the run fails.
+- **The masker**: any paragraph is prose ("Welcome Avery Quill"), refs before a colon are allowed, and a value that
+  is a link inside an empty cell of a sensitive column is hidden. All three were caught by the evidence scan.
+- **Commits**: ParaBank's transfer and bill pay commit at once through JSON `POST`s. Every non-GET request is
+  checked against `commitPaths`, and the goals declare all of ParaBank's write paths.
+
 ### As built: each bank's own credentials (D26)
 - `src/interface/artifact/templates.py`: secrets are read from a **mapping** (the environment by default; a vault
   client that reads as a mapping drops in). On a tenant, `TenantSecrets` looks `{{secrets.APP_USER}}` up as
@@ -604,7 +629,7 @@ full handoff in `evidence/`.
 - **Prompt injection:** page text is data, not instructions (same rule as loop_runner's system prompts).
 
 ### As built: names in free text (D24)
-- **Where:** prose only, meaning text, paragraph, cell or list content of five words or more. The names of controls,
+- **Where:** prose only: any paragraph, and text, cell or list content of five words or more. The names of controls,
   headings, columns and options are the page's **vocabulary**, never prose.
 - **What's hidden:** every run of two or more capitalised words (initials, `Mc`/`O'`, hyphens, accents and particles
   like `de la` included), or a title and a name (`Mr. Lee`), as a stable `⟨NAME_n⟩`.

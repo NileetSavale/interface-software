@@ -95,6 +95,10 @@ postcondition, but only exactly: the screen this action is known to lead to here
 - **Bank C** also renames "Member Inquiry", which no strategy survives. Without a map both flows stop at sign-on.
   With C's map, learned from **one** verified lookup, the whole fault matrix holds on C, including the sub-account
   flow the map never saw. Maps are per bank, never shared (D5): learned without review, unlike curated artifacts.
+- **On an app we didn't write.** Two capabilities discovered on ParaBank, Parasoft's public demo bank, replay with no
+  model on other accounts and fail cleanly where the app has no answer
+  ([`evidence/parabank/`](evidence/parabank/README.md)). It found what the mock hadn't: captions over fields, four
+  identical buttons, an onload focus move that misplaced typed text, results lists (D27). Each is fixed and tested.
 - **Discovery with a map** cut median turns 5 → 3 (lookup) and 7 → 6 (sub-account), Claude running 6 known actions
   per run. Lookup got cheaper ($0.019 → $0.011); the sub-account flow didn't ($0.028 → $0.032), as the known-actions
   list adds tokens to every turn. N=5 per arm: a direction, not a rate.

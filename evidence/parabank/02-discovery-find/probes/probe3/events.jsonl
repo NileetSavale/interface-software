@@ -1,0 +1,12 @@
+{"t": 0.0, "at": "2026-11-16T07:16:49+00:00", "event": "replay_started", "capability": "parabank.find_transaction_by_amount", "version": "1.0.0", "inputs": ["accountId", "amount"], "tenant": null, "page_map": null}
+{"t": 0.845, "at": "2026-11-16T07:16:50+00:00", "event": "navigated", "step": "preflight", "path": "/index.htm"}
+{"t": 3.147, "at": "2026-11-16T07:16:53+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/index.htm"}
+{"t": 3.192, "at": "2026-11-16T07:16:53+00:00", "event": "acted", "step": "enter_username", "action": "type", "value": "{{secrets.PARABANK_USER}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.23, "at": "2026-11-16T07:16:53+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.PARABANK_PASSWORD}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.823, "at": "2026-11-16T07:16:53+00:00", "event": "acted", "step": "log_in", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.313, "at": "2026-11-16T07:16:54+00:00", "event": "acted", "step": "open_find_transactions", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.364, "at": "2026-11-16T07:16:54+00:00", "event": "acted", "step": "select_account", "action": "select", "value": "{{inputs.accountId}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.381, "at": "2026-11-16T07:16:54+00:00", "event": "acted", "step": "enter_amount", "action": "type", "value": "{{inputs.amount}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.752, "at": "2026-11-16T07:16:54+00:00", "event": "acted", "step": "search_by_amount", "action": "click", "value": null, "rank": 0, "strategy": "anchor"}
+{"t": 4.759, "at": "2026-11-16T07:16:54+00:00", "event": "outcome", "code": "NO_TRANSACTIONS", "kind": "business", "step": "search_by_amount"}
+{"t": 4.779, "at": "2026-11-16T07:16:54+00:00", "event": "replay_finished", "status": "business_outcome", "result": {"runId": "disc_20261116T071607Z_807eea-probe3", "completedAt": "2026-11-16T07:16:54+00:00", "recovered": [], "drift": [], "status": "business_outcome", "code": "NO_TRANSACTIONS", "atStep": "search_by_amount", "details": {}}}

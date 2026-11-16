@@ -1,0 +1,11 @@
+{"t": 0.0, "at": "2026-11-16T07:17:19+00:00", "event": "replay_started", "capability": "parabank.find_transaction_by_amount", "version": "1.0.0", "inputs": ["accountId", "amount"], "tenant": null, "page_map": null}
+{"t": 0.836, "at": "2026-11-16T07:17:20+00:00", "event": "navigated", "step": "preflight", "path": "/index.htm"}
+{"t": 3.1, "at": "2026-11-16T07:17:22+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/index.htm"}
+{"t": 3.14, "at": "2026-11-16T07:17:22+00:00", "event": "acted", "step": "enter_username", "action": "type", "value": "{{secrets.PARABANK_USER}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.181, "at": "2026-11-16T07:17:22+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.PARABANK_PASSWORD}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.872, "at": "2026-11-16T07:17:23+00:00", "event": "acted", "step": "log_in", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.397, "at": "2026-11-16T07:17:23+00:00", "event": "acted", "step": "open_find_transactions", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.444, "at": "2026-11-16T07:17:23+00:00", "event": "acted", "step": "select_account", "action": "select", "value": "{{inputs.accountId}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.458, "at": "2026-11-16T07:17:23+00:00", "event": "acted", "step": "enter_amount", "action": "type", "value": "{{inputs.amount}}", "rank": 0, "strategy": "anchor"}
+{"t": 4.837, "at": "2026-11-16T07:17:24+00:00", "event": "acted", "step": "search_by_amount", "action": "click", "value": null, "rank": 0, "strategy": "anchor"}
+{"t": 16.514, "at": "2026-11-16T07:17:35+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261116T071719Z_3e015b", "completedAt": "2026-11-16T07:17:35+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "read_date", "errorClass": "TARGET_UNRESOLVED", "expected": "exactly one match for: tableCell", "observed": "tableCell: TARGET_UNRESOLVED", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261116T071719Z_3e015b/read_date.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261116T071719Z_3e015b/read_date.png"}]}}

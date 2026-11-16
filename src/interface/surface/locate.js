@@ -32,7 +32,53 @@
     return cell.querySelector("input:not([type=hidden]),select,textarea,button,a") || null;
   }
 
+  // Form controls by role, for "the <role> after this text"; without a role, any control
+  const CONTROLS = "input:not([type=hidden]),select,textarea,button";
+  const BY_ROLE = {
+    textbox: "input:not([type]),input[type=text],input[type=password],input[type=email],input[type=search]," +
+             "input[type=tel],input[type=url],input[type=number],textarea",
+    button: "button,input[type=submit],input[type=button],input[type=reset],input[type=image]",
+    combobox: "select", checkbox: "input[type=checkbox]", radio: "input[type=radio]",
+  };
+  const SKIP = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "OPTION", "SELECT", "TEXTAREA", "BUTTON", "TITLE"]);
+
+  const blockOf = (node) => {
+    for (let a = node.parentElement; a && a !== document.body; a = a.parentElement) {
+      if (getComputedStyle(a).display !== "inline") return a;
+    }
+    return document.body;
+  };
+
+  // The static text a reader meets just before an element, read as a line: "Username" in the paragraph over a box,
+  // "Find by Amount:" on the line holding a field (or the line before its button). On the control's own line, only
+  // the text since the previous control on it counts ("Between [ ] and [ ]": the second box is the one after "and").
+  function textBefore(el) {
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    walker.currentNode = el;
+    for (let node = walker.previousNode(); node; node = walker.previousNode()) {
+      if (!norm(node.data) || el.contains(node)) continue;
+      let skipped = false;
+      for (let a = node.parentElement; a; a = a.parentElement) if (SKIP.has(a.tagName)) { skipped = true; break; }
+      if (skipped || node.parentElement?.closest("[hidden],[aria-hidden=true]")) continue;
+      const block = blockOf(node), range = document.createRange();
+      range.selectNodeContents(block);
+      const earlier = Array.from(block.querySelectorAll(CONTROLS)).filter(
+        (c) => c !== el && !c.contains(node) && (c.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING));
+      if (block.contains(el)) {
+        if (earlier.length) range.setStartAfter(earlier[earlier.length - 1]);
+        range.setEndBefore(el);
+      }
+      return norm(range.toString());
+    }
+    return "";
+  }
+
   function anchor(anchorM, relation, role) {
+    if (relation === "after") {
+      // Every control of the role whose nearest preceding text is the anchor; the caller insists on exactly one
+      return Array.from(document.querySelectorAll(BY_ROLE[role] || CONTROLS))
+        .filter((c) => c.getClientRects().length && matches(textBefore(c), anchorM));
+    }
     const hits = Array.from(document.querySelectorAll("td,th,label,b,span,font")).filter((el) => matches(textOf(el), anchorM));
     const innermost = hits.filter((el) => !hits.some((o) => o !== el && el.contains(o)));
     const out = [];
@@ -52,7 +98,11 @@
     return out;
   }
 
-  function tableCell(tableM, column, rowColumn, rowEquals, role) {
+  // The rows after the header that hold a full set of cells: the results, not a footer or an empty placeholder
+  const dataRows = (table, header) => Array.from(table.rows).filter(
+    (r) => r !== header && r.cells.length === header.cells.length && Array.from(r.cells).some((c) => textOf(c)));
+
+  function tableCell(tableM, column, rowColumn, rowEquals, role, first) {
     const out = [];
     for (const table of document.querySelectorAll("table")) {
       const label = tableLabel(table);
@@ -60,6 +110,12 @@
       if (!label || !header || !matches(label, tableM)) continue;
       const heads = Array.from(header.cells).map(textOf);
       const ci = heads.indexOf(column), ri = heads.indexOf(rowColumn);
+      if (first) {
+        // D27: the first result, for reading; a table with no results finds nothing
+        const row = ci >= 0 && table.getClientRects().length ? dataRows(table, header)[0] : null;
+        if (row) out.push(row.cells[ci]);
+        continue;
+      }
       if (ci < 0 || ri < 0) continue;
       for (const row of table.rows) {
         const cell = row !== header && row.cells[ri] && textOf(row.cells[ri]) === norm(rowEquals) && row.cells[ci];
@@ -75,16 +131,26 @@
   const isLabel = (text) => !!text && !/\d/.test(text);
 
   // Strategies that describe where a value sits, never what it says: the value changes per record, its place doesn't
-  function describeValue(el) {
-    const cell = el.closest("td,th");
-    if (!cell) return [];
+  function describeValue(el, firstResult) {
     const out = [];
+    // Last, below the cell-based ones: a control under or after a caption ("the textbox after Username")
+    const after = () => {
+      const before = el.matches(CONTROLS) ? textBefore(el) : "";
+      if (isLabel(before) && before.length <= 60) out.push({ kind: "anchor", anchorText: before, relation: "after" });
+      return out;
+    };
+    const cell = el.closest("td,th");
+    if (!cell) return after();
     const table = cell.closest("table");
     const header = table && headerRow(table);
     const label = table && tableLabel(table);
     if (header && label && cell.parentElement !== header) {
       const heads = Array.from(header.cells).map(textOf);
       const row = cell.parentElement;
+      // Only when the goal asks for the first result, for a value (not a control), in the first data row
+      if (firstResult && !el.matches(CONTROLS) && heads[cell.cellIndex] && dataRows(table, header)[0] === row) {
+        out.push({ kind: "tableCell", tableAnchor: label, column: heads[cell.cellIndex], row: "first" });
+      }
       if (heads[cell.cellIndex] && heads[0] && cell.cellIndex !== 0 && isLabel(textOf(row.cells[0]))) {
         out.push({ kind: "tableCell", tableAnchor: label, column: heads[cell.cellIndex],
                    rowWhere: { column: heads[0], equals: textOf(row.cells[0]) } });
@@ -92,7 +158,7 @@
     }
     const prev = cell.previousElementSibling;
     if (prev && isLabel(textOf(prev))) out.push({ kind: "anchor", anchorText: textOf(prev), relation: "right-of" });
-    return out;
+    return after();
   }
 
   // The nearest labelled region around an element: what tells two same-named controls apart (scope, not index).

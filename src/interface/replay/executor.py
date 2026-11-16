@@ -18,7 +18,7 @@ from interface.artifact.schema import (
     Artifact, ClickThrough, IdentityMatches, InputSpec, OutcomeSeen, Outcome, OutputPresent, RunSubflow, SetOp, Step,
     Target, TEMPLATE, Visible, WaitLonger,
 )
-from interface.artifact.templates import TemplateError, TenantSecrets, render, secrets_for
+from interface.artifact.templates import TemplateError, TenantSecrets, bind, render, secrets_for
 from interface.evidence import Audit, RunLog, new_run_id, now, structure_only
 from interface.operator import _public
 from interface.pagemap import TRUSTED, PageMap, screen_of, target_name
@@ -202,7 +202,7 @@ class Replayer:
             try:
                 if not steps_done:
                     for pre in self.artifact.preconditions:
-                        if pre.unless and (await self.surface.wait_any([pre.unless], 2_000) is not None or (
+                        if pre.unless and (await self._wait_any([pre.unless], 2_000) is not None or (
                                 self.map and await self._map_confirms(self.artifact.subflows[pre.use][-1]))):
                             self.log.event("precondition_skipped", subflow=pre.use)
                             continue
@@ -257,13 +257,13 @@ class Replayer:
         if step.wait_for and step.wait_for.any_of:
             await self._wait_branches(step, recovering)
         elif step.wait_for and step.wait_for.load_state:
-            await self.surface.wait_any([], timeout, step.wait_for.frame, step.wait_for.load_state)
+            await self._wait_any([], timeout, step.wait_for.frame, step.wait_for.load_state)
         await self._outcomes(step, "after", recovering)
         if step.expect:
             # Race the postcondition against every outcome that could explain its absence, so an error page is
             # reported as soon as it shows, not after the timeout
             watched = self._watched(step)
-            index = await self.surface.wait_any([step.expect, *(o.detect for o in watched)], timeout)
+            index = await self._wait_any([step.expect, *(o.detect for o in watched)], timeout)
             if index:
                 await self._handle(watched[index - 1], step, recovering, acted=True)
             if index is None and self.map and await self._map_confirms(step):
@@ -310,7 +310,7 @@ class Replayer:
         # found") ends the wait at once instead of after the full timeout
         deadline = asyncio.get_running_loop().time() + timeout / 1000
         while True:
-            hit = await self.surface.resolve(target, min(1_000, timeout))
+            hit = await self._find(target, min(1_000, timeout))
             if isinstance(hit, Resolved) or asyncio.get_running_loop().time() >= deadline:
                 break
             await self._outcomes(step, "during", recovering)  # only outcomes declared for any point match
@@ -369,7 +369,7 @@ class Replayer:
         route = min(routes, key=lambda r: (len(r), -min(self.map.weight(e) for e in r)))
         for edge in route:
             target = Target.model_validate(edge["target"])
-            hit = await self.surface.resolve(target, 3_000)
+            hit = await self._find(target, 3_000)
             if not isinstance(hit, Resolved):
                 raise self._fail(step.id, "TARGET_UNRESOLVED", "a trusted page-map route to the step's control",
                                  f"map edge '{edge['intent']}' found nothing on this screen")
@@ -435,10 +435,10 @@ class Replayer:
     async def _reached_destination(self) -> bool:
         nxt = self._next
         if nxt is None:
-            return all([await self.surface.wait_any([c], 3_000) is not None
+            return all([await self._wait_any([c], 3_000) is not None
                         for c in self.artifact.success.checkpoint if isinstance(c, Visible)])
         target = nxt.target or next(iter(nxt.extract.values()), None)
-        return target is None or isinstance(await self.surface.resolve(target, 3_000), Resolved)
+        return target is None or isinstance(await self._find(target, 3_000), Resolved)
 
     async def _propose_override(self, step: Step, target, hit: Resolved) -> str | None:
         """Drift on a tenant becomes a pending override for that tenant, for a person to approve (§4 drift). Without
@@ -469,7 +469,7 @@ class Replayer:
         conditions = [outcomes[b.code].detect if isinstance(b, OutcomeSeen) else b for b in step.wait_for.any_of]
         named = {b.code for b in step.wait_for.any_of if isinstance(b, OutcomeSeen)}
         others = [o for o in self._watched(step) if o.code not in named]
-        index = await self.surface.wait_any([*conditions, *(o.detect for o in others)], step.wait_for.timeout_ms,
+        index = await self._wait_any([*conditions, *(o.detect for o in others)], step.wait_for.timeout_ms,
                                             step.wait_for.frame)
         if index is not None and index >= len(conditions):
             await self._handle(others[index - len(conditions)], step, recovering, acted=True)
@@ -488,7 +488,7 @@ class Replayer:
 
     async def _outcomes(self, step: Step, when: str, recovering: bool):
         for outcome in self.artifact.outcomes:
-            if outcome.at in ("any", f"{when}:{step.id}") and await self.surface.holds(outcome.detect):
+            if outcome.at in ("any", f"{when}:{step.id}") and await self._holds(outcome.detect):
                 await self._handle(outcome, step, recovering, acted=when == "after")
 
     async def _handle(self, outcome: Outcome, step: Step, recovering: bool, acted: bool = False):
@@ -538,7 +538,7 @@ class Replayer:
         """After clicking through, wait for the page to move on, so the same notice isn't met twice. If it's still
         there at the deadline the run carries on, and the recovery cap decides."""
         deadline = asyncio.get_running_loop().time() + DEFAULT_TIMEOUT_MS / 1000
-        while await self.surface.holds(outcome.detect) and asyncio.get_running_loop().time() < deadline:
+        while await self._holds(outcome.detect) and asyncio.get_running_loop().time() < deadline:
             await asyncio.sleep(0.1)
 
     # ── Checkpoint ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -551,7 +551,7 @@ class Replayer:
                     # the success screen: race them, as every other wait does
                     last = self.artifact.steps[-1]
                     watched = self._watched(last)
-                    index = await self.surface.wait_any([assertion, *(o.detect for o in watched)], 5_000)
+                    index = await self._wait_any([assertion, *(o.detect for o in watched)], 5_000)
                     if index:
                         await self._handle(watched[index - 1], last, recovering=False, acted=True)
                     if index is None:
@@ -561,7 +561,7 @@ class Replayer:
                     if assertion.not_empty and self.outputs.get(name) in (None, ""):
                         raise self._fail("checkpoint", "CHECKPOINT_FAILED", f"output {name}", "empty")
                 case IdentityMatches():
-                    hit = await self.surface.resolve(assertion.target, 5_000)
+                    hit = await self._find(assertion.target, 5_000)
                     if not isinstance(hit, Resolved):
                         raise self._fail("checkpoint", "CHECKPOINT_FAILED", f"the {assertion.input} on screen",
                                          "not found", evidence=await self._evidence("checkpoint"))
@@ -577,7 +577,7 @@ class Replayer:
         for assertion in self.artifact.success.checkpoint:
             if not isinstance(assertion, IdentityMatches):
                 continue
-            hit = await self.surface.resolve(assertion.target, 0)
+            hit = await self._find(assertion.target, 0)
             if not isinstance(hit, Resolved):
                 continue
             shown = await self.surface.read_text(hit.handle)
@@ -630,7 +630,7 @@ class Replayer:
         """Resume verifies, it doesn't assume. The outcome that paused the run must be gone; then either this step can
         run (its control is on screen), or the person already did it (the next step's control is on screen)."""
         await self.surface.observe()  # let the screen settle after the person's last action
-        if outcome and await self.surface.holds(outcome.detect):
+        if outcome and await self._holds(outcome.detect):
             return None
         if acted:
             return "step had already acted"
@@ -643,7 +643,7 @@ class Replayer:
     async def _ready(self, step: Step) -> bool:
         targets = list(step.extract.values()) if step.extract else [step.target] if step.target else []
         for target in targets:
-            if not isinstance(await self.surface.resolve(target, 1_500), Resolved):
+            if not isinstance(await self._find(target, 1_500), Resolved):
                 return False
         return bool(targets)
 
@@ -660,6 +660,16 @@ class Replayer:
         })
 
     # ── Helpers ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    async def _find(self, target, timeout_ms: int):
+        """Resolve a target with this run's inputs filled in (a link named {{inputs.accountId}})."""
+        return await self.surface.resolve(bind(target, self.inputs), timeout_ms)
+
+    async def _wait_any(self, conditions: list, timeout_ms: int, *args):
+        return await self.surface.wait_any([bind(c, self.inputs) for c in conditions], timeout_ms, *args)
+
+    async def _holds(self, condition) -> bool:
+        return await self.surface.holds(bind(condition, self.inputs))
 
     def _missing_secrets(self) -> list[str]:
         """Checked before the browser opens, so a bank with no credentials configured fails at once and says which."""
