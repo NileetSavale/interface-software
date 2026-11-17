@@ -23,3 +23,11 @@ jobs:
       - run: uv sync --locked
       - run: uv run playwright install --with-deps chromium
       - run: uv run pytest -q
+      # A failed run's own record: event logs, masked screenshots and snapshots, server logs. Everything under runs/
+      # is already redacted (no secrets here anyway: CI has none and the mocks hold fake data)
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runs
+          path: runs/
+          retention-days: 7

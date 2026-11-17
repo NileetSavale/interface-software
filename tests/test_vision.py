@@ -225,3 +225,11 @@ def test_a_masked_field_is_counted_by_its_glyphs_not_read():
     words = Image.new("RGB", (220, 24), "white")
     ImageDraw.Draw(words).text((6, 4), "teller01", fill="black")
     assert vision._mask_glyphs(np.array(words)) == 0
+
+
+def test_mask_glyphs_that_run_together_are_not_counted():
+    # A font that draws * touching * (CI's Linux): no count, so typing is checked by the mask's presence instead
+    from PIL import Image, ImageDraw
+    image = Image.new("RGB", (220, 24), "white")
+    ImageDraw.Draw(image).rectangle((6, 9, 150, 14), fill="black")
+    assert vision._mask_glyphs(np.array(image)) == 0

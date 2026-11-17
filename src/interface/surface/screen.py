@@ -43,6 +43,7 @@ class Element:
     screen: str = ""
     box: tuple[int, int, int, int] | None = None  # in pixels (x, y, w, h), on a surface read from pixels
     hidden: bool = False  # a field that shows a mask, not what was typed
+    mask_count: int = 0  # how many mask characters it shows, when they could be counted (0: not known)
 
     @property
     def text(self) -> str:

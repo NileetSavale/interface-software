@@ -484,6 +484,7 @@ class VisionSurface(ScreenSurface):
             return r[0] <= mx < r[2] and r[1] <= my < r[3]
 
         placed: list[tuple[str, float, float, float, float, str, bool]] = []  # role, x, y, w, h, text, hidden
+        counted: dict[tuple[float, float], int] = {}  # a masked field's place -> its glyphs, where they're separate
         used: set[int] = set()
         code = ""
         if band:
@@ -511,6 +512,7 @@ class VisionSurface(ScreenSurface):
                 if ink.sum() > 4:
                     if count := _mask_glyphs(inner):
                         text, hidden = "*" * count, True
+                        counted[(r[0], r[1])] = count
                     else:
                         text = re.sub(r"[^\x20-\x7e]", "", _recognise(inner, 1)[0]).strip()
                         hidden = not re.search(r"[0-9A-Za-z]", text)
@@ -545,7 +547,7 @@ class VisionSurface(ScreenSurface):
                              <= 14 and abs(e.box[0] - box[0]) <= 12]
                     name = label_of(above[-1].name).rstrip(":").strip() if above else ""
                 elements.append(Element("textbox", name, row, box[0], box[2], text, screen=code, box=box,
-                                        hidden=hidden))
+                                        hidden=hidden, mask_count=counted.get((x, y), 0)))
             else:
                 elements.append(Element(role, label_of(text) if role == "text" else text, row, box[0], box[2],
                                         screen=code, box=box))
@@ -630,8 +632,11 @@ class VisionSurface(ScreenSurface):
             await self._settle(before, wait_s=1.5)
             live = self._live(field)
             shown = live.value
-            if _squash(shown) == _squash(value) or (value and live.hidden and abs(len(shown) - len(value)) <= 1):
-                return  # the value, or (a masked field) one mask glyph a character
+            # The value; or, in a masked field, one glyph a character where the glyphs could be counted, and any
+            # mask where a font runs them together (the step's own checks then catch a wrong password)
+            if _squash(shown) == _squash(value) or (value and live.hidden and (
+                    not live.mask_count or abs(live.mask_count - len(value)) <= 1)):
+                return
         raise SurfaceError("NOT_ACTIONABLE", "the field didn't keep what was typed into it", retry="safe")
 
     async def read_text(self, handle: object) -> str:
