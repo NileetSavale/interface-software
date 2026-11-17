@@ -1,7 +1,7 @@
 {
   "suite": "terminal",
-  "date": "2026-11-16T21:27:52+00:00",
-  "commit": "8237219",
+  "date": "2026-11-17T06:24:09+00:00",
+  "commit": "067545f",
   "fault_matrix": [
     {
       "arm": "A",
@@ -10,8 +10,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 3.56,
-      "run_id": "replay_20261116T211918Z_78ead4"
+      "seconds": 3.62,
+      "run_id": "replay_20261117T062107Z_428ccd"
     },
     {
       "arm": "A",
@@ -20,8 +20,8 @@
       "got": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "drift": [],
-      "seconds": 3.58,
-      "run_id": "replay_20261116T211922Z_3fc790"
+      "seconds": 3.59,
+      "run_id": "replay_20261117T062110Z_053f84"
     },
     {
       "arm": "A",
@@ -30,8 +30,8 @@
       "got": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "drift": [],
-      "seconds": 3.55,
-      "run_id": "replay_20261116T211926Z_fd47bb"
+      "seconds": 3.58,
+      "run_id": "replay_20261117T062114Z_6cbff3"
     },
     {
       "arm": "A",
@@ -40,8 +40,8 @@
       "got": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "drift": [],
-      "seconds": 3.56,
-      "run_id": "replay_20261116T211929Z_c1eee9"
+      "seconds": 3.57,
+      "run_id": "replay_20261117T062117Z_a17770"
     },
     {
       "arm": "A",
@@ -51,7 +51,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0.0,
-      "run_id": "replay_20261116T211933Z_8f6825"
+      "run_id": "replay_20261117T062121Z_5582af"
     },
     {
       "arm": "A",
@@ -60,8 +60,8 @@
       "got": "success+recovered",
       "pass": true,
       "drift": [],
-      "seconds": 4.93,
-      "run_id": "replay_20261116T211933Z_c9d459"
+      "seconds": 4.99,
+      "run_id": "replay_20261117T062121Z_4fda49"
     },
     {
       "arm": "A",
@@ -70,8 +70,8 @@
       "got": "failed/APP_ERROR",
       "pass": true,
       "drift": [],
-      "seconds": 3.56,
-      "run_id": "replay_20261116T211938Z_fd6009"
+      "seconds": 3.55,
+      "run_id": "replay_20261117T062126Z_c25f79"
     },
     {
       "arm": "A",
@@ -80,8 +80,8 @@
       "got": "failed/WRONG_RECORD",
       "pass": true,
       "drift": [],
-      "seconds": 3.58,
-      "run_id": "replay_20261116T211941Z_3cf532"
+      "seconds": 3.59,
+      "run_id": "replay_20261117T062129Z_ea00b5"
     },
     {
       "arm": "A",
@@ -90,8 +90,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 5.6,
-      "run_id": "replay_20261116T211945Z_e438e4"
+      "seconds": 5.62,
+      "run_id": "replay_20261117T062133Z_b25700"
     },
     {
       "arm": "A",
@@ -100,8 +100,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 5.09,
-      "run_id": "replay_20261116T211950Z_e67996"
+      "seconds": 5.12,
+      "run_id": "replay_20261117T062139Z_b9813c"
     },
     {
       "arm": "B first contact",
@@ -113,8 +113,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 3.61,
-      "run_id": "replay_20261116T211955Z_cf532b"
+      "seconds": 3.62,
+      "run_id": "replay_20261117T062144Z_012c8d"
     },
     {
       "arm": "B first contact",
@@ -126,8 +126,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 3.54,
-      "run_id": "replay_20261116T211959Z_d7039a"
+      "seconds": 3.59,
+      "run_id": "replay_20261117T062147Z_b20396"
     },
     {
       "arm": "B first contact",
@@ -139,8 +139,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 3.6,
-      "run_id": "replay_20261116T212003Z_a2b1fc"
+      "seconds": 3.57,
+      "run_id": "replay_20261117T062151Z_d89b85"
     },
     {
       "arm": "B first contact",
@@ -152,8 +152,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 3.58,
-      "run_id": "replay_20261116T212006Z_796e80"
+      "seconds": 3.61,
+      "run_id": "replay_20261117T062155Z_4c0760"
     },
     {
       "arm": "B first contact",
@@ -163,7 +163,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0.0,
-      "run_id": "replay_20261116T212010Z_cc90b6"
+      "run_id": "replay_20261117T062158Z_6cac61"
     },
     {
       "arm": "B first contact",
@@ -177,8 +177,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 4.96,
-      "run_id": "replay_20261116T212010Z_bfb7db"
+      "seconds": 5.06,
+      "run_id": "replay_20261117T062158Z_f77802"
     },
     {
       "arm": "B first contact",
@@ -190,8 +190,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 3.56,
-      "run_id": "replay_20261116T212015Z_0ee742"
+      "seconds": 3.49,
+      "run_id": "replay_20261117T062203Z_24940c"
     },
     {
       "arm": "B first contact",
@@ -203,8 +203,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 3.58,
-      "run_id": "replay_20261116T212018Z_d48ae2"
+      "seconds": 3.47,
+      "run_id": "replay_20261117T062207Z_a29fa8"
     },
     {
       "arm": "B first contact",
@@ -216,8 +216,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 5.61,
-      "run_id": "replay_20261116T212022Z_0d628b"
+      "seconds": 5.48,
+      "run_id": "replay_20261117T062210Z_4d1cc1"
     },
     {
       "arm": "B first contact",
@@ -229,8 +229,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 5.09,
-      "run_id": "replay_20261116T212027Z_fef4d0"
+      "seconds": 4.99,
+      "run_id": "replay_20261117T062216Z_8de8d3"
     },
     {
       "arm": "B override approved",
@@ -239,8 +239,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 3.59,
-      "run_id": "replay_20261116T212033Z_2248d2"
+      "seconds": 3.52,
+      "run_id": "replay_20261117T062221Z_46a524"
     },
     {
       "arm": "B override approved",
@@ -249,8 +249,8 @@
       "got": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "drift": [],
-      "seconds": 3.56,
-      "run_id": "replay_20261116T212036Z_1867a3"
+      "seconds": 3.5,
+      "run_id": "replay_20261117T062224Z_8321ab"
     },
     {
       "arm": "B override approved",
@@ -259,8 +259,8 @@
       "got": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "drift": [],
-      "seconds": 3.59,
-      "run_id": "replay_20261116T212040Z_406e33"
+      "seconds": 3.5,
+      "run_id": "replay_20261117T062228Z_05eaf5"
     },
     {
       "arm": "B override approved",
@@ -269,8 +269,8 @@
       "got": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "drift": [],
-      "seconds": 3.55,
-      "run_id": "replay_20261116T212043Z_ca1edf"
+      "seconds": 3.48,
+      "run_id": "replay_20261117T062231Z_097db3"
     },
     {
       "arm": "B override approved",
@@ -280,7 +280,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0.0,
-      "run_id": "replay_20261116T212047Z_deaf79"
+      "run_id": "replay_20261117T062235Z_923bf8"
     },
     {
       "arm": "B override approved",
@@ -289,8 +289,8 @@
       "got": "success+recovered",
       "pass": true,
       "drift": [],
-      "seconds": 4.91,
-      "run_id": "replay_20261116T212047Z_e481dc"
+      "seconds": 4.78,
+      "run_id": "replay_20261117T062235Z_432e9c"
     },
     {
       "arm": "B override approved",
@@ -299,8 +299,8 @@
       "got": "failed/APP_ERROR",
       "pass": true,
       "drift": [],
-      "seconds": 3.57,
-      "run_id": "replay_20261116T212052Z_ee562c"
+      "seconds": 3.44,
+      "run_id": "replay_20261117T062240Z_2a2a42"
     },
     {
       "arm": "B override approved",
@@ -309,8 +309,8 @@
       "got": "failed/WRONG_RECORD",
       "pass": true,
       "drift": [],
-      "seconds": 3.57,
-      "run_id": "replay_20261116T212055Z_6f4cba"
+      "seconds": 3.47,
+      "run_id": "replay_20261117T062243Z_b6bc13"
     },
     {
       "arm": "B override approved",
@@ -319,8 +319,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 5.61,
-      "run_id": "replay_20261116T212059Z_6ba2bb"
+      "seconds": 5.49,
+      "run_id": "replay_20261117T062246Z_82caac"
     },
     {
       "arm": "B override approved",
@@ -329,8 +329,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 5.1,
-      "run_id": "replay_20261116T212105Z_dcf08d"
+      "seconds": 5.0,
+      "run_id": "replay_20261117T062252Z_aa926b"
     },
     {
       "arm": "B first contact",
@@ -340,7 +340,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0,
-      "run_id": "replay_20261116T211915Z_06ad1f"
+      "run_id": "replay_20261117T062103Z_a4f9f6"
     }
   ],
   "passed": 31,
@@ -361,8 +361,8 @@
     },
     "success_rate": 1.0,
     "distinct_outputs_per_member": 1,
-    "p50_s": 3.59,
-    "p95_s": 3.61
+    "p50_s": 3.53,
+    "p95_s": 3.56
   },
   "discovery": {
     "n": 5,
@@ -445,5 +445,9 @@
       }
     ]
   },
-  "sub_accounts_opened": 0
+  "sub_accounts_opened": 0,
+  "discovery_stamp": {
+    "commit": "8237219",
+    "date": "2026-11-16T21:27:52+00:00"
+  }
 }

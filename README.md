@@ -44,7 +44,7 @@ Nothing below needs an API key except discovery itself.
 
 ```bash
 uv run pytest                              # 172 tests; discovery is driven by a scripted planner, not Claude
-uv run python -m evals all                 # the four eval suites that need no LLM (~15 min)
+uv run python -m evals all                 # the seven eval suites that need no LLM (~1 h)
 uv run python scripts/make_evidence.py     # rebuilds evidence/ (replays run fresh; no model)
 ```
 

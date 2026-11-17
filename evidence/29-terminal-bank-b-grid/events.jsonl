@@ -1,16 +1,16 @@
-{"t": 0.0, "at": "2026-11-17T04:13:33+00:00", "event": "replay_started", "capability": "core_banking_terminal.lookup_member_balance", "version": "1.0.0", "revision": "556c518031d3", "inputs": ["memberId"], "tenant": "b", "page_map": null}
-{"t": 0.133, "at": "2026-11-17T04:13:33+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.35, "at": "2026-11-17T04:13:35+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.503, "at": "2026-11-17T04:13:35+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.791, "at": "2026-11-17T04:13:36+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.941, "at": "2026-11-17T04:13:36+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.086, "at": "2026-11-17T04:13:36+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
-{"t": 3.237, "at": "2026-11-17T04:13:36+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.26, "at": "2026-11-17T04:13:36+00:00", "event": "drift", "step": "enter_member_number", "rank": 3, "strategy": "bbox", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpms55tpo5/b.json"}
-{"t": 3.398, "at": "2026-11-17T04:13:36+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 3, "strategy": "bbox"}
-{"t": 3.42, "at": "2026-11-17T04:13:36+00:00", "event": "drift", "step": "search", "rank": 1, "strategy": "bbox", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpms55tpo5/b.json"}
-{"t": 3.556, "at": "2026-11-17T04:13:36+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 1, "strategy": "bbox"}
-{"t": 3.574, "at": "2026-11-17T04:13:36+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
-{"t": 3.585, "at": "2026-11-17T04:13:36+00:00", "event": "extracted", "step": "read_savings", "outputs": ["savingsBalance"]}
-{"t": 3.589, "at": "2026-11-17T04:13:36+00:00", "event": "checkpoint_passed"}
-{"t": 3.589, "at": "2026-11-17T04:13:36+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T041333Z_0ad2e6", "completedAt": "2026-11-17T04:13:36+00:00", "recovered": [], "drift": [{"stepId": "enter_member_number", "hitRank": 3, "strategy": "bbox", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpms55tpo5/b.json"}, {"stepId": "search", "hitRank": 1, "strategy": "bbox", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmpms55tpo5/b.json"}], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}
+{"t": 0.0, "at": "2026-11-17T07:05:06+00:00", "event": "replay_started", "capability": "core_banking_terminal.lookup_member_balance", "version": "1.0.0", "revision": "556c518031d3", "inputs": ["memberId"], "tenant": "b", "page_map": null}
+{"t": 0.125, "at": "2026-11-17T07:05:06+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.301, "at": "2026-11-17T07:05:08+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.449, "at": "2026-11-17T07:05:08+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.719, "at": "2026-11-17T07:05:09+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.858, "at": "2026-11-17T07:05:09+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.0, "at": "2026-11-17T07:05:09+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
+{"t": 3.14, "at": "2026-11-17T07:05:09+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.157, "at": "2026-11-17T07:05:09+00:00", "event": "drift", "step": "enter_member_number", "rank": 3, "strategy": "bbox", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp172x1pbx/b.json"}
+{"t": 3.286, "at": "2026-11-17T07:05:09+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 3, "strategy": "bbox"}
+{"t": 3.306, "at": "2026-11-17T07:05:09+00:00", "event": "drift", "step": "search", "rank": 1, "strategy": "bbox", "proposed": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp172x1pbx/b.json"}
+{"t": 3.434, "at": "2026-11-17T07:05:09+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 1, "strategy": "bbox"}
+{"t": 3.452, "at": "2026-11-17T07:05:09+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 3.464, "at": "2026-11-17T07:05:09+00:00", "event": "extracted", "step": "read_savings", "outputs": ["savingsBalance"]}
+{"t": 3.468, "at": "2026-11-17T07:05:09+00:00", "event": "checkpoint_passed"}
+{"t": 3.468, "at": "2026-11-17T07:05:09+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T070506Z_8dd8f4", "completedAt": "2026-11-17T07:05:09+00:00", "recovered": [], "drift": [{"stepId": "enter_member_number", "hitRank": 3, "strategy": "bbox", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp172x1pbx/b.json"}, {"stepId": "search", "hitRank": 1, "strategy": "bbox", "proposedOverride": "/var/folders/mx/gk00y6jd7cg2rnj84j4pr_1c0000gn/T/tmp172x1pbx/b.json"}], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

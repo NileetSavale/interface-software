@@ -1,7 +1,7 @@
 {
   "suite": "vision",
-  "date": "2026-11-17T04:10:09+00:00",
-  "commit": "1acc2c8",
+  "date": "2026-11-17T06:36:52+00:00",
+  "commit": "067545f",
   "reads": {
     "screens": 100,
     "values": 500,
@@ -26,7 +26,7 @@
       }
     },
     "misreads": [],
-    "seconds": 160.0
+    "seconds": 161.5
   },
   "fault_matrix": [
     {
@@ -36,8 +36,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 12.33,
-      "run_id": "replay_20261117T040023Z_59a0d0"
+      "seconds": 12.23,
+      "run_id": "replay_20261117T062703Z_61bcfb"
     },
     {
       "arm": "A",
@@ -46,8 +46,8 @@
       "got": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "drift": [],
-      "seconds": 10.29,
-      "run_id": "replay_20261117T040035Z_4190a8"
+      "seconds": 10.09,
+      "run_id": "replay_20261117T062716Z_252b0e"
     },
     {
       "arm": "A",
@@ -56,8 +56,8 @@
       "got": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "drift": [],
-      "seconds": 10.04,
-      "run_id": "replay_20261117T040046Z_aa1eb4"
+      "seconds": 10.28,
+      "run_id": "replay_20261117T062726Z_147a3b"
     },
     {
       "arm": "A",
@@ -66,8 +66,8 @@
       "got": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "drift": [],
-      "seconds": 10.23,
-      "run_id": "replay_20261117T040056Z_36eb64"
+      "seconds": 10.19,
+      "run_id": "replay_20261117T062736Z_7a07a0"
     },
     {
       "arm": "A",
@@ -77,7 +77,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0.0,
-      "run_id": "replay_20261117T040106Z_3004e8"
+      "run_id": "replay_20261117T062746Z_96a446"
     },
     {
       "arm": "A",
@@ -86,8 +86,8 @@
       "got": "success+recovered",
       "pass": true,
       "drift": [],
-      "seconds": 17.37,
-      "run_id": "replay_20261117T040106Z_ab5587"
+      "seconds": 17.01,
+      "run_id": "replay_20261117T062746Z_b8e11c"
     },
     {
       "arm": "A",
@@ -96,8 +96,8 @@
       "got": "failed/APP_ERROR",
       "pass": true,
       "drift": [],
-      "seconds": 10.19,
-      "run_id": "replay_20261117T040123Z_826aa4"
+      "seconds": 10.8,
+      "run_id": "replay_20261117T062803Z_0a8a9e"
     },
     {
       "arm": "A",
@@ -106,8 +106,8 @@
       "got": "failed/WRONG_RECORD",
       "pass": true,
       "drift": [],
-      "seconds": 10.86,
-      "run_id": "replay_20261117T040133Z_241289"
+      "seconds": 10.97,
+      "run_id": "replay_20261117T062814Z_9050b4"
     },
     {
       "arm": "A",
@@ -116,8 +116,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 14.0,
-      "run_id": "replay_20261117T040144Z_2529ec"
+      "seconds": 13.96,
+      "run_id": "replay_20261117T062825Z_ef445f"
     },
     {
       "arm": "A",
@@ -126,8 +126,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 13.79,
-      "run_id": "replay_20261117T040158Z_8ce5ad"
+      "seconds": 13.78,
+      "run_id": "replay_20261117T062839Z_544ba9"
     },
     {
       "arm": "B first contact",
@@ -139,8 +139,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 12.29,
-      "run_id": "replay_20261117T040212Z_15d11e"
+      "seconds": 12.64,
+      "run_id": "replay_20261117T062853Z_c9042f"
     },
     {
       "arm": "B first contact",
@@ -153,7 +153,7 @@
         "search:bbox"
       ],
       "seconds": 11.15,
-      "run_id": "replay_20261117T040224Z_871947"
+      "run_id": "replay_20261117T062905Z_e20c82"
     },
     {
       "arm": "B first contact",
@@ -165,8 +165,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 10.5,
-      "run_id": "replay_20261117T040235Z_7c30e5"
+      "seconds": 10.41,
+      "run_id": "replay_20261117T062916Z_7a0b20"
     },
     {
       "arm": "B first contact",
@@ -178,8 +178,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 10.52,
-      "run_id": "replay_20261117T040246Z_e14bb2"
+      "seconds": 11.05,
+      "run_id": "replay_20261117T062927Z_9a7a4f"
     },
     {
       "arm": "B first contact",
@@ -189,7 +189,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0.0,
-      "run_id": "replay_20261117T040256Z_62af6c"
+      "run_id": "replay_20261117T062938Z_1f47d7"
     },
     {
       "arm": "B first contact",
@@ -203,8 +203,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 17.79,
-      "run_id": "replay_20261117T040256Z_a3c750"
+      "seconds": 17.48,
+      "run_id": "replay_20261117T062938Z_b470e4"
     },
     {
       "arm": "B first contact",
@@ -216,8 +216,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 10.9,
-      "run_id": "replay_20261117T040314Z_f975b4"
+      "seconds": 11.38,
+      "run_id": "replay_20261117T062955Z_28ddf8"
     },
     {
       "arm": "B first contact",
@@ -229,8 +229,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 11.78,
-      "run_id": "replay_20261117T040325Z_a1ca80"
+      "seconds": 11.9,
+      "run_id": "replay_20261117T063007Z_2dc698"
     },
     {
       "arm": "B first contact",
@@ -242,8 +242,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 14.56,
-      "run_id": "replay_20261117T040337Z_92c9e9"
+      "seconds": 14.7,
+      "run_id": "replay_20261117T063019Z_2c99d8"
     },
     {
       "arm": "B first contact",
@@ -255,8 +255,8 @@
         "enter_member_number:bbox",
         "search:bbox"
       ],
-      "seconds": 13.94,
-      "run_id": "replay_20261117T040351Z_28199e"
+      "seconds": 14.2,
+      "run_id": "replay_20261117T063033Z_88b374"
     },
     {
       "arm": "B override approved",
@@ -265,8 +265,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 12.61,
-      "run_id": "replay_20261117T040405Z_cc872b"
+      "seconds": 12.55,
+      "run_id": "replay_20261117T063048Z_e0693c"
     },
     {
       "arm": "B override approved",
@@ -275,8 +275,8 @@
       "got": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "drift": [],
-      "seconds": 10.67,
-      "run_id": "replay_20261117T040418Z_6f8321"
+      "seconds": 10.62,
+      "run_id": "replay_20261117T063100Z_e9eab1"
     },
     {
       "arm": "B override approved",
@@ -285,8 +285,8 @@
       "got": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "drift": [],
-      "seconds": 10.58,
-      "run_id": "replay_20261117T040429Z_7e235b"
+      "seconds": 10.55,
+      "run_id": "replay_20261117T063111Z_eabf8f"
     },
     {
       "arm": "B override approved",
@@ -295,8 +295,8 @@
       "got": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "drift": [],
-      "seconds": 10.58,
-      "run_id": "replay_20261117T040439Z_f27c20"
+      "seconds": 10.68,
+      "run_id": "replay_20261117T063121Z_b932bb"
     },
     {
       "arm": "B override approved",
@@ -306,7 +306,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0.0,
-      "run_id": "replay_20261117T040450Z_b5128b"
+      "run_id": "replay_20261117T063132Z_3caf00"
     },
     {
       "arm": "B override approved",
@@ -315,8 +315,8 @@
       "got": "success+recovered",
       "pass": true,
       "drift": [],
-      "seconds": 17.56,
-      "run_id": "replay_20261117T040450Z_5f0dec"
+      "seconds": 17.62,
+      "run_id": "replay_20261117T063132Z_d58cde"
     },
     {
       "arm": "B override approved",
@@ -325,8 +325,8 @@
       "got": "failed/APP_ERROR",
       "pass": true,
       "drift": [],
-      "seconds": 11.22,
-      "run_id": "replay_20261117T040507Z_ce6cc3"
+      "seconds": 10.71,
+      "run_id": "replay_20261117T063150Z_178ca2"
     },
     {
       "arm": "B override approved",
@@ -335,8 +335,8 @@
       "got": "failed/WRONG_RECORD",
       "pass": true,
       "drift": [],
-      "seconds": 11.34,
-      "run_id": "replay_20261117T040519Z_92ef1c"
+      "seconds": 11.05,
+      "run_id": "replay_20261117T063200Z_3bc7e3"
     },
     {
       "arm": "B override approved",
@@ -345,8 +345,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 14.45,
-      "run_id": "replay_20261117T040530Z_94f569"
+      "seconds": 14.93,
+      "run_id": "replay_20261117T063211Z_db3e8a"
     },
     {
       "arm": "B override approved",
@@ -355,8 +355,8 @@
       "got": "success",
       "pass": true,
       "drift": [],
-      "seconds": 13.75,
-      "run_id": "replay_20261117T040544Z_392722"
+      "seconds": 13.91,
+      "run_id": "replay_20261117T063226Z_031c23"
     },
     {
       "arm": "B first contact",
@@ -366,7 +366,7 @@
       "pass": true,
       "drift": [],
       "seconds": 0,
-      "run_id": "replay_20261117T040010Z_c204ce"
+      "run_id": "replay_20261117T062651Z_75e42d"
     }
   ],
   "passed": 31,
@@ -387,8 +387,8 @@
     },
     "success_rate": 1.0,
     "distinct_outputs_per_member": 1,
-    "p50_s": 12.02,
-    "p95_s": 12.43
+    "p50_s": 12.11,
+    "p95_s": 12.46
   },
   "discovery": {
     "n": 5,

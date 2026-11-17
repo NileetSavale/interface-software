@@ -1,7 +1,7 @@
 {
   "suite": "concurrency",
-  "date": "2026-11-16T10:24:49+00:00",
-  "commit": "63d3183",
+  "date": "2026-11-17T06:21:03+00:00",
+  "commit": "067545f",
   "banks": [
     "a",
     "b"
@@ -22,10 +22,10 @@
       "results": {
         "success": 24
       },
-      "wall_s": 92.5,
-      "per_minute": 15.6,
-      "p50_s": 3.85,
-      "p95_s": 3.9
+      "wall_s": 92.7,
+      "per_minute": 15.5,
+      "p50_s": 3.86,
+      "p95_s": 3.92
     },
     {
       "concurrency": 4,
@@ -35,10 +35,10 @@
       "results": {
         "success": 24
       },
-      "wall_s": 30.8,
-      "per_minute": 46.8,
-      "p50_s": 5.08,
-      "p95_s": 5.43
+      "wall_s": 30.7,
+      "per_minute": 46.9,
+      "p50_s": 5.01,
+      "p95_s": 5.39
     },
     {
       "concurrency": 8,
@@ -49,9 +49,9 @@
         "success": 24
       },
       "wall_s": 19.3,
-      "per_minute": 74.8,
-      "p50_s": 6.28,
-      "p95_s": 6.71
+      "per_minute": 74.6,
+      "p50_s": 6.41,
+      "p95_s": 6.77
     }
   ],
   "sub_accounts_opened": 0

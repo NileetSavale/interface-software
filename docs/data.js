@@ -264,24 +264,24 @@ window.SITE = {
    "passed": 97,
    "runs": 97,
    "opened": 0,
-   "date": "2026-11-16T09:50:32+00:00",
-   "commit": "e6893f9",
+   "date": "2026-11-17T07:01:32+00:00",
+   "commit": "067545f",
    "misses": []
   },
   "stability": {
    "ok": 80,
    "runs": 80,
    "distinct": 1,
-   "p50": 3.83,
-   "date": "2026-11-16T09:58:05+00:00",
-   "commit": "e6893f9"
+   "p50": 3.85,
+   "date": "2026-11-17T06:07:05+00:00",
+   "commit": "067545f"
   },
   "robustness": {
    "ok": 120,
    "runs": 120,
    "wrong": 0,
-   "date": "2026-11-16T10:08:57+00:00",
-   "commit": "e6893f9"
+   "date": "2026-11-17T06:17:57+00:00",
+   "commit": "067545f"
   },
   "safety": {
    "passed": 18,
@@ -291,8 +291,8 @@ window.SITE = {
    "llm_total": 12,
    "llm_spent": 0.4251,
    "harm": 0,
-   "date": "2026-11-16T09:34:49+00:00",
-   "commit": "e6893f9"
+   "date": "2026-11-17T06:18:35+00:00",
+   "commit": "067545f"
   },
   "discovery": {
    "recorded": 20,
@@ -352,8 +352,8 @@ window.SITE = {
    "crossed": 0,
    "top": 8,
    "speedup": 4.8,
-   "date": "2026-11-16T10:24:49+00:00",
-   "commit": "63d3183"
+   "date": "2026-11-17T06:21:03+00:00",
+   "commit": "067545f"
   },
   "terminal": {
    "passed": 31,
@@ -363,8 +363,8 @@ window.SITE = {
    "stable_n": 20,
    "recorded": 5,
    "disc_n": 5,
-   "date": "2026-11-16T21:27:52+00:00",
-   "commit": "8237219"
+   "date": "2026-11-17T06:24:09+00:00",
+   "commit": "067545f"
   },
   "vision": {
    "passed": 31,
@@ -377,16 +377,16 @@ window.SITE = {
    "stable_n": 20,
    "recorded": 5,
    "disc_n": 5,
-   "date": "2026-11-17T04:10:09+00:00",
-   "commit": "1acc2c8"
+   "date": "2026-11-17T06:36:52+00:00",
+   "commit": "067545f"
   },
   "parabank": {
    "ok": 40,
    "runs": 40,
    "distinct": 1,
    "resets": 0,
-   "date": "2026-11-16T10:13:34+00:00",
-   "commit": "e6893f9"
+   "date": "2026-11-17T06:41:28+00:00",
+   "commit": "067545f"
   }
  },
  "commits": [
@@ -635,6 +635,18 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Count mask glyphs only where a font keeps them apart; CI keeps runs/ when tests fail",
    "body": "On CI's Linux fonts the canvas's asterisks run together, so the count was wrong and sign-on retried\nuntil it failed. Where glyphs can't be counted, any mask is accepted as before and the step's own\nchecks catch a wrong password. A failed CI run now uploads runs/ (redacted logs, masked evidence)."
+  },
+  {
+   "sha": "5cb341e",
+   "date": "2026-11-16",
+   "subject": "REPORT trimmed to 1,400 words; README describes the 36 evidence cases",
+   "body": "REPORT keeps its seven headings and every number, and no longer calls an app without a tree invisible\nor the pixel surface only designed."
+  },
+  {
+   "sha": "067545f",
+   "date": "2026-11-17",
+   "subject": "Report: a kept Claude arm carries its own commit stamp in every section; README test count",
+   "body": ""
   }
  ],
  "tests": 139
