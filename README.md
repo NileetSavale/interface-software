@@ -12,10 +12,13 @@ mid-run, and nothing automated can ever press "Confirm".
 
 - **Design write-up:** [`REPORT.md`](REPORT.md). Full design: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). All
   decisions: [`docs/DECISIONS.md`](docs/DECISIONS.md).
-- **Evidence of real runs:** [`evidence/`](evidence/README.md): four real Claude discoveries, and 14 replays covering
-  success, business outcomes, recovery, hard failures, a handoff with a screen recording, a second bank, a blocked
-  commit, and a third bank run without and with its page map. Plus [`evidence/parabank/`](evidence/parabank/README.md):
-  two capabilities discovered and replayed on ParaBank, a public demo bank we didn't write.
+- **Evidence of real runs:** [`evidence/`](evidence/README.md): 36 curated cases, with real Claude discoveries on the
+  legacy web app, a green screen and a pixels-only client, and replays covering success, business outcomes,
+  recovery, hard failures, a handoff with a screen recording, other banks, and blocked commits. Plus ParaBank, a
+  public demo bank we didn't write, through the web ([`parabank/`](evidence/parabank/README.md)) and from pixels only
+  ([`parabank-pixels/`](evidence/parabank-pixels/README.md)); a native window driven by real OS input
+  ([`desktop-demo/`](evidence/desktop-demo/README.md)); and Claude as the calling agent over MCP
+  ([`agent-mcp/`](evidence/agent-mcp/README.md)).
 - **Measured:** [`evals/report.md`](evals/report.md): nine suites, N and commit stated.
 - **Visual tour:** <https://nileetsavale.github.io/interface-software/>: interactive architecture, decisions, numbers.
 
@@ -234,5 +237,5 @@ apps/mock_terminal/       the green-screen host: the same members and faults on 
 apps/mock_gui/            the same host as a GUI drawn only in pixels: a canvas page and a native Tk window
 goals/        the capabilities' goal specs              artifacts/  the discovered artifacts
 evals/        the nine suites and their results        evidence/   curated runs
-tests/        171 tests                                 docs/       design, decisions, the site
+tests/        172 tests                                 docs/       design, decisions, the site
 ```

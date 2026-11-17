@@ -623,7 +623,19 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Pixels on ParaBank: seven gaps the mock hid, fixed; Claude recorded it and it replayed",
    "body": "Select-all is the platform's, then Backspace (a retry had appended); masked fields are counted by\ntheir glyphs; a box of several lines is a container; links by colour or underline, read back by\ntheir role; labels above a field, and \"Label: value\" split at the gap; a greeting and bare\nidentifiers are masked in a flat snapshot; an element showing an input is found by that value and\na screen without a code gets no positions; captures retry through a navigation. The browser\nbackend screenshots the whole page and keeps the network gate. evidence/parabank-pixels."
+  },
+  {
+   "sha": "3472d2e",
+   "date": "2026-11-16",
+   "subject": "Suite 9 at 1acc2c8, evidence index, report and site",
+   "body": ""
+  },
+  {
+   "sha": "726ed97",
+   "date": "2026-11-16",
+   "subject": "Count mask glyphs only where a font keeps them apart; CI keeps runs/ when tests fail",
+   "body": "On CI's Linux fonts the canvas's asterisks run together, so the count was wrong and sign-on retried\nuntil it failed. Where glyphs can't be counted, any mask is accepted as before and the step's own\nchecks catch a wrong password. A failed CI run now uploads runs/ (redacted logs, masked evidence)."
   }
  ],
- "tests": 138
+ "tests": 139
 };
