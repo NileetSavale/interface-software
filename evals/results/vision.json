@@ -1,0 +1,475 @@
+{
+  "suite": "vision",
+  "date": "2026-11-17T02:36:26+00:00",
+  "commit": "669b04a+dirty",
+  "reads": {
+    "screens": 100,
+    "values": 500,
+    "right": 500,
+    "refused": 0,
+    "silent_misreads": 0,
+    "per_kind": {
+      "memberNumber": {
+        "right": 100
+      },
+      "name": {
+        "right": 100
+      },
+      "dob": {
+        "right": 100
+      },
+      "savings": {
+        "right": 100
+      },
+      "checking": {
+        "right": 100
+      }
+    },
+    "misreads": [],
+    "seconds": 137.2
+  },
+  "fault_matrix": [
+    {
+      "arm": "A",
+      "case": "happy",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 38.13,
+      "run_id": "replay_20261117T014205Z_01bbc4"
+    },
+    {
+      "arm": "A",
+      "case": "not_found",
+      "expected": "business_outcome/MEMBER_NOT_FOUND",
+      "got": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "drift": [],
+      "seconds": 30.7,
+      "run_id": "replay_20261117T014243Z_20de0d"
+    },
+    {
+      "arm": "A",
+      "case": "malformed",
+      "expected": "business_outcome/INVALID_MEMBER_NUMBER",
+      "got": "business_outcome/INVALID_MEMBER_NUMBER",
+      "pass": true,
+      "drift": [],
+      "seconds": 30.72,
+      "run_id": "replay_20261117T014314Z_7d02d6"
+    },
+    {
+      "arm": "A",
+      "case": "restricted",
+      "expected": "business_outcome/PERMISSION_DENIED",
+      "got": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "drift": [],
+      "seconds": 30.3,
+      "run_id": "replay_20261117T014345Z_0294c9"
+    },
+    {
+      "arm": "A",
+      "case": "bad_input",
+      "expected": "invalid_input",
+      "got": "invalid_input",
+      "pass": true,
+      "drift": [],
+      "seconds": 0.0,
+      "run_id": "replay_20261117T014415Z_839fee"
+    },
+    {
+      "arm": "A",
+      "case": "session_timeout",
+      "expected": "success+recovered",
+      "got": "success+recovered",
+      "pass": true,
+      "drift": [],
+      "seconds": 63.94,
+      "run_id": "replay_20261117T014415Z_a6f52d"
+    },
+    {
+      "arm": "A",
+      "case": "server_error",
+      "expected": "failed/APP_ERROR",
+      "got": "failed/APP_ERROR",
+      "pass": true,
+      "drift": [],
+      "seconds": 30.24,
+      "run_id": "replay_20261117T014519Z_179927"
+    },
+    {
+      "arm": "A",
+      "case": "wrong_record",
+      "expected": "failed/WRONG_RECORD",
+      "got": "failed/WRONG_RECORD",
+      "pass": true,
+      "drift": [],
+      "seconds": 33.07,
+      "run_id": "replay_20261117T014549Z_9e7867"
+    },
+    {
+      "arm": "A",
+      "case": "slow",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 39.98,
+      "run_id": "replay_20261117T014622Z_efa26b"
+    },
+    {
+      "arm": "A",
+      "case": "late_fill",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 38.5,
+      "run_id": "replay_20261117T014702Z_5011e8"
+    },
+    {
+      "arm": "B first contact",
+      "case": "happy",
+      "expected": "success+drift",
+      "got": "success+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 38.52,
+      "run_id": "replay_20261117T014741Z_42f0b4"
+    },
+    {
+      "arm": "B first contact",
+      "case": "not_found",
+      "expected": "business_outcome/MEMBER_NOT_FOUND",
+      "got": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 30.76,
+      "run_id": "replay_20261117T014819Z_d3efec"
+    },
+    {
+      "arm": "B first contact",
+      "case": "malformed",
+      "expected": "business_outcome/INVALID_MEMBER_NUMBER",
+      "got": "business_outcome/INVALID_MEMBER_NUMBER",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 30.7,
+      "run_id": "replay_20261117T014850Z_c6674e"
+    },
+    {
+      "arm": "B first contact",
+      "case": "restricted",
+      "expected": "business_outcome/PERMISSION_DENIED",
+      "got": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 30.32,
+      "run_id": "replay_20261117T014921Z_3b1195"
+    },
+    {
+      "arm": "B first contact",
+      "case": "bad_input",
+      "expected": "invalid_input",
+      "got": "invalid_input",
+      "pass": true,
+      "drift": [],
+      "seconds": 0.0,
+      "run_id": "replay_20261117T014951Z_7defef"
+    },
+    {
+      "arm": "B first contact",
+      "case": "session_timeout",
+      "expected": "success+recovered+drift",
+      "got": "success+recovered+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox",
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 65.04,
+      "run_id": "replay_20261117T014951Z_1fd70e"
+    },
+    {
+      "arm": "B first contact",
+      "case": "server_error",
+      "expected": "failed/APP_ERROR",
+      "got": "failed/APP_ERROR",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 30.19,
+      "run_id": "replay_20261117T015056Z_e54905"
+    },
+    {
+      "arm": "B first contact",
+      "case": "wrong_record",
+      "expected": "failed/WRONG_RECORD",
+      "got": "failed/WRONG_RECORD",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 33.22,
+      "run_id": "replay_20261117T015126Z_0e06a6"
+    },
+    {
+      "arm": "B first contact",
+      "case": "slow",
+      "expected": "success+drift",
+      "got": "success+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 40.52,
+      "run_id": "replay_20261117T015159Z_00885e"
+    },
+    {
+      "arm": "B first contact",
+      "case": "late_fill",
+      "expected": "success+drift",
+      "got": "success+drift",
+      "pass": true,
+      "drift": [
+        "enter_member_number:bbox",
+        "search:bbox"
+      ],
+      "seconds": 38.97,
+      "run_id": "replay_20261117T015240Z_11df65"
+    },
+    {
+      "arm": "B override approved",
+      "case": "happy",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 38.63,
+      "run_id": "replay_20261117T015319Z_1fde63"
+    },
+    {
+      "arm": "B override approved",
+      "case": "not_found",
+      "expected": "business_outcome/MEMBER_NOT_FOUND",
+      "got": "business_outcome/MEMBER_NOT_FOUND",
+      "pass": true,
+      "drift": [],
+      "seconds": 31.49,
+      "run_id": "replay_20261117T015358Z_896ac8"
+    },
+    {
+      "arm": "B override approved",
+      "case": "malformed",
+      "expected": "business_outcome/INVALID_MEMBER_NUMBER",
+      "got": "business_outcome/INVALID_MEMBER_NUMBER",
+      "pass": true,
+      "drift": [],
+      "seconds": 30.57,
+      "run_id": "replay_20261117T015429Z_fc2e27"
+    },
+    {
+      "arm": "B override approved",
+      "case": "restricted",
+      "expected": "business_outcome/PERMISSION_DENIED",
+      "got": "business_outcome/PERMISSION_DENIED",
+      "pass": true,
+      "drift": [],
+      "seconds": 29.78,
+      "run_id": "replay_20261117T015500Z_a88440"
+    },
+    {
+      "arm": "B override approved",
+      "case": "bad_input",
+      "expected": "invalid_input",
+      "got": "invalid_input",
+      "pass": true,
+      "drift": [],
+      "seconds": 0.0,
+      "run_id": "replay_20261117T015529Z_69c5dd"
+    },
+    {
+      "arm": "B override approved",
+      "case": "session_timeout",
+      "expected": "success+recovered",
+      "got": "success+recovered",
+      "pass": true,
+      "drift": [],
+      "seconds": 63.6,
+      "run_id": "replay_20261117T015529Z_a38fea"
+    },
+    {
+      "arm": "B override approved",
+      "case": "server_error",
+      "expected": "failed/APP_ERROR",
+      "got": "failed/APP_ERROR",
+      "pass": true,
+      "drift": [],
+      "seconds": 29.28,
+      "run_id": "replay_20261117T015633Z_58d004"
+    },
+    {
+      "arm": "B override approved",
+      "case": "wrong_record",
+      "expected": "failed/WRONG_RECORD",
+      "got": "failed/WRONG_RECORD",
+      "pass": true,
+      "drift": [],
+      "seconds": 33.03,
+      "run_id": "replay_20261117T015702Z_f63378"
+    },
+    {
+      "arm": "B override approved",
+      "case": "slow",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 40.14,
+      "run_id": "replay_20261117T015735Z_90a752"
+    },
+    {
+      "arm": "B override approved",
+      "case": "late_fill",
+      "expected": "success",
+      "got": "success",
+      "pass": true,
+      "drift": [],
+      "seconds": 38.06,
+      "run_id": "replay_20261117T015815Z_74e743"
+    },
+    {
+      "arm": "B first contact",
+      "case": "override proposed",
+      "expected": "two ops",
+      "got": "enter_member_number, search",
+      "pass": true,
+      "drift": [],
+      "seconds": 0,
+      "run_id": "replay_20261117T014126Z_5612f0"
+    }
+  ],
+  "passed": 31,
+  "cases": 31,
+  "commit_guard": {
+    "review_screen": "CB0410",
+    "after_post": "CB0410",
+    "blocked": [
+      "blocked by policy: 'Post' on CB0410 would commit a change (irreversible). Automation can reach a commit point but never press it; stop here."
+    ],
+    "sub_accounts_opened": 0,
+    "pass": true
+  },
+  "stability": {
+    "n": 20,
+    "results": {
+      "success": 20
+    },
+    "success_rate": 1.0,
+    "distinct_outputs_per_member": 1,
+    "p50_s": 37.79,
+    "p95_s": 38.19
+  },
+  "discovery": {
+    "n": 5,
+    "recorded": 5,
+    "replays_on_other_member": 5,
+    "median_turns": 5,
+    "median_cost_usd": 0.0183,
+    "spent_usd": 0.1155,
+    "escalated_runs": 0,
+    "runs": [
+      {
+        "run": 1,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0359,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261117T021135Z_345c90"
+      },
+      {
+        "run": 2,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0183,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261117T021632Z_dc04f5"
+      },
+      {
+        "run": 3,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0183,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261117T022127Z_a4fdf4"
+      },
+      {
+        "run": 4,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0183,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261117T022626Z_743387"
+      },
+      {
+        "run": 5,
+        "status": "recorded",
+        "replay_other_member": "success",
+        "turns": 5,
+        "cost_usd": 0.0247,
+        "escalations": 0,
+        "probes": [
+          "learned MEMBER_NOT_FOUND",
+          "learned INVALID_MEMBER_NUMBER",
+          "already handled as PERMISSION_DENIED"
+        ],
+        "run_id": "disc_20261117T023126Z_930046"
+      }
+    ]
+  },
+  "sub_accounts_opened": 0
+}

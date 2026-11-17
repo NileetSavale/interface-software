@@ -26,6 +26,7 @@ FailureClass = Literal[
     "ESCALATION_UNATTENDED",  # an escalate outcome matched and no operator is attached to take over
     "OPERATOR_ABORTED",     # an operator ended the run from the intervention
     "SURFACE_ERROR",        # the browser or app surface itself failed
+    "UNREADABLE",           # a value read from pixels wasn't certain enough to return (VisionSurface); never guessed
     "INTERNAL_ERROR",       # the replay itself crashed; the run log has what's known (redacted)
 ]
 

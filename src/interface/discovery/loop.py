@@ -25,6 +25,7 @@ from interface.policy import PolicyViolation, check_action, check_url, classify
 from interface.session import Intervention, Session
 from interface.surface.base import Resolved, SurfaceError
 from interface.surface.terminal import TerminalSurface
+from interface.surface.vision import VisionSurface
 from interface.surface.web import WebSurface
 
 SYSTEM = """You operate a bank's back-office web application for an automation system. You see the screen as an \
@@ -89,6 +90,12 @@ This application is a character-cell terminal (a green screen), read for you as 
 screen's code and title come first, a textbox is a field you can type in (named by the label in front of it), and \
 each function key on the bottom line is a button (click it to press the key, e.g. Enter=Search). A menu is answered \
 by typing the option's number in its field and pressing Enter. Messages appear near the bottom of the screen."""
+VISION_NOTE = """
+
+This application shows only pixels: there's no page structure under it, so the snapshot is read off the screen by \
+OCR. The screen's code and title come first, a textbox is a white input box (named by the label to its left), and a \
+button is a filled box with a caption: click it to press it. A menu is answered by typing the option's number in its \
+field and pressing the button next to it. OCR can drop the spaces between words. Messages appear near the bottom."""
 TEXT_ROLES = {"cell", "text", "generic", "paragraph", "columnheader", "rowheader", "strong", "emphasis"}
 NUDGE_AFTER = 3   # the same action on the same screen this many times in a row
 STOP_AFTER = 5
@@ -120,7 +127,7 @@ class Discovery:
         self.hub = operator_hub
         self.pause_timeout_s = pause_timeout_s
         self._rung = 0
-        self.system = SYSTEM + (TERMINAL_NOTE if goal.get("surface") == "terminal" else "")
+        self.system = SYSTEM + {"terminal": TERMINAL_NOTE, "vision": VISION_NOTE}.get(goal.get("surface"), "")
         self.tools = [t for t in TOOLS if t["name"] != "next_page" or goal.get("resultsSpanPages")]
         parts = urlsplit(self.base_url)
         self.recorder = Recorder(goal, f"{parts.scheme}://{parts.netloc}", self.run_id, planner.model)
@@ -170,8 +177,9 @@ class Discovery:
         self.log.event("discovery_started", capability=self.goal["capability"], goal=self.goal["goal"],
                        model=self.planner.model, inputs=sorted(self.inputs),
                        page_map=self.map.version() if self.map else None)
-        if self.goal.get("surface") == "terminal":
-            self.surface = TerminalSurface(policy=self.policy)
+        if self.goal.get("surface") in ("terminal", "vision"):
+            kind = TerminalSurface if self.goal["surface"] == "terminal" else VisionSurface
+            self.surface = kind(policy=self.policy)
             try:
                 await self.surface.navigate(self.base_url + self.goal.get("entryPath", "/"))
                 outcome = await self._loop()
@@ -515,7 +523,12 @@ class Discovery:
         # The model may see the value (it judges whether it read the right thing); the run log never keeps it
         self.log.mask(value.strip(), f"{{{{outputs.{args['output']}}}}}")
         self.log.event("extracted", output=args["output"])
-        return f"Recorded output {args['output']} (currently {self.for_model(value)!r})."
+        shown = self.for_model(value)
+        if value.strip() and shown.strip() == value.strip():
+            # Nothing on screen taught the masker this value (a surface can read a value more exactly than its
+            # snapshot showed it): the model gets its shape, never the value
+            shown = f"⟨{args['output']}: {len(value.strip())} characters⟩"
+        return f"Recorded output {args['output']} (currently {shown!r})."
 
     async def _verify(self, args: dict) -> str:
         input_name = args["input"]

@@ -23,6 +23,7 @@ ErrorCode = Literal[
     "NOT_ACTIONABLE",      # found, but hidden, disabled or covered (e.g. by a banner)
     "TIMEOUT",
     "NAVIGATION_BLOCKED",  # outside the allowlist
+    "UNREADABLE",          # read from pixels, but not with enough confidence to return (VisionSurface)
 ]
 
 

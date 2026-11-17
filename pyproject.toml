@@ -11,11 +11,18 @@ dependencies = [
     "pydantic>=2.9",
     "pyte>=0.8",
     "python-multipart>=0.0.33",
+    "rapidocr-onnxruntime>=1.4.4",
     "uvicorn>=0.54.0",
 ]
 
 [project.scripts]
 interface = "interface.cli:main"
+
+[project.optional-dependencies]
+desktop = [
+    "mss>=10.2.0",
+    "pyautogui>=0.9.54",
+]
 
 [dependency-groups]
 dev = [

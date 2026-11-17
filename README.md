@@ -16,7 +16,7 @@ mid-run, and nothing automated can ever press "Confirm".
   success, business outcomes, recovery, hard failures, a handoff with a screen recording, a second bank, a blocked
   commit, and a third bank run without and with its page map. Plus [`evidence/parabank/`](evidence/parabank/README.md):
   two capabilities discovered and replayed on ParaBank, a public demo bank we didn't write.
-- **Measured:** [`evals/report.md`](evals/report.md): eight suites, N and commit stated.
+- **Measured:** [`evals/report.md`](evals/report.md): nine suites, N and commit stated.
 - **Visual tour:** <https://nileetsavale.github.io/interface-software/>: interactive architecture, decisions, numbers.
 
 ## Setup
@@ -185,6 +185,21 @@ uv run interface discover goals/terminal_lookup_member_balance.json --base-url t
     --input memberId=12345 --out /tmp/terminal   # Claude on the green screen, about $0.02
 ```
 
+**9c. Pixels only.** The same thread on a client that exposes nothing but a picture (no DOM text, no
+accessibility tree), read by OCR and driven by mouse and keyboard. In the browser it's a canvas; `desktop://` opens
+the same screens in a native Tk window driven with real OS input (macOS; the terminal needs Screen Recording and
+Accessibility permission):
+
+```bash
+uv run interface mock-gui                          # http://127.0.0.1:4400; --variant b for the second bank
+G=artifacts/core_banking_gui.lookup_member_balance.json
+uv run interface approve $G
+uv run interface replay $G --base-url http://127.0.0.1:4400 --input memberId=34567
+uv run interface discover goals/vision_lookup_member_balance.json --base-url http://127.0.0.1:4400 \
+    --input memberId=12345 --out /tmp/pixels     # Claude reading OCR text, about $0.04
+uv sync --extra desktop && uv run python scripts/desktop_demo.py   # the native window, recorded → evidence/desktop-demo/
+```
+
 **10. An agent calling the capabilities.** `interface mcp` serves the bank's approved artifacts as MCP tools over
 stdio: one tool each, its input schema from the artifact, its answer the result contract. For an agent host's config:
 
@@ -206,7 +221,8 @@ src/interface/
   artifact/    schema.py (the contract), overrides.py (tenants), library.py (standard outcomes)
   replay/      executor.py (deterministic replay), result.py (the five result types)
   surface/     web.py + locate.js (Playwright over the accessibility tree), human.js (records a person's actions),
-               terminal.py (a VT100 green screen, read through an emulator)
+               screen.py (what a surface without a tree shares), terminal.py (a VT100 green screen, read through
+               an emulator), vision.py (pixels only: OCR and mouse and keyboard, on a canvas or a native window)
   policy.py    allowlist, risk classes, the network gate        pii.py       the masker the model sees through
   pagemap.py   each bank's learned map of screens and actions
   session.py   the control token                                operator.py  the operator page
@@ -214,7 +230,8 @@ src/interface/
   drift.py     the drift report across runs                   mcp_server.py  approved artifacts as MCP tools
 apps/mock_core_banking/   the target: faults, variant B, layout shuffles, hostile pages
 apps/mock_terminal/       the green-screen host: the same members and faults on a 24x80 terminal
+apps/mock_gui/            the same host as a GUI drawn only in pixels: a canvas page and a native Tk window
 goals/        the capabilities' goal specs              artifacts/  the discovered artifacts
-evals/        the eight suites and their results        evidence/   curated runs
-tests/        160 tests                                 docs/       design, decisions, the site
+evals/        the nine suites and their results        evidence/   curated runs
+tests/        169 tests                                 docs/       design, decisions, the site
 ```

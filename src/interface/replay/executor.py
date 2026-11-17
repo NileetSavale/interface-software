@@ -30,6 +30,7 @@ from interface.replay.result import (
 )
 from interface.surface.base import Resolved, SurfaceError
 from interface.surface.terminal import TerminalSurface
+from interface.surface.vision import Unreadable, VisionSurface
 from interface.surface.web import WebSurface
 
 DEFAULT_TIMEOUT_MS = 10_000
@@ -175,8 +176,9 @@ class Replayer:
                                        error_class="CIRCUIT_OPEN", expected="no recent wrong-record incidents",
                                        observed=f"{Audit.TRIP_AFTER}+ WRONG_RECORD in the last day; re-approve after "
                                                 f"review to reset"))
-        if self.artifact.app.surface == "terminal":
-            self.surface = TerminalSurface(policy=self.artifact.policy)
+        if self.artifact.app.surface in ("terminal", "vision"):
+            kind = TerminalSurface if self.artifact.app.surface == "terminal" else VisionSurface
+            self.surface = kind(policy=self.artifact.policy)
             try:
                 result = await self._run_all()
             finally:
@@ -274,7 +276,7 @@ class Replayer:
             for name, extractor in step.extract.items():
                 hit = await self._resolve(step, extractor, timeout, recovering)
                 await self._identity_gate(step.id)
-                text = await self._filled(hit.handle, min(timeout, 5_000))
+                text = await self._filled(hit.handle, min(timeout, 5_000), step.id)
                 self.outputs[name] = parse_value(text, extractor.parse)
                 # The caller gets the value; the run log and evidence on disk only the placeholder
                 for shown in {text.strip(), str(self.outputs[name])}:
@@ -600,7 +602,7 @@ class Replayer:
                     if not isinstance(hit, Resolved):
                         raise self._fail("checkpoint", "CHECKPOINT_FAILED", f"the {assertion.input} on screen",
                                          "not found", evidence=await self._evidence("checkpoint"))
-                    shown = await self._filled(hit.handle, 5_000)
+                    shown = await self._filled(hit.handle, 5_000, "checkpoint")
                     if not shown.strip():
                         raise self._fail("checkpoint", "TIMEOUT", f"the {assertion.input} on screen", "never filled in")
                     if shown.strip() != self._render("checkpoint", assertion.equals).strip():
@@ -619,7 +621,7 @@ class Replayer:
                 continue
             # Empty is "not shown yet", not "someone else": ParaBank fills its detail cells by a background call
             # ~150 ms after the page loads, and reading too early raised a false WRONG_RECORD
-            shown = await self._filled(hit.handle, 5_000)
+            shown = await self._filled(hit.handle, 5_000, step_id)
             if not shown.strip():
                 raise self._fail(step_id, "TIMEOUT", f"the {assertion.input} on screen", "never filled in")
             if shown.strip() != self._render(step_id, assertion.equals).strip():
@@ -650,12 +652,18 @@ class Replayer:
                          f"not on any of the first {step.max_pages + 1} pages (maxPages {step.max_pages})",
                          evidence=await self._evidence(step.id))
 
-    async def _filled(self, handle, timeout_ms: int) -> str:
+    async def _filled(self, handle, timeout_ms: int, step_id: str) -> str:
         """The element's text once it has any: a value a page fills in after loading is waited for, not read empty.
-        Once there, it's read once; nothing here waits for it to become the value we want."""
+        Once there, it's read once; nothing here waits for it to become the value we want. A value read from
+        pixels that isn't certain fails the step: it's never guessed."""
         deadline = asyncio.get_running_loop().time() + timeout_ms / 1000
-        while not (text := await self.surface.read_text(handle)).strip() and asyncio.get_running_loop().time() < deadline:
-            await asyncio.sleep(0.1)
+        try:
+            while not (text := await self.surface.read_text(handle)).strip() \
+                    and asyncio.get_running_loop().time() < deadline:
+                await asyncio.sleep(0.1)
+        except Unreadable as e:
+            raise self._fail(step_id, "UNREADABLE", "a value read with confidence", str(e),
+                             evidence=await self._evidence(step_id))
         return text
 
     async def _wrong_record(self, step_id: str, assertion: IdentityMatches, shown: str):

@@ -101,6 +101,14 @@ def summary(results: dict) -> dict:
                          "stable": round(tm["stability"]["success_rate"] * tm["stability"]["n"]),
                          "stable_n": tm["stability"]["n"], "recorded": dc.get("recorded"), "disc_n": dc.get("n"),
                          "date": tm["date"], "commit": tm["commit"]}
+    if vs := results.get("vision"):
+        dc = vs.get("discovery") or {}
+        s["vision"] = {"passed": vs["passed"], "cases": vs["cases"], "guard": vs["commit_guard"]["pass"],
+                       "reads": vs["reads"]["values"], "right": vs["reads"]["right"],
+                       "misreads": vs["reads"]["silent_misreads"],
+                       "stable": round(vs["stability"]["success_rate"] * vs["stability"]["n"]),
+                       "stable_n": vs["stability"]["n"], "recorded": dc.get("recorded"), "disc_n": dc.get("n"),
+                       "date": vs["date"], "commit": vs["commit"]}
     if pb := results.get("parabank"):
         s["parabank"] = {"ok": sum(a["results"].get("success", 0) for a in pb["arms"]), "runs": sum(a["n"] for a in pb["arms"]),
                          "distinct": max(a["distinct_outputs"] for a in pb["arms"]), "resets": pb["database_resets"],

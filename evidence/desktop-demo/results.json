@@ -1,0 +1,41 @@
+[
+  {
+    "shows": "a member's balance, bank A",
+    "bank": "A",
+    "fault": null,
+    "result": "success",
+    "drift": [],
+    "seconds": 44.4,
+    "run_id": "replay_20261117T020013Z_c87353"
+  },
+  {
+    "shows": "a member number that doesn't exist",
+    "bank": "A",
+    "fault": null,
+    "result": "business_outcome/MEMBER_NOT_FOUND",
+    "drift": [],
+    "seconds": 36.0,
+    "run_id": "replay_20261117T020058Z_5304ac"
+  },
+  {
+    "shows": "the same lookup at bank B: new labels, font and colours",
+    "bank": "B",
+    "fault": null,
+    "result": "success+drift",
+    "drift": [
+      "enter_member_number:bbox",
+      "search:bbox"
+    ],
+    "seconds": 45.5,
+    "run_id": "replay_20261117T020134Z_e214cf"
+  },
+  {
+    "shows": "the host shows someone else's record",
+    "bank": "A",
+    "fault": "wrong_record",
+    "result": "failed/WRONG_RECORD",
+    "drift": [],
+    "seconds": 40.1,
+    "run_id": "replay_20261117T020219Z_19460b"
+  }
+]

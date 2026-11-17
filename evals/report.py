@@ -105,6 +105,35 @@ def terminal(d: dict) -> str:
 """
 
 
+def vision(d: dict) -> str:
+    rows = [[r["arm"], r["case"], f"`{r['expected']}`", f"`{r['got']}`", ", ".join(r["drift"]) or "–",
+             "✅" if r["pass"] else "❌"] for r in d["fault_matrix"]]
+    rd, g, st, dc = d["reads"], d["commit_guard"], d["stability"], d.get("discovery")
+    kinds = ", ".join(f"{k} {v.get('right', 0)}/{sum(v.values())}" for k, v in rd["per_kind"].items())
+    found = (f"""- **Discovery with Claude:** {dc['recorded']}/{dc['n']} recorded, {dc['replays_on_other_member']}/{dc['n']} replayed on another
+  member, median {dc['median_turns']} turns, median ${dc['median_cost_usd']:.3f} including probes (${dc['spent_usd']:.2f} spent),
+  {dc['escalated_runs']} escalated.""" if dc else "- Discovery with Claude: not run (`--llm`).")
+    if dc and (stamp := d.get("discovery_stamp")):
+        found += (f" (This arm ran at `{stamp['commit']}`, {stamp['date'][:10]}, before a change that made replay's "
+                  f"condition checks reuse a fresh capture; the rest of this section is from the run above.)")
+    return f"""## 9. Pixels only (VisionSurface)
+{_stamp(d)} A client that draws itself on a canvas: no DOM text, no accessibility tree. Read by OCR, driven by mouse
+and keyboard, with the artifact Claude recorded there.
+
+- **Reads: {rd['right']}/{rd['values']} values right on {rd['screens']} random screens (both looks), {rd['refused']} refused as
+  UNREADABLE, silent misreads: {rd['silent_misreads']}.** {kinds}.
+- **Fault matrix: {d['passed']}/{d['cases']}.** Bank B relabels the member field and the search button and changes font and
+  colours; the layout doesn't move.
+- **Commit guard:** on the review screen ({g['review_screen']}), Post was clicked and the click never sent ({len(g['blocked'])}
+  blocked, still on {g['after_post']}). Sub-accounts opened across the suite: **{d['sub_accounts_opened']}**.
+- **Stability:** {st['n']} replays on rotating members, {st['success_rate']:.0%} success, {st['distinct_outputs_per_member']} distinct
+  output per member, p50 {st['p50_s']} s, p95 {st['p95_s']} s.
+{found}
+
+{_table(["arm", "case", "expected", "actual", "drift", ""], rows)}
+"""
+
+
 def robustness(d: dict) -> str:
     parts = [f"""## 5. Recorder robustness (no LLM)
 {_stamp(d)} {d['seeds']} shuffled layouts per flow (frames, fieldsets, rows, columns and nesting reordered; labels kept).
@@ -161,7 +190,8 @@ between arms is noise.
 def write() -> str:
     sections = [(s, fn) for s, fn in (("fault_matrix", fault_matrix), ("discovery", discovery), ("stability", stability),
                                       ("safety", safety), ("robustness", robustness), ("parabank", parabank),
-                                      ("concurrency", concurrency), ("terminal", terminal))]
+                                      ("concurrency", concurrency), ("terminal", terminal),
+                                      ("vision", vision))]
     body = [fn(data) for s, fn in sections if (data := _load(s))]
     missing = [s for s, _ in sections if not _load(s)]
     text = f"""# Evaluation report

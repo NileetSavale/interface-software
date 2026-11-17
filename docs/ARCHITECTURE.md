@@ -794,6 +794,65 @@ grid position) and with B's override approved; F10=Post on the review screen was
 A first attempt at the Claude arm crashed when a probe's API call raised. A probe the model can't answer is now
 skipped and the recording stands (tested).
 
+### As built: pixels only (Pass 3 item 10, D32)
+`src/interface/surface/vision.py` is a third Surface, for apps that expose only a picture: Citrix-streamed desktops,
+Swing or Delphi clients, canvas-drawn pages. What the terminal surface did over its grid moved into
+`surface/screen.py` (`ScreenSurface`: the snapshot, the recorder's strategies, resolve, conditions, the commit
+guard), so the terminal and vision surfaces differ only in how they read the screen and how they press and type.
+
+The mock is `apps/mock_gui` (`interface mock-gui`, http://127.0.0.1:4400): the green-screen host's screens, members
+and faults with a GUI drawn over them, laid out once by the server as a spec of things at pixel positions and drawn
+by two clients, a `<canvas>` page (driven through Playwright's screenshots, mouse and keyboard only; nothing is read
+from the DOM) and a native Tk window (`apps/mock_gui/desktop.py`, `desktop://`, driven through mss screen capture
+and pyautogui OS input). Bank B relabels like the terminal's and draws in another font and colours, with blue
+buttons.
+
+**Reading it.** RapidOCR (local, ONNX, about 0.2 s a screen) finds the words; boxes come from the pixels (stacked
+rows of a long unbroken run of not-background colour, which survive a gap where anti-aliased text passes through the
+background's colour):
+
+| On the screen | In the snapshot |
+|---|---|
+| the top band: `CB0300   Member Inquiry   First Bank` | `text "CB0300"`, `heading "Member Inquiry"`, `text "First Bank"` |
+| `Member #:` then a white box | `textbox "Member #"` (the label to its left names it) |
+| a white box with ink but no letters | a masked field, shown as `***` |
+| a filled box with a caption | `button "Search"` |
+| `Name:` then `Jane Doe` | `text "Name:"`, `text "Jane Doe"` (so the masker's label rule applies) |
+
+Positions are logical pixels (a Retina capture is divided by its scale), so a recording made on the canvas describes
+the same places on the native window.
+
+**What OCR got wrong, and what each rule answers** (all found by the read check, `evals/vision.py`):
+- The recogniser reads Chinese as well as English; given blank space beside a short value it reads a character into
+  it (`1` → `1個`). Every crop is cut to its ink with a 2 px margin, and a value with a character the app doesn't show
+  is UNREADABLE.
+- It drops spaces (`Margarethe Doe` → `MargaretheDoe`): a wrong name, returned as success, 3 times in 60 values on
+  the first run. Spaces now come from the pixels too: the crop is cut at blank gaps of 5 px or more (measured:
+  letters ≤ 3, digits ≤ 4, spaces ≥ 5), each piece is read alone, and the pieces must spell what the whole reads
+  agreed on. In a value a space survives only between letters, so a wide gap after a comma never changes a balance or
+  a member number.
+- It misses a single short character on the whole screen (the menu option `1`): a field's contents are read from the
+  field's own crop.
+
+**Reading a value.** Twice, from a crop at two scales; the reads must agree, each with confidence ≥ 0.85, and a
+value with three or more digits mustn't mix in a letter OCR confuses with one (`0/O`, `1/l`, `5/S`). Anything else
+raises `Unreadable`, and the step fails `UNREADABLE`: a misread balance returned as success would be worse than no
+answer. What's typed is read back off the field before the step counts (a masked field: that it shows a mask).
+
+**The model reads text, never the picture.** The OCR'd snapshot goes through the same masker as every surface;
+sending screenshots would send the record. Building this found a leak the other surfaces couldn't have: an
+extraction read a name with its space restored while the snapshot had shown it without, so the masker didn't know the
+spelling and the extract tool's reply carried it. The snapshot now places spaces the way extraction does, and
+discovery never echoes an extracted value the masker hasn't seen on screen: the model gets its length instead
+(tested). Evidence screenshots black out every field and every text that isn't a label, title or button.
+
+**Targets** are the terminal's: role and name, label, the caption it's right of, then `bbox` in logical pixels,
+which hits an element on the same line that starts where the recorded one started or holds its centre. (Mere
+overlap was too loose: on bank B the shorter "Find" button left the recorded "Search" box overlapping "Exit" too, and
+replay rightly refused to choose.) Names match with whitespace ignored, never more loosely.
+
+**Measured** (suite 9): MEASURED_PLACEHOLDER
+
 ### As built: crashes leave a record (found by that crash)
 That crashed run's log simply stopped after the model's `done`: no error, no traceback, no final event, so its
 cause couldn't be recovered afterwards. Only `Runs.invoke` caught crashes, and kept just the message. Now the runs

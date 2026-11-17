@@ -2,7 +2,7 @@
 
 Claude discovers a task once against a live legacy UI, and the run becomes a typed, versioned capability. Once a
 person approves it, it replays without the model: same inputs, same steps, same typed result, in about 4 s for $0.
-Numbers come from [`evals/report.md`](evals/report.md) (eight suites, each stamped with its commit, N stated). The full design is in
+Numbers come from [`evals/report.md`](evals/report.md) (nine suites, each stamped with its commit, N stated). The full design is in
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 31 decisions, including where I overrode the AI I built this
 with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 

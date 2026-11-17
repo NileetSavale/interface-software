@@ -173,6 +173,7 @@
             "ESCALATION_UNATTENDED",
             "OPERATOR_ABORTED",
             "SURFACE_ERROR",
+            "UNREADABLE",
             "INTERNAL_ERROR"
           ],
           "title": "Errorclass",

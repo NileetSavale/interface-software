@@ -315,6 +315,60 @@ def terminal_cases():
         host.close()
 
 
+def vision_cases():
+    """Item 10: the same thread on an app that is only pixels (VisionSurface, D32)."""
+    from evals import vision
+    path = vision.ARTIFACT
+    art = load_artifact(path)
+    run_id = art.provenance.discovery_run_id
+    dest = OUT / "32-discovery-pixels"
+    shutil.copytree(RUNS / run_id, dest)
+    for probe in sorted(RUNS.glob(f"{run_id}-probe*")):
+        shutil.copytree(probe, dest / "probes" / probe.name.split("-")[-1])
+    shutil.copy(path, dest / "artifact.json")
+    finished = next(json.loads(l) for l in (dest / "events.jsonl").read_text().splitlines() if '"discovery_finished"' in l)
+    cases.append({"dir": dest.name, "title": f"Real Claude discovery from pixels only: {art.capability.title}",
+                  "why": f"{art.provenance.model} on a client drawn on a canvas, with no DOM text or accessibility tree: "
+                         f"the screen read by OCR into the same snapshot, {finished['steps']} steps, "
+                         f"${finished['cost_usd']:.3f} including probes ({'; '.join(p['result'] for p in finished.get('probes', []))}). "
+                         f"The model read the masked OCR text, never the picture.",
+                  "result": finished["status"], "run_id": run_id})
+    print(f"{dest.name:<36} {finished['status']}", flush=True)
+
+    host = vision.Host()
+    try:
+        subject = vision.approved(host)
+
+        def case(name, title, why, inputs, fault=None, variant="a", **kw):
+            result, _ = vision.replay(host, subject, inputs, fault, variant, **kw)
+            keep(name, result.run_id, title, why, result)
+            return result
+
+        case("33-pixels-replay-success", "Pixels only, no model: another member", "Clicks into each field, types, "
+             "reads it back off the screen, presses buttons by clicking them, and reads two values, each twice from a "
+             "crop at two scales that must agree. The screenshots here have every value blacked out.", vision.HAPPY)
+        pending = Path(tempfile.mkdtemp())
+        case("34-pixels-bank-b", "Pixels only, second bank: another look, new labels", "Bank B draws in Verdana on "
+             "other colours with blue buttons, and calls the field \"Mbr Number\" and the button Find. Role, label and "
+             "caption miss; the field's place in the window (bbox, logical pixels) finds both, and B's override is "
+             "proposed (proposed-override.b.json).", vision.HAPPY, variant="b", tenant="b", pending_dir=pending)
+        shutil.copy(pending / "b.json", OUT / "34-pixels-bank-b" / "proposed-override.b.json")
+        case("35-pixels-wrong-record", "Pixels only: the client shows a different member", "The member number is read "
+             "off the screen before anything else: WRONG_RECORD, structure-only evidence.", vision.HAPPY,
+             fault="wrong_record")
+        guard = vision.commit_guard(host)
+        dest = OUT / "36-pixels-commit-guard"
+        dest.mkdir()
+        (dest / "result.json").write_text(json.dumps(guard, indent=2) + "\n")
+        cases.append({"dir": dest.name, "title": "Pixels only: Post is never clicked", "why": "A surface signed on "
+                      "fills the sub-account form by OCR and reaches the review screen (CB0410, in commitPaths), then "
+                      "is told to click Post. The click is dropped before the mouse moves; only exit and cancel get "
+                      "through there.", "result": f"blocked, opened {guard['sub_accounts_opened']}", "run_id": None})
+        print(f"{dest.name:<36} {cases[-1]['result']}", flush=True)
+    finally:
+        host.close()
+
+
 def map_discovery():
     """A real Claude discovery with the bank's page map on, from the latest discovery eval."""
     results = json.loads((ROOT / "evals" / "results" / "discovery.json").read_text())
@@ -375,21 +429,25 @@ Parasoft's public demo bank, replayed with no model, and what that app found tha
 **An agent calling the tools:** [`agent-mcp/`](agent-mcp/README.md) has Claude answering a teller's question using
 only the MCP tools `interface mcp` serves: two calls, two replays, no model in either.
 
+**A native window, real OS input:** [`desktop-demo/`](desktop-demo/README.md) has the artifact Claude recorded on the
+canvas client replayed on a native Tk window, by screen capture and OS mouse and keyboard, with a recording.
+
 Aggregate numbers across many runs are in [`evals/report.md`](../evals/report.md).
 """)
 
 
 def main():
     OUT.mkdir(exist_ok=True)
-    # Everything but evidence/parabank/ and evidence/agent-mcp/, which call Claude and have their own scripts
+    # Everything but the folders with their own scripts (Claude calls, or a screen recording on a Mac)
     for path in OUT.iterdir():
-        if path.name not in ("parabank", "agent-mcp"):
+        if path.name not in ("parabank", "agent-mcp", "desktop-demo"):
             shutil.rmtree(path) if path.is_dir() else path.unlink()
     discoveries()
     replays()
     hostile_discovery()
     map_discovery()
     terminal_cases()
+    vision_cases()
     index()
     (OUT / "cases.json").write_text(json.dumps(cases, indent=2) + "\n")
     if leaks := scan():

@@ -2,6 +2,7 @@
 
     interface mock-app
     interface mock-terminal                             (the green-screen host, telnet://127.0.0.1:4300)
+    interface mock-gui                                  (the pixels-only client, http://127.0.0.1:4400)
     interface discover goals/lookup_member_balance.json --input memberId=12345
     interface approve artifacts/core_banking.lookup_member_balance.json
     interface replay artifacts/core_banking.lookup_member_balance.json --input memberId=12345
@@ -200,7 +201,27 @@ def cmd_mock_app(args) -> int:
     return 0
 
 
+def _project_root_importable():
+    """apps/ sits at the project root, which an installed entry point doesn't have on its import path."""
+    root = str(Path(__file__).resolve().parents[2])
+    if root not in sys.path:
+        sys.path.insert(0, root)
+
+
+def cmd_mock_gui(args) -> int:
+    import uvicorn
+    _project_root_importable()
+    from apps.mock_gui.app import BANK
+    BANK.variant(args.variant)
+    BANK.always = args.fault
+    BANK.log.echo()
+    uvicorn.run("apps.mock_gui.app:app", port=args.port, app_dir=str(Path(__file__).resolve().parents[2]),
+                log_level="warning")
+    return 0
+
+
 def cmd_mock_terminal(args) -> int:
+    _project_root_importable()
     from apps.mock_terminal.app import main as serve_terminal
     serve_terminal(args.port, args.variant, args.fault)
     return 0
@@ -287,6 +308,12 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--variant", default="a", choices=["a", "b", "c"],
                    help="b: a second bank's templates; c: b with the menu link renamed")
     p.set_defaults(fn=cmd_mock_app)
+
+    p = sub.add_parser("mock-gui", help="serve the mock pixels-only core-banking client (canvas; desktop:// for Tk)")
+    p.add_argument("--port", type=int, default=4400)
+    p.add_argument("--variant", choices=["a", "b"], default="a")
+    p.add_argument("--fault", help="this fault every time")
+    p.set_defaults(fn=cmd_mock_gui)
 
     p = sub.add_parser("mock-terminal", help="serve the mock green-screen core-banking host (telnet://)")
     p.add_argument("--port", type=int, default=4300)
