@@ -1,6 +1,6 @@
 {
-  "runId": "replay_20261117T030147Z_142c3c",
-  "completedAt": "2026-11-17T03:01:52+00:00",
+  "runId": "replay_20261117T041028Z_a872c1",
+  "completedAt": "2026-11-17T04:10:32+00:00",
   "recovered": [],
   "drift": [],
   "status": "failed",
@@ -11,7 +11,7 @@
   "evidence": [
     {
       "kind": "a11y_snapshot",
-      "path": "runs/replay_20261117T030147Z_142c3c/read_name.snapshot.txt"
+      "path": "runs/replay_20261117T041028Z_a872c1/read_name.snapshot.txt"
     }
   ]
 }

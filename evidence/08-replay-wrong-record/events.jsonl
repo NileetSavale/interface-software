@@ -1,11 +1,11 @@
-{"t": 0.0, "at": "2026-11-17T03:01:47+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b0ed439db19c", "inputs": ["memberId"], "tenant": null, "page_map": null}
-{"t": 0.284, "at": "2026-11-17T03:01:48+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.375, "at": "2026-11-17T03:01:50+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.449, "at": "2026-11-17T03:01:50+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.505, "at": "2026-11-17T03:01:50+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.915, "at": "2026-11-17T03:01:50+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.355, "at": "2026-11-17T03:01:51+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.419, "at": "2026-11-17T03:01:51+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.804, "at": "2026-11-17T03:01:51+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.863, "at": "2026-11-17T03:01:51+00:00", "event": "identity_mismatch", "step": "read_name", "input": "memberId", "observed_last4": "****5678"}
-{"t": 4.433, "at": "2026-11-17T03:01:52+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261117T030147Z_142c3c", "completedAt": "2026-11-17T03:01:52+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "read_name", "errorClass": "WRONG_RECORD", "expected": "memberId = {{inputs.memberId}}", "observed": "a different member", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261117T030147Z_142c3c/read_name.snapshot.txt"}]}}
+{"t": 0.0, "at": "2026-11-17T04:10:28+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b0ed439db19c", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.252, "at": "2026-11-17T04:10:28+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.337, "at": "2026-11-17T04:10:30+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.404, "at": "2026-11-17T04:10:30+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.45, "at": "2026-11-17T04:10:30+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.86, "at": "2026-11-17T04:10:31+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.268, "at": "2026-11-17T04:10:31+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.33, "at": "2026-11-17T04:10:31+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.717, "at": "2026-11-17T04:10:31+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.775, "at": "2026-11-17T04:10:32+00:00", "event": "identity_mismatch", "step": "read_name", "input": "memberId", "observed_last4": "****5678"}
+{"t": 4.35, "at": "2026-11-17T04:10:32+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261117T041028Z_a872c1", "completedAt": "2026-11-17T04:10:32+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "read_name", "errorClass": "WRONG_RECORD", "expected": "memberId = {{inputs.memberId}}", "observed": "a different member", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261117T041028Z_a872c1/read_name.snapshot.txt"}]}}

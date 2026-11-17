@@ -255,7 +255,7 @@ window.SITE = {
    "topic": "A surface with only pixels",
    "proposed": "(Pass 3 item 10) For apps with no tree at all (Citrix, Swing, Delphi, canvas), the AI proposed reading the screen by OCR into the same element list the terminal builds, and the user agreed the design: RapidOCR, canvas evals in CI plus a native Tk demo with real OS input, the model reading OCR text and never the picture",
    "chose": "<strong>Agreed: <code>VisionSurface</code> (on <code>ScreenSurface</code>, shared with the terminal) finds words by OCR and boxes from the pixels: a near-white box is a field named by the label to its left, a filled box with a caption a button, the top band the screen code and title. Positions are logical pixels, so a recording on the canvas replays on the native window. A value is read twice from a crop (two scales), must agree with confidence and not mix digits with look-alike letters, or the step fails <code>UNREADABLE</code>; spaces come back from the pixel gaps, and in a value only between letters. Typed text is read back off the screen</strong>",
-   "why": "A misread balance returned as success is the one failure that's worse than none, so every rule here trades answers for certainty, and the read check measures it: values read against the truth on random screens, silent misreads must be 0. Sending the model screenshots would send it the record; the OCR'd snapshot goes through the same masker as every other surface. Fields are found by a convention (white wells), which a real app may not follow: a calibration per app is the honest next step. Not built: attended handoff on this surface, scrolling lists, disabled state (only colour).",
+   "why": "A misread balance returned as success is the one failure that's worse than none, so every rule here trades answers for certainty, and the read check measures it: values read against the truth on random screens, silent misreads must be 0. Sending the model screenshots would send it the record; the OCR'd snapshot goes through the same masker as every other surface. Fields are found by a convention (white wells), which a real app may not follow: a calibration per app is the honest next step. Not built: attended handoff on this surface, scrolling lists, disabled state (only colour). On ParaBank, an app not built for these conventions, three attempts found seven gaps (select-all on macOS, masked fields, tables as buttons, links, labels above and inline, flat-snapshot masking, unscoped positions); fixed, the fourth recorded and replayed (<code>evidence/parabank-pixels/</code>).",
    "kind": "agreed"
   }
  ],
@@ -377,8 +377,8 @@ window.SITE = {
    "stable_n": 20,
    "recorded": 5,
    "disc_n": 5,
-   "date": "2026-11-17T03:01:05+00:00",
-   "commit": "212b88f"
+   "date": "2026-11-17T04:10:09+00:00",
+   "commit": "1acc2c8"
   },
   "parabank": {
    "ok": 40,
@@ -611,7 +611,19 @@ window.SITE = {
    "date": "2026-11-16",
    "subject": "Pixels only: VisionSurface over OCR, a canvas and a native mock client, suite 9",
    "body": "ScreenSurface takes what the terminal surface had that doesn't depend on the terminal; VisionSurface\nreads a picture by OCR (RapidOCR) and boxes from the pixels, acts by mouse and keyboard, on a canvas in\nChromium or a native Tk window (desktop://). Values are read twice from a crop and must agree, or the\nstep fails UNREADABLE; spaces come from the pixel gaps. Discovery never echoes an extracted value the\nmasker hasn't seen. mock-gui serves the terminal host's screens as a GUI; mock-terminal and mock-gui\ncan import apps/ from the installed entry point. Suite 9, desktop demo, D32."
+  },
+  {
+   "sha": "dc219bd",
+   "date": "2026-11-16",
+   "subject": "Suite 9 at 212b88f, evidence 32-36, desktop demo, report and site",
+   "body": ""
+  },
+  {
+   "sha": "1acc2c8",
+   "date": "2026-11-16",
+   "subject": "Pixels on ParaBank: seven gaps the mock hid, fixed; Claude recorded it and it replayed",
+   "body": "Select-all is the platform's, then Backspace (a retry had appended); masked fields are counted by\ntheir glyphs; a box of several lines is a container; links by colour or underline, read back by\ntheir role; labels above a field, and \"Label: value\" split at the gap; a greeting and bare\nidentifiers are masked in a flat snapshot; an element showing an input is found by that value and\na screen without a code gets no positions; captures retry through a navigation. The browser\nbackend screenshots the whole page and keeps the network gate. evidence/parabank-pixels."
   }
  ],
- "tests": 136
+ "tests": 138
 };
