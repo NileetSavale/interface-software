@@ -43,7 +43,7 @@ The mock app holds only made-up members, so these are not real credentials. Arti
 Nothing below needs an API key except discovery itself.
 
 ```bash
-uv run pytest                              # 138 tests; discovery is driven by a scripted planner, not Claude
+uv run pytest                              # 172 tests; discovery is driven by a scripted planner, not Claude
 uv run python -m evals all                 # the four eval suites that need no LLM (~15 min)
 uv run python scripts/make_evidence.py     # rebuilds evidence/ (replays run fresh; no model)
 ```

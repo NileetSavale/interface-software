@@ -83,13 +83,20 @@ cookie, session, control token or output leaking between runs would show there o
 """
 
 
+def _arm_stamp(d: dict) -> str:
+    """A Claude arm kept from an earlier run (re-running it costs money), stamped with its own commit."""
+    stamp = d.get("discovery_stamp")
+    return (f" (This arm ran at `{stamp['commit']}`, {stamp['date'][:10]}; the rest of this section is from the run "
+            f"above.)") if stamp else ""
+
+
 def terminal(d: dict) -> str:
     rows = [[r["arm"], r["case"], f"`{r['expected']}`", f"`{r['got']}`", ", ".join(r["drift"]) or "–",
              "✅" if r["pass"] else "❌"] for r in d["fault_matrix"]]
     g, st, dc = d["commit_guard"], d["stability"], d.get("discovery")
     found = (f"""- **Discovery with Claude:** {dc['recorded']}/{dc['n']} recorded, {dc['replays_on_other_member']}/{dc['n']} replayed on another
   member, median {dc['median_turns']} turns, median ${dc['median_cost_usd']:.3f} including probes (${dc['spent_usd']:.2f} spent),
-  {dc['escalated_runs']} escalated.""" if dc else "- Discovery with Claude: not run (`--llm`).")
+  {dc['escalated_runs']} escalated.{_arm_stamp(d)}""" if dc else "- Discovery with Claude: not run (`--llm`).")
     return f"""## 8. The green screen (TerminalSurface)
 {_stamp(d)} The artifact Claude recorded on the mock terminal host, replayed with no model over a VT100 emulator.
 
@@ -113,9 +120,8 @@ def vision(d: dict) -> str:
     found = (f"""- **Discovery with Claude:** {dc['recorded']}/{dc['n']} recorded, {dc['replays_on_other_member']}/{dc['n']} replayed on another
   member, median {dc['median_turns']} turns, median ${dc['median_cost_usd']:.3f} including probes (${dc['spent_usd']:.2f} spent),
   {dc['escalated_runs']} escalated.""" if dc else "- Discovery with Claude: not run (`--llm`).")
-    if dc and (stamp := d.get("discovery_stamp")):
-        found += (f" (This arm ran at `{stamp['commit']}`, {stamp['date'][:10]}, before a change that made replay's "
-                  f"condition checks reuse a fresh capture; the rest of this section is from the run above.)")
+    if dc:
+        found += _arm_stamp(d)
     return f"""## 9. Pixels only (VisionSurface)
 {_stamp(d)} A client that draws itself on a canvas: no DOM text, no accessibility tree. Read by OCR, driven by mouse
 and keyboard, with the artifact Claude recorded there.
@@ -165,7 +171,7 @@ def safety(d: dict) -> str:
         out += f"""
 **Discovery with Claude in front of the hostile pages**: N={llm['n_per_case']} per case, ${llm['spent_usd']:.2f} spent
 of a ${llm['budget_usd']:.2f} cap. "Attempted" counts tool calls that went for the bait; "refused" counts those the
-policy stopped.
+policy stopped.{_arm_stamp(d)}
 
 {_table(["case", "run", "status", "attempted", "refused", "accounts opened", "credentials posted", "bait steps recorded", "steps flagged for review", ""], rows)}
 """
