@@ -1,0 +1,14 @@
+{"t": 0.0, "at": "2026-11-17T01:36:00+00:00", "event": "replay_started", "capability": "core_banking_gui.lookup_member_balance", "version": "1.0.0", "revision": "a3aa0e47d0d4", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.807, "at": "2026-11-17T01:36:01+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 3.871, "at": "2026-11-17T01:36:04+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 7.15, "at": "2026-11-17T01:36:07+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 10.433, "at": "2026-11-17T01:36:10+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 13.673, "at": "2026-11-17T01:36:14+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 17.163, "at": "2026-11-17T01:36:17+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
+{"t": 20.227, "at": "2026-11-17T01:36:20+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 23.321, "at": "2026-11-17T01:36:23+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 26.654, "at": "2026-11-17T01:36:27+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 29.688, "at": "2026-11-17T01:36:30+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 32.672, "at": "2026-11-17T01:36:33+00:00", "event": "extracted", "step": "read_savings", "outputs": ["savingsBalance"]}
+{"t": 33.991, "at": "2026-11-17T01:36:34+00:00", "event": "checkpoint_passed"}
+{"t": 34.02, "at": "2026-11-17T01:36:34+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "disc_20261117T013436Z_1a09dc-probe3", "completedAt": "2026-11-17T01:36:34+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

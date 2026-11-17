@@ -1,0 +1,10 @@
+{
+  "runId": "disc_20261117T013436Z_1a09dc-probe5",
+  "completedAt": "2026-11-17T01:37:47+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "business_outcome",
+  "code": "INVALID_MEMBER_NUMBER",
+  "atStep": "search",
+  "details": {}
+}

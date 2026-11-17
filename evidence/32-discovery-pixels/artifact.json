@@ -1,0 +1,528 @@
+{
+  "schemaVersion": "1",
+  "capability": {
+    "id": "core_banking_gui.lookup_member_balance",
+    "version": "1.0.0",
+    "title": "Look up a member's savings balance (pixels only)",
+    "description": "On the core system's desktop client, which exposes no text or accessibility tree: searches for a member by member number and returns the member's name and the current balance of their savings account."
+  },
+  "app": {
+    "product": "mock-core-banking-gui",
+    "versionRange": ">=1.0 <2.0",
+    "surface": "vision",
+    "entryPath": "/"
+  },
+  "status": "draft",
+  "provenance": {
+    "discoveryRunId": "disc_20261117T013436Z_1a09dc",
+    "recordedAt": "2026-11-17T01:34:52+00:00",
+    "model": "claude-sonnet-5-5"
+  },
+  "inputs": {
+    "memberId": {
+      "type": "string",
+      "description": "5-digit member number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "member"
+    }
+  },
+  "outputs": {
+    "memberName": {
+      "type": "string",
+      "redact": "none"
+    },
+    "savingsBalance": {
+      "type": "money",
+      "redact": "none"
+    }
+  },
+  "outcomes": [
+    {
+      "code": "APP_ERROR",
+      "kind": "fatal",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)internal server error|an unexpected error|service unavailable"
+        }
+      },
+      "description": "The application failed. Stop and keep the evidence."
+    },
+    {
+      "code": "PERMISSION_DENIED",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)not authori[sz]ed|access denied|insufficient (privileges|permissions)"
+        }
+      },
+      "description": "The operator account may not do this. An answer for the caller, not a fault."
+    },
+    {
+      "code": "UNEXPECTED_DIALOG",
+      "kind": "escalate",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "role": "dialog"
+      },
+      "description": "A dialog the capability doesn't know. A person decides."
+    },
+    {
+      "code": "SLOW_LOAD",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)^\\s*(loading|please wait)\\b"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "wait",
+          "timeoutMs": 5000
+        },
+        "maxAttempts": 2,
+        "resume": "step"
+      },
+      "description": "The app shows a wait message. Wait longer, then carry on."
+    },
+    {
+      "code": "SESSION_EXPIRED",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)session (has )?(expired|timed out)"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "subflow",
+          "subflow": "sign_on"
+        },
+        "maxAttempts": 1,
+        "resume": "start"
+      },
+      "description": "Sign on again and run the steps from the first."
+    },
+    {
+      "code": "MEMBER_NOT_FOUND",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)No member found for that number\\."
+        }
+      },
+      "description": "The Member Inquiry screen shows that no member exists for the number entered, so the name field to read was never displayed. (learned from probe: a member number that doesn't exist)"
+    },
+    {
+      "code": "INVALID_MEMBER_NUMBER",
+      "kind": "business",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)Invalid member number\\."
+        }
+      },
+      "description": "The Member Inquiry screen rejected the malformed member number with an inline \"Invalid member number.\" message, so no member name was shown to read. (learned from probe: a member number the application rejects as malformed)"
+    }
+  ],
+  "policy": {
+    "allowedOrigins": [
+      "http://127.0.0.1:4400"
+    ],
+    "allowedPaths": [
+      "/*"
+    ],
+    "maxRisk": "read",
+    "commitPaths": [
+      "/CB0410"
+    ]
+  },
+  "subflows": {
+    "sign_on": [
+      {
+        "id": "open_sign_on_page",
+        "intent": "open the sign-on page",
+        "action": "navigate",
+        "value": "/",
+        "risk": "read",
+        "recordedBy": "author",
+        "needsReview": false
+      },
+      {
+        "id": "enter_user_id",
+        "intent": "enter user id",
+        "action": "type",
+        "target": {
+          "frame": [
+            "CB0100"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "User ID"
+            },
+            {
+              "kind": "label",
+              "label": "User ID"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "User ID:",
+              "relation": "right-of",
+              "role": "textbox"
+            },
+            {
+              "kind": "bbox",
+              "x": 244.0,
+              "y": 290.0,
+              "width": 116.0,
+              "height": 26.0
+            }
+          ]
+        },
+        "value": "{{secrets.APP_USER}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "enter_password",
+        "intent": "enter password",
+        "action": "type",
+        "target": {
+          "frame": [
+            "CB0100"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "textbox",
+              "name": "Password"
+            },
+            {
+              "kind": "label",
+              "label": "Password"
+            },
+            {
+              "kind": "anchor",
+              "anchorText": "Password:",
+              "relation": "right-of",
+              "role": "textbox"
+            },
+            {
+              "kind": "bbox",
+              "x": 244.0,
+              "y": 344.0,
+              "width": 216.0,
+              "height": 26.0
+            }
+          ]
+        },
+        "value": "{{secrets.APP_PASSWORD}}",
+        "risk": "read",
+        "recordedBy": "model",
+        "needsReview": false
+      },
+      {
+        "id": "sign",
+        "intent": "sign on",
+        "action": "click",
+        "target": {
+          "frame": [
+            "CB0100"
+          ],
+          "strategies": [
+            {
+              "kind": "role",
+              "role": "button",
+              "name": "Sign on"
+            },
+            {
+              "kind": "bbox",
+              "x": 24.0,
+              "y": 660.0,
+              "width": 106.0,
+              "height": 34.0
+            }
+          ]
+        },
+        "risk": "read",
+        "expect": {
+          "kind": "visible",
+          "frame": [
+            "CB0200"
+          ],
+          "role": "textbox",
+          "name": "Option"
+        },
+        "recordedBy": "model",
+        "needsReview": false
+      }
+    ]
+  },
+  "preconditions": [
+    {
+      "use": "sign_on",
+      "unless": {
+        "kind": "visible",
+        "frame": [
+          "CB0200"
+        ],
+        "role": "textbox",
+        "name": "Option"
+      }
+    }
+  ],
+  "steps": [
+    {
+      "id": "choose_member_inquiry",
+      "intent": "choose member inquiry",
+      "action": "type",
+      "target": {
+        "frame": [
+          "CB0200"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Option"
+          },
+          {
+            "kind": "label",
+            "label": "Option"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Option:",
+            "relation": "right-of",
+            "role": "textbox"
+          },
+          {
+            "kind": "bbox",
+            "x": 244.0,
+            "y": 371.0,
+            "width": 64.0,
+            "height": 26.0
+          }
+        ]
+      },
+      "value": "1",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "select",
+      "intent": "select",
+      "action": "click",
+      "target": {
+        "frame": [
+          "CB0200"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Select"
+          },
+          {
+            "kind": "bbox",
+            "x": 24.0,
+            "y": 660.0,
+            "width": 96.0,
+            "height": 34.0
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "enter_member_number",
+      "intent": "enter member number",
+      "action": "type",
+      "target": {
+        "frame": [
+          "CB0300"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "textbox",
+            "name": "Member #"
+          },
+          {
+            "kind": "label",
+            "label": "Member #"
+          },
+          {
+            "kind": "anchor",
+            "anchorText": "Member #:",
+            "relation": "right-of",
+            "role": "textbox"
+          },
+          {
+            "kind": "bbox",
+            "x": 244.0,
+            "y": 263.0,
+            "width": 66.0,
+            "height": 26.0
+          }
+        ]
+      },
+      "value": "{{inputs.memberId}}",
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "search",
+      "intent": "search",
+      "action": "click",
+      "target": {
+        "frame": [
+          "CB0300"
+        ],
+        "strategies": [
+          {
+            "kind": "role",
+            "role": "button",
+            "name": "Search"
+          },
+          {
+            "kind": "bbox",
+            "x": 24.0,
+            "y": 660.0,
+            "width": 96.0,
+            "height": 34.0
+          }
+        ]
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "read_name",
+      "intent": "read name",
+      "action": "extract",
+      "extract": {
+        "memberName": {
+          "frame": [
+            "CB0310"
+          ],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Name:",
+              "relation": "right-of"
+            },
+            {
+              "kind": "bbox",
+              "x": 241.0,
+              "y": 262.0,
+              "width": 75.0,
+              "height": 24.0
+            }
+          ],
+          "parse": "text"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    },
+    {
+      "id": "read_savings",
+      "intent": "read savings",
+      "action": "extract",
+      "extract": {
+        "savingsBalance": {
+          "frame": [
+            "CB0310"
+          ],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Savings balance:",
+              "relation": "right-of"
+            },
+            {
+              "kind": "bbox",
+              "x": 242.0,
+              "y": 345.0,
+              "width": 68.0,
+              "height": 21.0
+            }
+          ],
+          "parse": "money"
+        }
+      },
+      "risk": "read",
+      "recordedBy": "model",
+      "needsReview": false
+    }
+  ],
+  "success": {
+    "checkpoint": [
+      {
+        "kind": "visible",
+        "frame": [
+          "CB0310"
+        ],
+        "role": "heading",
+        "name": "Member Detail"
+      },
+      {
+        "kind": "output",
+        "output": "memberName",
+        "notEmpty": true
+      },
+      {
+        "kind": "output",
+        "output": "savingsBalance",
+        "notEmpty": true
+      },
+      {
+        "kind": "identity",
+        "input": "memberId",
+        "target": {
+          "frame": [
+            "CB0310"
+          ],
+          "strategies": [
+            {
+              "kind": "anchor",
+              "anchorText": "Member #:",
+              "relation": "right-of"
+            },
+            {
+              "kind": "bbox",
+              "x": 242.0,
+              "y": 209.0,
+              "width": 50.0,
+              "height": 22.0
+            }
+          ]
+        },
+        "equals": "{{inputs.memberId}}"
+      }
+    ]
+  },
+  "overrides": {}
+}

@@ -1,0 +1,9 @@
+{
+  "review_screen": "CB0410",
+  "after_post": "CB0410",
+  "blocked": [
+    "blocked by policy: 'Post' on CB0410 would commit a change (irreversible). Automation can reach a commit point but never press it; stop here."
+  ],
+  "sub_accounts_opened": 0,
+  "pass": true
+}

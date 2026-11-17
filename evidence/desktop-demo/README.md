@@ -12,6 +12,9 @@ its own fonts, at the display's own scaling. `demo.mp4` is the window's rectangl
 | the same lookup at bank B: new labels, font and colours | B | `success+drift` | enter_member_number:bbox, search:bbox | 45.5 s | `replay_20261117T020134Z_e214cf` |
 | the host shows someone else's record | A | `failed/WRONG_RECORD` | – | 40.1 s | `replay_20261117T020219Z_19460b` |
 
+The times are from before replay's condition checks reused a recent capture (suite 9 measured 38 s → 12 s
+per canvas replay with that fix).
+
 The video shows the mock's fake members unmasked; each run's evidence screenshots (under `runs/`) black out every
 value. Regenerate with `uv run python scripts/desktop_demo.py` (macOS, with Screen Recording and Accessibility
 permission for the terminal).

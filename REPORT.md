@@ -3,7 +3,7 @@
 Claude discovers a task once against a live legacy UI, and the run becomes a typed, versioned capability. Once a
 person approves it, it replays without the model: same inputs, same steps, same typed result, in about 4 s for $0.
 Numbers come from [`evals/report.md`](evals/report.md) (nine suites, each stamped with its commit, N stated). The full design is in
-[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 31 decisions, including where I overrode the AI I built this
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the 32 decisions, including where I overrode the AI I built this
 with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 
 ## Architecture
@@ -96,6 +96,11 @@ postcondition, but only exactly: the screen this action is known to lead to here
   snapshot from the characters, so discovery, the masker, the schema and replay are shared. Claude recorded it 5/5
   and each recording replayed on another member; the fault matrix holds 31/31 across two banks, where bank B's
   renamed controls are found by their place on the grid; a commit key on the review screen is never sent (suite 8).
+- **Pixels only, built** (D32): `VisionSurface` reads an app that exposes only a picture by OCR, into the same
+  snapshot, and acts by mouse and keyboard, on a canvas or a native window. A value is read twice and must agree, or
+  the step fails `UNREADABLE`, never a guess: 500/500 values right with 0 silent misreads; 31/31 faults across two
+  banks; Claude recorded it 5/5 reading OCR text, never the picture (suite 9). Building it found a masking leak the
+  other surfaces couldn't have, now closed and tested.
 - **Tenants.** Artifacts are keyed by vendor product and version range, not bank. A bank specialises one with an
   **override** addressed by **step id**, never array index (indexes shift silently), under a semver `appliesTo`;
   anything that doesn't apply is refused at load.

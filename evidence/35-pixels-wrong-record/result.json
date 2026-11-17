@@ -1,0 +1,17 @@
+{
+  "runId": "replay_20261117T030527Z_23717a",
+  "completedAt": "2026-11-17T03:05:38+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "read_name",
+  "errorClass": "WRONG_RECORD",
+  "expected": "memberId = {{inputs.memberId}}",
+  "observed": "a different member",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261117T030527Z_23717a/read_name.snapshot.txt"
+    }
+  ]
+}

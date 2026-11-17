@@ -43,11 +43,19 @@ for the mock's names, balances, member numbers and credentials, and fails if it 
 | [`29-terminal-bank-b-grid`](29-terminal-bank-b-grid/) | Green screen, second bank: found by its place on the grid | `success+drift` | Bank B calls the field "Mbr Number" and the key Enter=Find. Role, label and caption all miss; the bbox strategy (row and column in character cells) finds both, the run succeeds with drift, and proposes B's override (proposed-override.b.json). |
 | [`30-terminal-wrong-record`](30-terminal-wrong-record/) | Green screen: the host shows a different member | `failed/WRONG_RECORD` | The identity check reads the member number off the grid before anything else is read: WRONG_RECORD, structure-only evidence. |
 | [`31-terminal-commit-guard`](31-terminal-commit-guard/) | Green screen: a commit key is never sent | `blocked, opened 0` | A surface signed on as the operator fills the sub-account form and reaches the review screen (CB0410, declared in commitPaths), then presses F10=Post. The key is dropped before it leaves; only exit and cancel keys get through there. |
+| [`32-discovery-pixels`](32-discovery-pixels/) | Real Claude discovery from pixels only: Look up a member's savings balance (pixels only) | `recorded` | claude-sonnet-5-5 on a client drawn on a canvas, with no DOM text or accessibility tree: the screen read by OCR into the same snapshot, 9 steps, $0.036 including probes (learned MEMBER_NOT_FOUND; learned INVALID_MEMBER_NUMBER; already handled as PERMISSION_DENIED). The model read the masked OCR text, never the picture. |
+| [`33-pixels-replay-success`](33-pixels-replay-success/) | Pixels only, no model: another member | `success` | Clicks into each field, types, reads it back off the screen, presses buttons by clicking them, and reads two values, each twice from a crop at two scales that must agree. The screenshots here have every value blacked out. |
+| [`34-pixels-bank-b`](34-pixels-bank-b/) | Pixels only, second bank: another look, new labels | `success+drift` | Bank B draws in Verdana on other colours with blue buttons, and calls the field "Mbr Number" and the button Find. Role, label and caption miss; the field's place in the window (bbox, logical pixels) finds both, and B's override is proposed (proposed-override.b.json). |
+| [`35-pixels-wrong-record`](35-pixels-wrong-record/) | Pixels only: the client shows a different member | `failed/WRONG_RECORD` | The member number is read off the screen before anything else: WRONG_RECORD, structure-only evidence. |
+| [`36-pixels-commit-guard`](36-pixels-commit-guard/) | Pixels only: Post is never clicked | `blocked, opened 0` | A surface signed on fills the sub-account form by OCR and reaches the review screen (CB0410, in commitPaths), then is told to click Post. The click is dropped before the mouse moves; only exit and cancel get through there. |
 
 **On an app we didn't write:** [`parabank/`](parabank/README.md) has two capabilities Claude discovered on ParaBank,
 Parasoft's public demo bank, replayed with no model, and what that app found that the mock hadn't.
 
 **An agent calling the tools:** [`agent-mcp/`](agent-mcp/README.md) has Claude answering a teller's question using
 only the MCP tools `interface mcp` serves: two calls, two replays, no model in either.
+
+**A native window, real OS input:** [`desktop-demo/`](desktop-demo/README.md) has the artifact Claude recorded on the
+canvas client replayed on a native Tk window, by screen capture and OS mouse and keyboard, with a recording.
 
 Aggregate numbers across many runs are in [`evals/report.md`](../evals/report.md).

@@ -32,49 +32,49 @@
     "title": "Replay, no model: another member",
     "why": "Recorded on one member, replayed on another. Outputs go to the caller; on disk they're placeholders.",
     "result": "success",
-    "run_id": "replay_20261116T210659Z_7d1f51"
+    "run_id": "replay_20261117T030129Z_28bb7d"
   },
   {
     "dir": "04-replay-not-found",
     "title": "Business outcome: no such member",
     "why": "A legitimate answer, not a failure. The outcome was learned by a probe during discovery.",
     "result": "business_outcome/MEMBER_NOT_FOUND",
-    "run_id": "replay_20261116T210704Z_f59b43"
+    "run_id": "replay_20261117T030134Z_55e674"
   },
   {
     "dir": "05-replay-invalid-input",
     "title": "Bad input, rejected before the app is touched",
     "why": "The member number breaks the input's pattern; no browser action runs.",
     "result": "invalid_input",
-    "run_id": "replay_20261116T210707Z_1bea30"
+    "run_id": "replay_20261117T030138Z_929909"
   },
   {
     "dir": "06-replay-session-timeout-recovered",
     "title": "Recoverable: the session expires mid-run",
     "why": "Signs on again through the sign-on subflow and restarts (read-only capability). Reported as a recovery beside the success.",
     "result": "success+recovered",
-    "run_id": "replay_20261116T210707Z_5c6996"
+    "run_id": "replay_20261117T030138Z_b0a9e0"
   },
   {
     "dir": "07-replay-app-error",
     "title": "Hard failure: the app returns a 500",
     "why": "Stops at once with the step, what was expected and what was seen, plus a masked screenshot and an accessibility snapshot.",
     "result": "failed/APP_ERROR",
-    "run_id": "replay_20261116T210713Z_bfd490"
+    "run_id": "replay_20261117T030143Z_88920b"
   },
   {
     "dir": "08-replay-wrong-record",
     "title": "Hard failure: the app shows a different member",
     "why": "The identity gate fires before anything is read. Evidence keeps the page's structure but none of its data, and no screenshot.",
     "result": "failed/WRONG_RECORD",
-    "run_id": "replay_20261116T210717Z_c4c4c1"
+    "run_id": "replay_20261117T030147Z_142c3c"
   },
   {
     "dir": "09-replay-sub-account-commit-point",
     "title": "Changing data: stops at the review screen",
     "why": "Fills the new sub-account form and reaches the review screen. Confirm is never pressed.",
     "result": "success",
-    "run_id": "replay_20261116T210721Z_7113df",
+    "run_id": "replay_20261117T030152Z_5f83dc",
     "accounts_opened": 0
   },
   {
@@ -82,14 +82,14 @@
     "title": "Business outcome on a form: deposit below the minimum",
     "why": "The form comes back with a validation message, recognised as DEPOSIT_BELOW_MINIMUM.",
     "result": "business_outcome/DEPOSIT_BELOW_MINIMUM",
-    "run_id": "replay_20261116T210726Z_840696"
+    "run_id": "replay_20261117T030157Z_f49262"
   },
   {
     "dir": "11-handoff-unknown-notice",
     "title": "Escalation: a person takes the live session and hands back",
     "why": "An unknown notice page appears. The run pauses and publishes an intervention; an operator claims control on the operator page, acknowledges the notice in the same browser, and hands back. Automation verifies the screen and finishes. recording.webm is the run, with PII masked throughout.",
     "result": "success",
-    "run_id": "replay_20261116T210731Z_9e4016",
+    "run_id": "replay_20261117T030201Z_b5d9bb",
     "intervention": {
       "step": "read_name",
       "reason": "TARGET_UNRESOLVED: can't find the control for 'read name'"
@@ -100,21 +100,21 @@
     "title": "Second bank: drift, and an override proposed",
     "why": "Bank B says \"Find Member\" and has no <label> on Member #. Fallback strategies find both controls; the run succeeds, reports drift, and writes the proposed override for B (proposed-override.b.json).",
     "result": "success+drift",
-    "run_id": "replay_20261116T210752Z_a5aae7"
+    "run_id": "replay_20261117T030222Z_d9431f"
   },
   {
     "dir": "13-tenant-b-override-approved",
     "title": "Second bank, override approved: no drift",
     "why": "With B's override applied at load, the first strategies hit again on B.",
     "result": "success",
-    "run_id": "replay_20261116T210756Z_515c14"
+    "run_id": "replay_20261117T030226Z_c2e962"
   },
   {
     "dir": "14-guard-ok-commit-blocked",
     "title": "Guard: a commit button labelled \"OK\"",
     "why": "The artifact is tampered to press it. The button's name says nothing, but the request goes to a declared commit path, so the browser drops it before it leaves: POLICY_VIOLATION, nothing opened.",
     "result": "failed/POLICY_VIOLATION",
-    "run_id": "replay_20261116T210800Z_60dad1",
+    "run_id": "replay_20261117T030230Z_cd08e0",
     "accounts_opened": 0
   },
   {
@@ -122,14 +122,14 @@
     "title": "Third bank, no page map: stops at once",
     "why": "Bank C renames the menu's \"Member Inquiry\" to \"Member Lookup\". No recorded strategy survives, and even sign-on was proved by that link, so the run fails at sign-on, saying so.",
     "result": "failed/EXPECT_FAILED",
-    "run_id": "replay_20261116T210811Z_15e5bd"
+    "run_id": "replay_20261117T030241Z_f3e085"
   },
   {
     "dir": "17-bank-c-map-fallback",
     "title": "Third bank, with its page map: the bounded fallback",
     "why": "C's map was learned from one verified run of the *lookup* flow on C. The sub-account flow, which the map never saw, replays through it: MAP_FALLBACK confirms the screen sign-on leads to and finds \"Member Lookup\", each with the pinned map version, and the fix is proposed as an override for C. bank-c-map.json is the map: screens and actions, no data.",
     "result": "success+recovered+drift",
-    "run_id": "replay_20261116T210825Z_512492"
+    "run_id": "replay_20261117T030255Z_2d74cf"
   },
   {
     "dir": "25-drift-report",
@@ -143,35 +143,35 @@
     "title": "Several matches: the one the input names",
     "why": "Three Chens; the Select link is found in the row where Date of Birth = {{inputs.dob}}, never by position, and the member page's date of birth is checked before anything is read.",
     "result": "success",
-    "run_id": "replay_20261116T210934Z_ba96af"
+    "run_id": "replay_20261117T030404Z_ba0c72"
   },
   {
     "dir": "22-replay-two-chens-same-birthday",
     "title": "Several matches the input can't tell apart",
     "why": "Two Chens born the same day: AMBIGUOUS_TARGET. The run never takes the first one.",
     "result": "failed/AMBIGUOUS_TARGET",
-    "run_id": "replay_20261116T210939Z_71eed6"
+    "run_id": "replay_20261117T030408Z_5f2ddb"
   },
   {
     "dir": "23-replay-row-on-page-3",
     "title": "A row pages away",
     "why": "pageUntil presses Next until the row where Reference = {{inputs.reference}} is on screen, at most 10 times; each page turned is in the log.",
     "result": "success",
-    "run_id": "replay_20261116T210954Z_230f1f"
+    "run_id": "replay_20261117T030423Z_6e9d63"
   },
   {
     "dir": "24-replay-row-on-no-page",
     "title": "A row on no page",
     "why": "Searched all 4 pages, no next page: TARGET_UNRESOLVED, saying how many pages it searched.",
     "result": "failed/TARGET_UNRESOLVED",
-    "run_id": "replay_20261116T211002Z_3ee441"
+    "run_id": "replay_20261117T030431Z_23bdf9"
   },
   {
     "dir": "26-mcp-agent-call",
     "title": "An agent's view: approved artifacts as MCP tools",
     "why": "`interface mcp` lists this bank's approved artifacts as tools (tools.json: input schemas, outcomes, read-only hints) and a call is a replay with no model. call.json is the answer the agent got, with the values masked here; the caller gets them in full.",
     "result": "success",
-    "run_id": "replay_20261116T211016Z_824c30"
+    "run_id": "replay_20261117T030445Z_67fd18"
   },
   {
     "dir": "15-discovery-hostile-form",
@@ -199,26 +199,61 @@
     "title": "Green screen, no model: another member",
     "why": "Signs on, answers the menu with 1, searches and reads two values off the grid, checking the member number first.",
     "result": "success",
-    "run_id": "replay_20261116T211020Z_6199d0"
+    "run_id": "replay_20261117T030449Z_4db0f7"
   },
   {
     "dir": "29-terminal-bank-b-grid",
     "title": "Green screen, second bank: found by its place on the grid",
     "why": "Bank B calls the field \"Mbr Number\" and the key Enter=Find. Role, label and caption all miss; the bbox strategy (row and column in character cells) finds both, the run succeeds with drift, and proposes B's override (proposed-override.b.json).",
     "result": "success+drift",
-    "run_id": "replay_20261116T211023Z_a85cfe"
+    "run_id": "replay_20261117T030452Z_8b3d5a"
   },
   {
     "dir": "30-terminal-wrong-record",
     "title": "Green screen: the host shows a different member",
     "why": "The identity check reads the member number off the grid before anything else is read: WRONG_RECORD, structure-only evidence.",
     "result": "failed/WRONG_RECORD",
-    "run_id": "replay_20261116T211027Z_4f9fd5"
+    "run_id": "replay_20261117T030456Z_fe1932"
   },
   {
     "dir": "31-terminal-commit-guard",
     "title": "Green screen: a commit key is never sent",
     "why": "A surface signed on as the operator fills the sub-account form and reaches the review screen (CB0410, declared in commitPaths), then presses F10=Post. The key is dropped before it leaves; only exit and cancel keys get through there.",
+    "result": "blocked, opened 0",
+    "run_id": null
+  },
+  {
+    "dir": "32-discovery-pixels",
+    "title": "Real Claude discovery from pixels only: Look up a member's savings balance (pixels only)",
+    "why": "claude-sonnet-5-5 on a client drawn on a canvas, with no DOM text or accessibility tree: the screen read by OCR into the same snapshot, 9 steps, $0.036 including probes (learned MEMBER_NOT_FOUND; learned INVALID_MEMBER_NUMBER; already handled as PERMISSION_DENIED). The model read the masked OCR text, never the picture.",
+    "result": "recorded",
+    "run_id": "disc_20261117T013436Z_1a09dc"
+  },
+  {
+    "dir": "33-pixels-replay-success",
+    "title": "Pixels only, no model: another member",
+    "why": "Clicks into each field, types, reads it back off the screen, presses buttons by clicking them, and reads two values, each twice from a crop at two scales that must agree. The screenshots here have every value blacked out.",
+    "result": "success",
+    "run_id": "replay_20261117T030501Z_a4d29f"
+  },
+  {
+    "dir": "34-pixels-bank-b",
+    "title": "Pixels only, second bank: another look, new labels",
+    "why": "Bank B draws in Verdana on other colours with blue buttons, and calls the field \"Mbr Number\" and the button Find. Role, label and caption miss; the field's place in the window (bbox, logical pixels) finds both, and B's override is proposed (proposed-override.b.json).",
+    "result": "success+drift",
+    "run_id": "replay_20261117T030515Z_920d68"
+  },
+  {
+    "dir": "35-pixels-wrong-record",
+    "title": "Pixels only: the client shows a different member",
+    "why": "The member number is read off the screen before anything else: WRONG_RECORD, structure-only evidence.",
+    "result": "failed/WRONG_RECORD",
+    "run_id": "replay_20261117T030527Z_23717a"
+  },
+  {
+    "dir": "36-pixels-commit-guard",
+    "title": "Pixels only: Post is never clicked",
+    "why": "A surface signed on fills the sub-account form by OCR and reaches the review screen (CB0410, in commitPaths), then is told to click Post. The click is dropped before the mouse moves; only exit and cancel get through there.",
     "result": "blocked, opened 0",
     "run_id": null
   }

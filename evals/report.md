@@ -325,7 +325,7 @@ _Run 2026-11-16 21:27 UTC at commit `8237219`._ The artifact Claude recorded on 
 | B first contact | override proposed | `two ops` | `enter_member_number, search` | – | ✅ |
 
 ## 9. Pixels only (VisionSurface)
-_Run 2026-11-17 02:36 UTC at commit `669b04a+dirty`._ A client that draws itself on a canvas: no DOM text, no accessibility tree. Read by OCR, driven by mouse
+_Run 2026-11-17 03:01 UTC at commit `212b88f`._ A client that draws itself on a canvas: no DOM text, no accessibility tree. Read by OCR, driven by mouse
 and keyboard, with the artifact Claude recorded there.
 
 - **Reads: 500/500 values right on 100 random screens (both looks), 0 refused as
@@ -335,10 +335,10 @@ and keyboard, with the artifact Claude recorded there.
 - **Commit guard:** on the review screen (CB0410), Post was clicked and the click never sent (1
   blocked, still on CB0410). Sub-accounts opened across the suite: **0**.
 - **Stability:** 20 replays on rotating members, 100% success, 1 distinct
-  output per member, p50 37.79 s, p95 38.19 s.
+  output per member, p50 12.21 s, p95 12.6 s.
 - **Discovery with Claude:** 5/5 recorded, 5/5 replayed on another
   member, median 5 turns, median $0.018 including probes ($0.12 spent),
-  0 escalated.
+  0 escalated. (This arm ran at `669b04a+dirty`, 2026-11-17, before a change that made replay's condition checks reuse a fresh capture; the rest of this section is from the run above.)
 
 | arm | case | expected | actual | drift |  |
 |---|---|---|---|---|---|

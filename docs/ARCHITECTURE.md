@@ -851,7 +851,14 @@ which hits an element on the same line that starts where the recorded one starte
 overlap was too loose: on bank B the shorter "Find" button left the recorded "Search" box overlapping "Exit" too, and
 replay rightly refused to choose.) Names match with whitespace ignored, never more loosely.
 
-**Measured** (suite 9): MEASURED_PLACEHOLDER
+**Measured** (suite 9): 500/500 values read right on 100 random screens in both banks' looks, 0 refused, 0 silent
+misreads (zero in 500 bounds the true rate below about 0.6% at 95%; on our own renderings, not a real app's). Claude
+recorded it 5/5 from the OCR'd text (5 turns, median $0.018 with probes) and every recording replayed on another
+member; the fault matrix holds 31/31 on bank A, bank B at first contact (both renamed controls found by their place in
+the window) and with B's override approved; Post on the review screen was never clicked; 20/20 stable replays at
+p50 12.2 s. That was 38 s until replay's condition checks reused a capture under 0.3 s old instead of each waiting for
+a steady screen of its own. On the native window (`evidence/desktop-demo/`) the same artifact ran 4/4 as expected,
+with real OS input, at 36–45 s a run before that fix.
 
 ### As built: crashes leave a record (found by that crash)
 That crashed run's log simply stopped after the model's `done`: no error, no traceback, no final event, so its
