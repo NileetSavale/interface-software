@@ -1,10 +1,10 @@
-{"t": 0.0, "at": "2026-11-17T07:04:22+00:00", "event": "replay_started", "capability": "core_banking.find_member_by_name", "version": "1.0.0", "revision": "89dcd257cfec", "inputs": ["dob", "lastName"], "tenant": null, "page_map": null}
-{"t": 0.249, "at": "2026-11-17T07:04:22+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.341, "at": "2026-11-17T07:04:24+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.406, "at": "2026-11-17T07:04:24+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.449, "at": "2026-11-17T07:04:24+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.85, "at": "2026-11-17T07:04:25+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.289, "at": "2026-11-17T07:04:25+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.352, "at": "2026-11-17T07:04:25+00:00", "event": "acted", "step": "enter_last_name", "action": "type", "value": "{{inputs.lastName}}", "rank": 0, "strategy": "anchor"}
-{"t": 3.735, "at": "2026-11-17T07:04:26+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 14.46, "at": "2026-11-17T07:04:36+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261117T070422Z_e303c1", "completedAt": "2026-11-17T07:04:36+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "open_matching_member", "errorClass": "AMBIGUOUS_TARGET", "expected": "exactly one match for: tableCell", "observed": "tableCell: AMBIGUOUS_TARGET", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261117T070422Z_e303c1/open_matching_member.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261117T070422Z_e303c1/open_matching_member.png"}]}}
+{"t": 0.0, "at": "2026-11-17T12:25:51+00:00", "event": "replay_started", "capability": "core_banking.find_member_by_name", "version": "1.0.0", "revision": "89dcd257cfec", "inputs": ["dob", "lastName"], "tenant": null, "page_map": null}
+{"t": 0.247, "at": "2026-11-17T12:25:51+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.315, "at": "2026-11-17T12:25:53+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.402, "at": "2026-11-17T12:25:53+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.457, "at": "2026-11-17T12:25:53+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.852, "at": "2026-11-17T12:25:54+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.276, "at": "2026-11-17T12:25:54+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.339, "at": "2026-11-17T12:25:54+00:00", "event": "acted", "step": "enter_last_name", "action": "type", "value": "{{inputs.lastName}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.723, "at": "2026-11-17T12:25:55+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 14.432, "at": "2026-11-17T12:26:05+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261117T122551Z_4725cf", "completedAt": "2026-11-17T12:26:05+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "open_matching_member", "errorClass": "AMBIGUOUS_TARGET", "expected": "exactly one match for: tableCell", "observed": "tableCell: AMBIGUOUS_TARGET", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261117T122551Z_4725cf/open_matching_member.snapshot.txt"}, {"kind": "screenshot", "path": "runs/replay_20261117T122551Z_4725cf/open_matching_member.png"}]}}

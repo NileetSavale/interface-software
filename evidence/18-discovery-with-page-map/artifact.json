@@ -14,8 +14,8 @@
   },
   "status": "draft",
   "provenance": {
-    "discoveryRunId": "disc_20261116T095325Z_85adbe",
-    "recordedAt": "2026-11-16T09:53:44+00:00",
+    "discoveryRunId": "disc_20261117T120345Z_b69020",
+    "recordedAt": "2026-11-17T12:04:05+00:00",
     "model": "claude-sonnet-5-5"
   },
   "inputs": {
@@ -128,7 +128,7 @@
           "matches": "(?i)No members found"
         }
       },
-      "description": "The member search returned \"No members found\" for the given member number, so the sub-account form could not be opened. (learned from probe: a member number that doesn't exist)"
+      "description": "The member search returned a \"No members found\" message, so the application is saying the member number doesn't exist. (learned from probe: a member number that doesn't exist)"
     },
     {
       "code": "DEPOSIT_BELOW_MINIMUM",
@@ -140,12 +140,12 @@
           "matches": "(?i)Minimum opening deposit is"
         }
       },
-      "description": "The Open Sub-Account form was shown again with a message stating the minimum opening deposit, so the below-minimum deposit was rejected. (learned from probe: an opening deposit below the minimum)"
+      "description": "The Open Sub-Account form was returned with a message stating the minimum opening deposit, so the below-minimum deposit was rejected. (learned from probe: an opening deposit below the minimum)"
     }
   ],
   "policy": {
     "allowedOrigins": [
-      "http://127.0.0.1:62947"
+      "http://127.0.0.1:51611"
     ],
     "allowedPaths": [
       "/*"

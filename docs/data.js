@@ -289,10 +289,10 @@ window.SITE = {
    "gaps": 0,
    "llm_passed": 12,
    "llm_total": 12,
-   "llm_spent": 0.4251,
+   "llm_spent": 0.4227,
    "harm": 0,
-   "date": "2026-11-17T06:18:35+00:00",
-   "commit": "067545f"
+   "date": "2026-11-17T07:52:49+00:00",
+   "commit": "4c7a67b"
   },
   "discovery": {
    "recorded": 20,
@@ -301,10 +301,10 @@ window.SITE = {
    "median_cost": [
     0.0173,
     0.0114,
-    0.0287,
-    0.0232
+    0.0381,
+    0.0278
    ],
-   "spent": 0.4884,
+   "spent": 0.5516,
    "arms": [
     {
      "flow": "lookup",
@@ -329,8 +329,8 @@ window.SITE = {
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 8,
-     "median_cost_usd": 0.0287,
+     "median_turns": 7,
+     "median_cost_usd": 0.0381,
      "escalated_runs": 0
     },
     {
@@ -338,13 +338,13 @@ window.SITE = {
      "n": 5,
      "recorded": 5,
      "replays_on_other_member": 5,
-     "median_turns": 5,
-     "median_cost_usd": 0.0232,
+     "median_turns": 6,
+     "median_cost_usd": 0.0278,
      "escalated_runs": 0
     }
    ],
-   "date": "2026-11-16T09:59:29+00:00",
-   "commit": "e6893f9"
+   "date": "2026-11-17T12:09:51+00:00",
+   "commit": "4c7a67b"
   },
   "concurrency": {
    "ok": 72,
@@ -363,8 +363,8 @@ window.SITE = {
    "stable_n": 20,
    "recorded": 5,
    "disc_n": 5,
-   "date": "2026-11-17T06:24:09+00:00",
-   "commit": "067545f"
+   "date": "2026-11-17T08:01:20+00:00",
+   "commit": "4c7a67b"
   },
   "vision": {
    "passed": 31,
@@ -377,8 +377,8 @@ window.SITE = {
    "stable_n": 20,
    "recorded": 5,
    "disc_n": 5,
-   "date": "2026-11-17T06:36:52+00:00",
-   "commit": "067545f"
+   "date": "2026-11-17T12:23:05+00:00",
+   "commit": "4c7a67b"
   },
   "parabank": {
    "ok": 40,
@@ -646,6 +646,12 @@ window.SITE = {
    "sha": "067545f",
    "date": "2026-11-17",
    "subject": "Report: a kept Claude arm carries its own commit stamp in every section; README test count",
+   "body": ""
+  },
+  {
+   "sha": "4c7a67b",
+   "date": "2026-11-17",
+   "subject": "All free suites re-run at 067545f; Claude arms kept with their own stamps; evidence, report and site",
    "body": ""
   }
  ],

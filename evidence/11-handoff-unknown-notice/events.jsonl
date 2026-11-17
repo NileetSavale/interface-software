@@ -1,19 +1,19 @@
-{"t": 0.0, "at": "2026-11-17T07:02:14+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b0ed439db19c", "inputs": ["memberId"], "tenant": null, "page_map": null}
-{"t": 0.258, "at": "2026-11-17T07:02:14+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.345, "at": "2026-11-17T07:02:17+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.417, "at": "2026-11-17T07:02:17+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.475, "at": "2026-11-17T07:02:17+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.884, "at": "2026-11-17T07:02:17+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.326, "at": "2026-11-17T07:02:18+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.39, "at": "2026-11-17T07:02:18+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.792, "at": "2026-11-17T07:02:18+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 15.534, "at": "2026-11-17T07:02:30+00:00", "event": "control", "from": "automation", "to": "paused_for_human", "epoch": 1, "holder": "nobody", "by": "automation", "reason": "TARGET_UNRESOLVED: can't find the control for 'read name'"}
-{"t": 17.044, "at": "2026-11-17T07:02:31+00:00", "event": "control", "from": "paused_for_human", "to": "human", "epoch": 2, "holder": "operator:alice", "by": "alice", "reason": "operator took control"}
-{"t": 18.575, "at": "2026-11-17T07:02:33+00:00", "event": "human_action", "actor": "operator:alice", "at_epoch": 2, "action": "click", "role": "button", "name": "Acknowledge", "target": {"frame": ["main"], "strategies": [{"kind": "role", "role": "button", "name": "Acknowledge"}, {"kind": "text", "text": "Acknowledge"}]}, "typed": false}
-{"t": 20.081, "at": "2026-11-17T07:02:34+00:00", "event": "control", "from": "human", "to": "resuming", "epoch": 3, "holder": "automation", "by": "alice", "reason": "operator handed back"}
-{"t": 20.636, "at": "2026-11-17T07:02:35+00:00", "event": "control", "from": "resuming", "to": "automation", "epoch": 4, "holder": "automation", "by": "automation", "reason": "resume check passed"}
-{"t": 20.636, "at": "2026-11-17T07:02:35+00:00", "event": "resumed", "step": "read_name", "verdict": "retry step", "human_actions": 1}
-{"t": 20.666, "at": "2026-11-17T07:02:35+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
-{"t": 20.688, "at": "2026-11-17T07:02:35+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
-{"t": 20.697, "at": "2026-11-17T07:02:35+00:00", "event": "checkpoint_passed"}
-{"t": 21.052, "at": "2026-11-17T07:02:35+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T070214Z_07871d", "completedAt": "2026-11-17T07:02:35+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}
+{"t": 0.0, "at": "2026-11-17T12:23:44+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b0ed439db19c", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.253, "at": "2026-11-17T12:23:44+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.345, "at": "2026-11-17T12:23:47+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.418, "at": "2026-11-17T12:23:47+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.477, "at": "2026-11-17T12:23:47+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.883, "at": "2026-11-17T12:23:47+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.332, "at": "2026-11-17T12:23:48+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.394, "at": "2026-11-17T12:23:48+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.804, "at": "2026-11-17T12:23:48+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 14.463, "at": "2026-11-17T12:23:59+00:00", "event": "control", "from": "automation", "to": "paused_for_human", "epoch": 1, "holder": "nobody", "by": "automation", "reason": "TARGET_UNRESOLVED: can't find the control for 'read name'"}
+{"t": 15.975, "at": "2026-11-17T12:24:00+00:00", "event": "control", "from": "paused_for_human", "to": "human", "epoch": 2, "holder": "operator:alice", "by": "alice", "reason": "operator took control"}
+{"t": 17.506, "at": "2026-11-17T12:24:02+00:00", "event": "human_action", "actor": "operator:alice", "at_epoch": 2, "action": "click", "role": "button", "name": "Acknowledge", "target": {"frame": ["main"], "strategies": [{"kind": "role", "role": "button", "name": "Acknowledge"}, {"kind": "text", "text": "Acknowledge"}]}, "typed": false}
+{"t": 19.01, "at": "2026-11-17T12:24:03+00:00", "event": "control", "from": "human", "to": "resuming", "epoch": 3, "holder": "automation", "by": "alice", "reason": "operator handed back"}
+{"t": 19.559, "at": "2026-11-17T12:24:04+00:00", "event": "control", "from": "resuming", "to": "automation", "epoch": 4, "holder": "automation", "by": "automation", "reason": "resume check passed"}
+{"t": 19.559, "at": "2026-11-17T12:24:04+00:00", "event": "resumed", "step": "read_name", "verdict": "retry step", "human_actions": 1}
+{"t": 19.591, "at": "2026-11-17T12:24:04+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 19.622, "at": "2026-11-17T12:24:04+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
+{"t": 19.631, "at": "2026-11-17T12:24:04+00:00", "event": "checkpoint_passed"}
+{"t": 19.821, "at": "2026-11-17T12:24:04+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T122344Z_ef3d6f", "completedAt": "2026-11-17T12:24:04+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

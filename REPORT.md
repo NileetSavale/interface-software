@@ -22,7 +22,7 @@ built this with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
   the model. Apps with no tree get a snapshot built from characters (green screen) or OCR (pixels); the model still
   reads masked text.
 - **Model choice** (D12): discovery's cost is spread over every free replay, so first-try success beats token price.
-  Over 20 real runs: median $0.017 (lookup) and $0.029 (sub-account), probes included, all replayed on another member.
+  Over 20 real runs: median $0.017 (lookup) and $0.038 (sub-account), probes included, all replayed on another member.
 - **Reused from Loop Runner**, my agent behind *When Tests Lie* (submitted to AGENT 2027 @ ICSE): the tool gate,
   stuck detection, model cascades, redaction and the eval method.
 
