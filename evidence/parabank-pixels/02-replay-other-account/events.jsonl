@@ -1,0 +1,11 @@
+{"t": 0.0, "at": "2026-11-17T03:45:09+00:00", "event": "replay_started", "capability": "parabank_pixels.account_balance", "version": "1.0.0", "revision": "ee0f5b434526", "inputs": ["accountId"], "tenant": null, "page_map": null}
+{"t": 2.315, "at": "2026-11-17T03:45:12+00:00", "event": "navigated", "step": "preflight", "path": "/index.htm"}
+{"t": 5.038, "at": "2026-11-17T03:45:14+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/index.htm"}
+{"t": 6.897, "at": "2026-11-17T03:45:16+00:00", "event": "acted", "step": "enter_username", "action": "type", "value": "{{secrets.PARABANK_USER}}", "rank": 0, "strategy": "role"}
+{"t": 9.012, "at": "2026-11-17T03:45:18+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.PARABANK_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 11.731, "at": "2026-11-17T03:45:21+00:00", "event": "acted", "step": "log_in", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 15.769, "at": "2026-11-17T03:45:25+00:00", "event": "acted", "step": "open_account_details", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 18.15, "at": "2026-11-17T03:45:27+00:00", "event": "extracted", "step": "read_type", "outputs": ["accountType"]}
+{"t": 18.82, "at": "2026-11-17T03:45:28+00:00", "event": "extracted", "step": "read_balance", "outputs": ["currentBalance"]}
+{"t": 19.338, "at": "2026-11-17T03:45:29+00:00", "event": "checkpoint_passed"}
+{"t": 19.358, "at": "2026-11-17T03:45:29+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T034509Z_e6a226", "completedAt": "2026-11-17T03:45:29+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"accountType": "{{outputs.accountType}}", "currentBalance": "{{outputs.currentBalance}}"}}}

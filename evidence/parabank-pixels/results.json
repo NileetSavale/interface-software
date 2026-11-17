@@ -1,0 +1,23 @@
+[
+  {
+    "dir": "01-discovery-pixels",
+    "title": "Real Claude discovery on ParaBank, from pixels only",
+    "why": "6 steps, $0.035: recorded",
+    "result": "recorded",
+    "run_id": "disc_20261117T034420Z_8508cd"
+  },
+  {
+    "dir": "02-replay-other-account",
+    "title": "Replay, no model: another account",
+    "why": "From pixels only, with no model.",
+    "result": "success",
+    "run_id": "replay_20261117T034509Z_e6a226"
+  },
+  {
+    "dir": "03-replay-no-such-account",
+    "title": "An account that isn't there",
+    "why": "From pixels only, with no model.",
+    "result": "failed/EXPECT_FAILED",
+    "run_id": "replay_20261117T034529Z_d4f276"
+  }
+]

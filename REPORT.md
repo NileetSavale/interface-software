@@ -100,7 +100,9 @@ postcondition, but only exactly: the screen this action is known to lead to here
   snapshot, and acts by mouse and keyboard, on a canvas or a native window. A value is read twice and must agree, or
   the step fails `UNREADABLE`, never a guess: 500/500 values right with 0 silent misreads; 31/31 faults across two
   banks; Claude recorded it 5/5 reading OCR text, never the picture (suite 9). Building it found a masking leak the
-  other surfaces couldn't have, now closed and tested.
+  other surfaces couldn't have, now closed and tested. On ParaBank, which wasn't built for its conventions, three
+  attempts found seven gaps, one of which signed into another customer's account on the public demo (Claude refused
+  it); fixed, Claude recorded it from pixels for $0.035 and it replayed on the other account.
 - **Tenants.** Artifacts are keyed by vendor product and version range, not bank. A bank specialises one with an
   **override** addressed by **step id**, never array index (indexes shift silently), under a semver `appliesTo`;
   anything that doesn't apply is refused at load.

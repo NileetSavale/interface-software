@@ -198,6 +198,7 @@ uv run interface replay $G --base-url http://127.0.0.1:4400 --input memberId=345
 uv run interface discover goals/vision_lookup_member_balance.json --base-url http://127.0.0.1:4400 \
     --input memberId=12345 --out /tmp/pixels     # Claude reading OCR text, about $0.04
 uv sync --extra desktop && uv run python scripts/desktop_demo.py   # the native window, recorded → evidence/desktop-demo/
+uv run python scripts/parabank_pixels.py   # ParaBank from pixels only, Claude, about $0.05 → evidence/parabank-pixels/
 ```
 
 **10. An agent calling the capabilities.** `interface mcp` serves the bank's approved artifacts as MCP tools over
@@ -233,5 +234,5 @@ apps/mock_terminal/       the green-screen host: the same members and faults on 
 apps/mock_gui/            the same host as a GUI drawn only in pixels: a canvas page and a native Tk window
 goals/        the capabilities' goal specs              artifacts/  the discovered artifacts
 evals/        the nine suites and their results        evidence/   curated runs
-tests/        169 tests                                 docs/       design, decisions, the site
+tests/        171 tests                                 docs/       design, decisions, the site
 ```

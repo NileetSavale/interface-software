@@ -142,6 +142,76 @@ def _letters_only(text: str) -> str:
         0 < i < len(text) - 1 and text[i - 1].isalpha() and (text[i + 1].isalpha() or text[i + 1] == "'")))
 
 
+_LABELLED = re.compile(r"^([A-Za-z][A-Za-z #/()'.-]{0,40}:)\s*(\S.*)$")
+
+
+def _split_label(image: np.ndarray, w: Word) -> list[Word]:
+    """"Account Type: CHECKING" read as one word when label and value sit close: two, cut at the blank gap after
+    which the left piece, read alone, spells exactly the label. No such gap, no split."""
+    m = _LABELLED.match(w.text)
+    if not m:
+        return [w]
+    crop = image[w.y0:w.y1, w.x0:w.x1].astype(np.int32)
+    if not crop.size:
+        return [w]
+    blank = ~(np.abs(crop - crop[0, 0]).max(axis=2) > 60).any(axis=0)
+    gaps, start = [], None
+    for x, empty in enumerate(blank):
+        if empty and start is None:
+            start = x
+        elif not empty and start is not None:
+            if x - start >= 2 and start > 0:
+                gaps.append((start + x) // 2)
+            start = None
+    for cut in gaps[:12]:
+        if _squash(_recognise(image[w.y0:w.y1, w.x0:w.x0 + cut], 1)[0]) == _squash(m[1]):
+            return [Word(m[1], w.confidence, w.x0, w.y0, w.x0 + cut, w.y1),
+                    Word(m[2], w.confidence, w.x0 + cut, w.y0, w.x1, w.y1)]
+    return [w]
+
+
+def _mask_glyphs(inner: np.ndarray) -> int:
+    """How many characters a masked field shows (•••• or ****), or 0 if it isn't one: a row of four or more blobs of
+    ink alike in width and height. OCR can't be asked: it reads sixteen dots as "FE00-00000000000"."""
+    ink = inner.max(axis=2) < 160
+    columns = ink.any(axis=0)
+    blobs, start = [], None
+    for x, on in enumerate(np.append(columns, False)):
+        if on and start is None:
+            start = x
+        elif not on and start is not None:
+            rows = np.flatnonzero(ink[:, start:x].any(axis=1))
+            blobs.append((x - start, rows[-1] - rows[0] + 1))
+            start = None
+    if len(blobs) < 4:
+        return 0
+    widths, heights = [b[0] for b in blobs], [b[1] for b in blobs]
+    alike = max(widths) - min(widths) <= 1 and max(heights) - min(heights) <= 1
+    return len(blobs) if alike and max(heights) <= inner.shape[0] * 0.6 else 0
+
+
+def _is_link(image: np.ndarray, w: Word) -> bool:
+    """Drawn in a saturated blue, or underlined: a line of ink just under the word that stops where the word stops
+    (a field's border under a label runs on past it)."""
+    region = image[w.y0:w.y1, w.x0:w.x1].astype(np.int32)
+    if not region.size:
+        return False
+    bg = region[0, 0]
+    ink = np.abs(region - bg).max(axis=2) > 60
+    if ink.any():
+        colour = region[ink].mean(axis=0)
+        if colour[2] - max(colour[0], colour[1]) > 50:
+            return True
+    for y in range(max(0, w.y1 - 3), min(image.shape[0], w.y1 + 4)):
+        row = np.abs(image[y].astype(np.int32) - bg).max(axis=1) > 60
+        within = row[w.x0:w.x1].mean() if w.x1 > w.x0 else 0
+        beyond = max(row[w.x1 + 3:w.x1 + 20].mean() if w.x1 + 20 <= len(row) else 0,
+                     row[max(0, w.x0 - 20):max(0, w.x0 - 3)].mean() if w.x0 >= 20 else 0)
+        if within >= 0.7 and beyond < 0.2:
+            return True
+    return False
+
+
 def boxes(image: np.ndarray) -> list[tuple[int, int, int, int, tuple[int, int, int]]]:
     """Rectangles drawn on the background: (x0, y0, x1, y1, fill colour)."""
     h, w, _ = image.shape
@@ -189,6 +259,7 @@ class CanvasScreen:
     viewport (an ordinary page treated as a picture, as a Citrix window would be). Mouse and keyboard out. Nothing is
     read from the DOM: the only thing asked of it is where the canvas is, to aim clicks."""
     scale = 1.0
+    select_all = "ControlOrMeta+A"  # Playwright's: Meta on macOS, Control elsewhere
 
     def __init__(self, policy: Policy | None = None, blocked: list[str] | None = None):
         self._pw = self.browser = self.page = None
@@ -226,10 +297,17 @@ class CanvasScreen:
         from io import BytesIO
 
         from PIL import Image
-        box = await self.page.locator("canvas").first.bounding_box() \
-            if await self.page.locator("canvas").count() else None
-        png = await self.page.screenshot(clip=box) if box else await self.page.screenshot()
-        return np.array(Image.open(BytesIO(png)).convert("RGB"))
+        from playwright.async_api import Error as PlaywrightError
+        for attempt in range(10):
+            try:
+                box = await self.page.locator("canvas").first.bounding_box() \
+                    if await self.page.locator("canvas").count() else None
+                png = await self.page.screenshot(clip=box) if box else await self.page.screenshot()
+                return np.array(Image.open(BytesIO(png)).convert("RGB"))
+            except PlaywrightError:  # mid-navigation the page can't be captured, or its canvas counted: a moment
+                if attempt == 9:
+                    raise
+                await asyncio.sleep(0.2)
 
     async def click(self, x: float, y: float):
         await self.page.mouse.click(self.offset[0] + x, self.offset[1] + y)
@@ -252,6 +330,8 @@ class DesktopScreen:
     """A native window (apps/mock_gui/desktop.py, Tk), driven with real OS input: the screen captured with mss, the
     mouse and keyboard with pyautogui. desktop://host:port starts the client against that server, fresh, as a
     terminal reconnects. On macOS the terminal running this needs Screen Recording and Accessibility permission."""
+
+    select_all = "Control+A"  # the Tk client binds both; pyautogui's ctrl is the same key on every platform
 
     def __init__(self):
         import pyautogui
@@ -338,7 +418,7 @@ class VisionSurface(ScreenSurface):
         deadline = time.monotonic() + 10
         while time.monotonic() < deadline:
             await self._quiet()
-            if self.code:
+            if self._parse():  # something readable: a screen code if the app has them, any text if it doesn't
                 return
             await asyncio.sleep(0.1)
         hint = (" (on macOS a capture without Screen Recording permission shows only the wallpaper: allow it for "
@@ -378,7 +458,6 @@ class VisionSurface(ScreenSurface):
 
     def _read(self, image: np.ndarray) -> list[Element]:
         # Detection over the whole screen finds the words; each is then read again from its own crop, which keeps
-        # the spaces whole-screen recognition can drop ("JaneDoe")
         # the spaces whole-screen recognition can drop ("JaneDoe"), placed the way read_text places them, so the
         # snapshot shows a value exactly as an extraction will read it
         s = self.pixels.scale if self.pixels else 1.0
@@ -394,7 +473,7 @@ class VisionSurface(ScreenSurface):
             except Unreadable:
                 pass
             text = _merge_spaces(*readings)
-            words.append(Word(text, w.confidence, w.x0, w.y0, w.x1, w.y1))
+            words.extend(_split_label(image, Word(text, w.confidence, w.x0, w.y0, w.x1, w.y1)))
         self._words[hashlib.sha1(image.tobytes()).hexdigest()] = words
         width = image.shape[1]
         rects = boxes(image)
@@ -418,6 +497,9 @@ class VisionSurface(ScreenSurface):
             if r is band or r[2] - r[0] >= 0.6 * width:
                 continue
             mine = sorted((w for w in words if inside(w, r) and id(w) not in used), key=lambda w: w.x0)
+            lines = {round((w.y0 + w.y1) / 2 / (12 * (self.pixels.scale if self.pixels else 1.0))) for w in mine}
+            if len(lines) > 1:
+                continue  # several lines of text in one box: a panel or a table, not a control; its words stand alone
             used |= {id(w) for w in mine}
             text = " ".join(w.text for w in mine)
             if min(r[4]) >= 245:  # a white well: a field, whatever's in it
@@ -427,15 +509,23 @@ class VisionSurface(ScreenSurface):
                 ink = inner.max(axis=2) < 128
                 text, hidden = "", False
                 if ink.sum() > 4:
-                    text = re.sub(r"[^\x20-\x7e]", "", _recognise(inner, 1)[0]).strip()
-                    hidden = not re.search(r"[0-9A-Za-z]", text)
-                    text = "*" * max(1, round(ink.any(axis=0).sum() / 8)) if hidden else text
+                    if count := _mask_glyphs(inner):
+                        text, hidden = "*" * count, True
+                    else:
+                        text = re.sub(r"[^\x20-\x7e]", "", _recognise(inner, 1)[0]).strip()
+                        hidden = not re.search(r"[0-9A-Za-z]", text)
+                        text = "*" * max(1, round(ink.any(axis=0).sum() / 8)) if hidden else text
                 placed.append(("textbox", r[0], r[1], r[2] - r[0], r[3] - r[1], text, hidden))
             elif text:
                 placed.append(("button", r[0], r[1], r[2] - r[0], r[3] - r[1], text, False))
-        for w in words:
-            if id(w) not in used:
-                placed.append(("text", w.x0, w.y0, w.x1 - w.x0, w.y1 - w.y0, w.text, False))
+        loose = [w for w in words if id(w) not in used]
+        tall = float(np.median([w.y1 - w.y0 for w in loose])) * 1.35 if loose else 0
+        for w in loose:
+            # With no title band, the screen's titles are the text drawn noticeably larger than the rest; a link is
+            # text that's underlined, or drawn in a saturated blue
+            role = "heading" if not band and w.y1 - w.y0 >= tall and not _CODE.match(w.text) else \
+                "link" if _is_link(image, w) else "text"
+            placed.append((role, w.x0, w.y0, w.x1 - w.x0, w.y1 - w.y0, w.text, False))
         # Lines: elements whose middles sit at the same height
         placed.sort(key=lambda p: p[2] + p[4] / 2)
         rows, row, top = [], -1, None
@@ -450,6 +540,10 @@ class VisionSurface(ScreenSurface):
             if role == "textbox":
                 before = next((e for e in reversed(elements) if e.row == row and e.role == "text"), None)
                 name = label_of(before.name).rstrip(":").strip() if before and before.name.endswith(":") else ""
+                if not name:  # or the text just above it, starting where it starts ("Username" over its box)
+                    above = [e for e in elements if e.role == "text" and e.box and -6 <= box[1] - (e.box[1] + e.box[3])
+                             <= 14 and abs(e.box[0] - box[0]) <= 12]
+                    name = label_of(above[-1].name).rstrip(":").strip() if above else ""
                 elements.append(Element("textbox", name, row, box[0], box[2], text, screen=code, box=box,
                                         hidden=hidden))
             else:
@@ -510,6 +604,8 @@ class VisionSurface(ScreenSurface):
 
     # ── Acting ─────────────────────────────────────────────────────────────────────────────────────────────────
 
+    clickable = ("button", "link", "text")  # pixels can't show what's clickable; the policy checks still apply
+
     def _centre(self, e: Element) -> tuple[float, float]:
         x, y, w, h = e.box
         return x + w / 2, y + h / 2
@@ -525,13 +621,17 @@ class VisionSurface(ScreenSurface):
             await self.pixels.click(*self._centre(field))
             if guard:
                 guard()
-            await self.pixels.key("Control+A")
+            # Select what's there and delete it, so a second try replaces rather than appends. Select-all is Cmd+A
+            # in a macOS text field (Ctrl+A there moves to the start of the line)
+            await self.pixels.key(self.pixels.select_all)
+            await self.pixels.key("Backspace")
             before = await self._capture()
             await self.pixels.type(value)
             await self._settle(before, wait_s=1.5)
-            shown = self._live(field).value
-            if _squash(shown) == _squash(value) or (value and shown and not re.search(r"[0-9A-Za-z]", shown)):
-                return  # the value, or (a masked field) a mask
+            live = self._live(field)
+            shown = live.value
+            if _squash(shown) == _squash(value) or (value and live.hidden and abs(len(shown) - len(value)) <= 1):
+                return  # the value, or (a masked field) one mask glyph a character
         raise SurfaceError("NOT_ACTIONABLE", "the field didn't keep what was typed into it", retry="safe")
 
     async def read_text(self, handle: object) -> str:
@@ -540,13 +640,13 @@ class VisionSurface(ScreenSurface):
         e = self._live(handle) if isinstance(handle, Element) else handle
         if not isinstance(e, Element) or e.role == "textbox":
             return e.text.strip() if isinstance(e, Element) else str(e)
-        live = next((x for x in self._parse() if x.role == "text" and self._same(x, e)), None)
+        live = next((x for x in self._parse() if x.role == e.role and self._same(x, e)), None)
         if live is None or not live.name:
             return ""
         s = self.pixels.scale
         x, y, w, h = (round(v * s) for v in live.box)
-        pad = round(4 * s)
-        crop = self.image[max(0, y - pad):y + h + pad, max(0, x - pad):x + w + pad]
+        pad, side = round(4 * s), round(1 * s)  # little to the sides: a label's colon can sit 3 px before the value
+        crop = self.image[max(0, y - pad):y + h + pad, max(0, x - side):x + w + side]
         reads = [await asyncio.to_thread(_recognise, crop, k) for k in (1, 2)]
         texts = {_squash(t) for t, _ in reads}
         if len(texts) != 1 or min(c for _, c in reads) < MIN_CONFIDENCE:

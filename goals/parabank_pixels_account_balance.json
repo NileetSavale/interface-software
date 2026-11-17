@@ -1,0 +1,52 @@
+{
+  "capability": "parabank_pixels.account_balance",
+  "title": "Read an account's type and balance, from pixels only",
+  "description": "Signs on to ParaBank, read only from screenshots by OCR and driven by mouse and keyboard, and returns the type and current balance of one of the customer's accounts.",
+  "product": "parabank",
+  "versionRange": ">=1.0 <2.0",
+  "entryPath": "/index.htm",
+  "goal": "Sign on, open the details of account {{inputs.accountId}}, and read its account type and current balance.",
+  "inputs": {
+    "accountId": {
+      "type": "string",
+      "description": "5-digit ParaBank account number",
+      "pattern": "^[0-9]{5}$",
+      "sensitive": true,
+      "identifies": "account"
+    }
+  },
+  "outputs": {
+    "accountType": {
+      "type": "string",
+      "description": "the account's type"
+    },
+    "currentBalance": {
+      "type": "money",
+      "description": "the account's current balance"
+    }
+  },
+  "secrets": [
+    "PARABANK_USER",
+    "PARABANK_PASSWORD"
+  ],
+  "commitPaths": [
+    "/parabank/services_proxy/*",
+    "/parabank/services/*",
+    "/parabank/register.htm*",
+    "/parabank/lookup.htm*",
+    "/parabank/admin.htm*",
+    "/parabank/initializeDB.htm*",
+    "/parabank/cleanDB.htm*"
+  ],
+  "maxRisk": "read",
+  "probes": [
+    {
+      "inputs": {
+        "accountId": "99999"
+      },
+      "why": "an account number that doesn't exist",
+      "expect": "ACCOUNT_NOT_FOUND"
+    }
+  ],
+  "surface": "vision"
+}

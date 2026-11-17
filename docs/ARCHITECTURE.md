@@ -860,6 +860,36 @@ p50 12.2 s. That was 38 s until replay's condition checks reused a capture under
 a steady screen of its own. On the native window (`evidence/desktop-demo/`) the same artifact ran 4/4 as expected,
 with real OS input, at 36–45 s a run before that fix.
 
+**On an app nobody designed for it: ParaBank** (`scripts/parabank_pixels.py`, `evidence/parabank-pixels/`). The
+browser backend screenshots the whole page when there's no canvas, and keeps the web surface's network gate (it reads
+no page; it refuses requests), so every ParaBank write path stays a refused commitPath. Three Claude attempts found
+what the mock's conventions had hidden; the fourth recorded ($0.035) and replayed on the other account with no model.
+In order:
+- **Select-all.** Fields were cleared with Ctrl+A, which in a macOS text field moves to the line's start. A retry
+  appended: the password typed twice. ParaBank's public demo then showed *another customer's* account, whose number
+  reached the model (Claude refused to accept an account it couldn't confirm). Now the platform's select-all, then
+  Backspace. That attempt's evidence and run log were deleted, never committed.
+- **Masked fields.** OCR read sixteen password dots as `FE00-00000000000`. A masked field is now a row of four or
+  more identical blobs, counted: the read-back checks one per character typed.
+- **Containers.** A bordered accounts table read as one "button", its number inside a name the masker never reads.
+  A box holding several lines of text is a container; its words stand alone.
+- **Links** are text in a saturated blue or underlined (by a line that stops where the word does: a field border
+  under a label runs on); text is clickable on this surface, since pixels can't show what is. Values are re-read by
+  their own role (links were read back empty, failing every identity check).
+- **Labels.** Above the field when nothing names it from the left; "Account Type: CHECKING" read as one word is cut at
+  the gap after which the left piece, read alone, spells the label. Value crops take 1 px at the sides, not 4: the
+  colon sat 3 px before the value.
+- **Masking a flat snapshot.** OCR gives no paragraphs or columns, so two masker rules: a greeting is prose
+  ("Welcome Avery Quill"), and an element that is a bare 5-8 digit number is an identifier.
+- **Positions** (in `ScreenSurface`, so the terminal gets it too). An element that shows an input's value is
+  `role "{{inputs.x}}"`, a value on a row keyed by one is right of it, and an identity check keeps its label anchor
+  where it has one (a detail page showing another record is still WRONG_RECORD). A screen without a code gets no
+  position strategies: unscoped, the identity check's position landed on another page's column header.
+- **Captures** retry through a page in mid-navigation instead of failing the run.
+Checked without the model before the fourth attempt: a scripted recording on ParaBank, replayed on the other account,
+read both values exactly as ParaBank's HTML has them. Measured on the mock again after all of it: the vision,
+terminal, masker and end-to-end tests pass unchanged.
+
 ### As built: crashes leave a record (found by that crash)
 That crashed run's log simply stopped after the model's `done`: no error, no traceback, no final event, so its
 cause couldn't be recovered afterwards. Only `Runs.invoke` caught crashes, and kept just the message. Now the runs

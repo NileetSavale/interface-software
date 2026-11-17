@@ -1,0 +1,21 @@
+{
+  "runId": "replay_20261117T034529Z_d4f276",
+  "completedAt": "2026-11-17T03:45:52+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "log_in",
+  "errorClass": "EXPECT_FAILED",
+  "expected": "visible(frame=[''], role='link', name='{{inputs.accountId}}')",
+  "observed": "not on screen",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/replay_20261117T034529Z_d4f276/log_in.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/replay_20261117T034529Z_d4f276/log_in.png"
+    }
+  ]
+}

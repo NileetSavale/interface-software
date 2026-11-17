@@ -33,7 +33,7 @@ POLL_S = 0.1
 
 @dataclass(frozen=True)
 class Element:
-    role: Literal["heading", "textbox", "button", "text"]
+    role: Literal["heading", "textbox", "button", "link", "text"]
     name: str  # what it's called: a field's label, a key's caption, a text's words
     row: int  # the line it's on: a terminal row, or a line of text found in a picture
     col: int  # where it starts: a column, or a pixel
@@ -61,6 +61,8 @@ def label_of(text: str) -> str:
 
 
 class ScreenSurface(Surface):
+    clickable: tuple[str, ...] = ("button", "link")
+
     def __init__(self, policy: Policy | None = None):
         self.policy = policy
         self.origin = ""
@@ -172,9 +174,26 @@ class ScreenSurface(Surface):
         if before and before.name.endswith(":"):
             candidates.append(AnchorStrategy(anchor_text=before.name, relation="right-of",
                                              role=e.role if purpose == "act" else None))
-        candidates.append(self._bbox(e))
+        if e.screen:  # a place means something only on a known screen: without a screen code it lands on any page
+            candidates.append(self._bbox(e))
+        # What an input's value identifies is found by that value, never by its place: in a list, the place is
+        # someone else's row on the next run (ParaBank's accounts, read off pixels). An element showing an input is
+        # `role "{{inputs.x}}"`; a value on a row that starts with one is right of it. A label anchor, where there
+        # is one, stays first for an identity check, so a detail page showing another record is still WRONG_RECORD
+        shows = lambda x: next((k for k, v in (inputs or {}).items() if v and x.name.strip() == v.strip()), None)  # noqa: E731
+        owner = next((x for x in reversed(self._elements) if x.row == e.row and x.col < e.col and shows(x)), None)
+        labelled = any(isinstance(c, AnchorStrategy) for c in candidates)
+        if (given := shows(e)) and (purpose == "act" or not labelled):
+            candidates = [RoleStrategy(role=e.role, name=f"{{{{inputs.{given}}}}}")]
+        elif purpose == "read" and owner and not labelled:
+            candidates = [AnchorStrategy(anchor_text=f"{{{{inputs.{shows(owner)}}}}}", relation="right-of")]
         target = Target(frame=[e.screen], strategies=candidates)
-        kept = [s for s in candidates if [(h.row, h.col) for h in self._hits(target, s, purpose)] == [(e.row, e.col)]]
+
+        def found(strategy: Strategy) -> list[Element]:  # with this run's values in place of the placeholders
+            bound = strategy.model_copy(update={k: re.sub(r"\{\{inputs\.(\w+)\}\}", lambda m: (inputs or {})[m[1]], v)
+                                               for k in ("name", "anchor_text") if isinstance(v := getattr(strategy, k, None), str)})
+            return self._hits(target, bound, purpose)
+        kept = [s for s in candidates if [(h.row, h.col) for h in found(s)] == [(e.row, e.col)]]
         if not kept:
             raise SurfaceError("TARGET_UNRESOLVED", f"no stable way to find {e.role} {e.name!r} again")
         return target.model_copy(update={"strategies": kept})
@@ -196,7 +215,7 @@ class ScreenSurface(Surface):
             case AnchorStrategy(anchor_text=anchor, relation=relation, role=role) if relation in ("right-of", "after"):
                 hits = []
                 for i, a in enumerate(elements):
-                    if a.role == "text" and self._match(anchor, a.name):
+                    if a.role in ("text", "link") and self._match(anchor, a.name):
                         nxt = next((e for e in elements[i + 1:] if (relation == "after" or e.row == a.row)
                                     and (role is None or e.role == role)), None)
                         if nxt and (relation == "after" or nxt.row == a.row):
@@ -237,7 +256,7 @@ class ScreenSurface(Surface):
         e = self._live(handle)
         if action == "type" and e.role == "textbox":
             await self._type(e, value or "", guard)
-        elif action in ("click", "press") and e.role == "button":
+        elif action in ("click", "press") and e.role in self.clickable:
             if guard:
                 guard()
             if reason := self._refused(e):

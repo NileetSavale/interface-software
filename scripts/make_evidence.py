@@ -432,6 +432,9 @@ only the MCP tools `interface mcp` serves: two calls, two replays, no model in e
 **A native window, real OS input:** [`desktop-demo/`](desktop-demo/README.md) has the artifact Claude recorded on the
 canvas client replayed on a native Tk window, by screen capture and OS mouse and keyboard, with a recording.
 
+**Pixels on an app we didn't write:** [`parabank-pixels/`](parabank-pixels/README.md) has Claude discovering on
+ParaBank read only by OCR, the replay on another account, and the seven gaps the attempts before it found.
+
 Aggregate numbers across many runs are in [`evals/report.md`](../evals/report.md).
 """)
 
@@ -440,7 +443,7 @@ def main():
     OUT.mkdir(exist_ok=True)
     # Everything but the folders with their own scripts (Claude calls, or a screen recording on a Mac)
     for path in OUT.iterdir():
-        if path.name not in ("parabank", "agent-mcp", "desktop-demo"):
+        if path.name not in ("parabank", "agent-mcp", "desktop-demo", "parabank-pixels"):
             shutil.rmtree(path) if path.is_dir() else path.unlink()
     discoveries()
     replays()

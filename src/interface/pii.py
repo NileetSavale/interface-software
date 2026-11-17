@@ -45,6 +45,11 @@ _PLAIN = re.compile(r"^(?P<indent>\s*)- (?P<role>[a-z]+)(?: \[[^\]]*\])*: (?P<na
 PROSE_ROLES = {"cell", "gridcell", "text", "paragraph", "generic", "listitem", "note", "blockquote", "caption",
                "definition", "status", "alert", "log", "group"}
 PROSE_MIN_WORDS = 5
+# A line that greets someone names them, however short: in a flat snapshot (OCR) "Welcome Avery Quill" is plain text
+_GREETING = re.compile(r"^(?:Welcome|Hello|Hi|Good (?:morning|afternoon|evening)|(?:Signed|Logged) in as)\b(?! to\b)")
+# The whole name of an element is a bare 5-8 digit number: an identifier (account, member, ZIP). On a page with
+# structure a column header says so; in a flat snapshot nothing else will
+_BARE_ID = re.compile(r"\d{5,8}")
 _UP, _LOW = "A-ZÀ-ÖØ-Þ", "a-zß-öø-ÿ"  # Latin letters, accented included
 # A capitalised word, a title with its dot (before plain words, so "Mr." isn't read as "Mr"), or an initial
 _WORD = rf"(?:(?:Mr|Mrs|Ms|Mx|Dr)\.|(?:Mc|Mac|O['’])?[{_UP}][{_LOW}]+(?:-[{_UP}][{_LOW}]+)?|[{_UP}]\.)"
@@ -91,6 +96,9 @@ class Masker:
         lines = snapshot.splitlines()
         self._by_label(lines)
         self._by_column(lines)
+        for i, line in enumerate(lines):
+            if (m := _LINE.match(line)) and _BARE_ID.fullmatch(m.group("name").strip()):
+                self._swap(lines, i, "ACCT")
         vocabulary = self._in_prose(lines)
         # A guess from an earlier note that this page uses as a label ("Holiday Club" as an option) was not a name
         keep = {v for v in self.from_prose if _in(v, vocabulary)}
@@ -134,7 +142,8 @@ class Masker:
             # A paragraph is prose however short ("Welcome Avery Quill", found on ParaBank); a cell or loose text is
             # prose from five words, below which it's a label or a value the other detectors handle
             role = m.group("role")
-            if role in PROSE_ROLES and (role == "paragraph" or len(m.group("name").split()) >= PROSE_MIN_WORDS):
+            if role in PROSE_ROLES and (role == "paragraph" or len(m.group("name").split()) >= PROSE_MIN_WORDS
+                                        or _GREETING.match(m.group("name"))):
                 prose.append((i, m))
             elif m.group("role") not in PROSE_ROLES or m.group("role") == "text":
                 vocabulary.append(m.group("name").lower())

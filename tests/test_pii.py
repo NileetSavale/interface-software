@@ -70,3 +70,11 @@ def test_paragraphs_with_refs_and_values_inside_links_are_masked():
     out = Masker().snapshot(snapshot)
     for raw in ("Avery", "Quill", "16230", "75.00"):
         assert raw not in out, raw
+
+
+def test_a_flat_snapshot_still_hides_a_greeted_name_and_bare_identifiers():
+    # Read off pixels there are no paragraphs or table columns to go by (ParaBank, through OCR)
+    masked = Masker().snapshot('- text "Welcome Avery Quill" [ref=e1]\n- text "Welcome to Account Services" [ref=e2]\n'
+                               '- link "15786" [ref=e3]\n- text "Accounts Overview" [ref=e4]\n- text "2026" [ref=e5]')
+    assert "Avery" not in masked and "15786" not in masked
+    assert "Welcome to Account Services" in masked and "Accounts Overview" in masked and '"2026"' in masked

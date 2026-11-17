@@ -212,3 +212,16 @@ def test_spaces_come_back_only_where_they_cant_change_a_value():
     assert vision._merge_spaces("Member #", "Member#") == "Member #"
     assert vision._letters_only("Jane O'Brien") == "Jane O'Brien"
     assert vision._letters_only("4, 210.55") == "4,210.55" and vision._letters_only("12 345") == "12345"
+
+
+def test_a_masked_field_is_counted_by_its_glyphs_not_read():
+    # OCR read sixteen of ParaBank's password dots as "FE00-00000000000"; the dots are counted instead
+    from PIL import Image, ImageDraw
+    image = Image.new("RGB", (220, 24), "white")
+    draw = ImageDraw.Draw(image)
+    for i in range(16):
+        draw.ellipse((6 + i * 9, 9, 11 + i * 9, 14), fill="black")
+    assert vision._mask_glyphs(np.array(image)) == 16
+    words = Image.new("RGB", (220, 24), "white")
+    ImageDraw.Draw(words).text((6, 4), "teller01", fill="black")
+    assert vision._mask_glyphs(np.array(words)) == 0

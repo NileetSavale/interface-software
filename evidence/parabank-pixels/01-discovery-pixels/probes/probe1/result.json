@@ -1,0 +1,21 @@
+{
+  "runId": "disc_20261117T034420Z_8508cd-probe1",
+  "completedAt": "2026-11-17T03:45:06+00:00",
+  "recovered": [],
+  "drift": [],
+  "status": "failed",
+  "atStep": "log_in",
+  "errorClass": "EXPECT_FAILED",
+  "expected": "visible(frame=[''], role='link', name='{{inputs.accountId}}')",
+  "observed": "not on screen",
+  "evidence": [
+    {
+      "kind": "a11y_snapshot",
+      "path": "runs/disc_20261117T034420Z_8508cd-probe1/log_in.snapshot.txt"
+    },
+    {
+      "kind": "screenshot",
+      "path": "runs/disc_20261117T034420Z_8508cd-probe1/log_in.png"
+    }
+  ]
+}

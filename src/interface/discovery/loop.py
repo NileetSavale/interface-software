@@ -24,6 +24,7 @@ from interface.pii import Masker
 from interface.policy import PolicyViolation, check_action, check_url, classify
 from interface.session import Intervention, Session
 from interface.surface.base import Resolved, SurfaceError
+from interface.surface.screen import ScreenSurface
 from interface.surface.terminal import TerminalSurface
 from interface.surface.vision import VisionSurface
 from interface.surface.web import WebSurface
@@ -534,7 +535,9 @@ class Discovery:
         input_name = args["input"]
         if input_name not in self.inputs:
             raise ValueError(f"{input_name} isn't one of the inputs: {', '.join(self.inputs)}")
-        target = await self.surface.describe(args["ref"], "read")
+        # A surface without a tree describes what an input identifies by its value (screen.py); the web keeps its own way
+        target = await self.surface.describe(args["ref"], "read", self.inputs if isinstance(self.surface, ScreenSurface)
+                                             else None)
         shown = await self.surface.read_ref(args["ref"])
         if shown.strip() != self.inputs[input_name].strip():
             raise ValueError(f"That element doesn't show {{{{inputs.{input_name}}}}}: this is a different record, "
