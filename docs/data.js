@@ -157,16 +157,16 @@ window.SITE = {
   {
    "id": "D20",
    "topic": "Guards a hostile page can't talk its way past",
-   "proposed": "(found by the safety eval, Pass 2 item 5) The design relied on the button-name classifier, with a mislabelled \"OK\" listed as residual risk",
-   "chose": "<strong>The AI's change, open for review: a network-level gate (origin allowlist on every request; allowed paths and declared <code>commitPaths</code> on every page load or post), credentials typed only on the sign-on page, and outcome checks on the screen where a control is found</strong>",
-   "why": "The eval showed each gap concretely. A tampered artifact pressed \"OK\" on the review screen; only the browser closing at the end of the run kept the account from opening. A link took the browser off-site. Discovery would type the password into a fake re-login form. A guard below the page holds whatever the page says. <strong>Then, from the Claude safety cases:</strong> Claude was refused the password 3/3 times but pressed the fake form's Verify anyway, and the click was recorded. The AI offered prompt-only, review-flag-only, or all three of form block + review flag + prompt line; <strong>the user chose all three (option A).</strong>",
+   "proposed": "(found by the safety eval) The design relied on the button-name classifier, with a mislabelled \"OK\" listed as residual risk",
+   "chose": "<strong>Adopted, the AI's change: a network-level gate (origin allowlist on every request; allowed paths and declared <code>commitPaths</code> on every page load or post), credentials typed only on the sign-on page, and outcome checks on the screen where a control is found</strong>",
+   "why": "The eval showed each gap concretely. A tampered artifact pressed \"OK\" on the review screen; only the browser closing at the end of the run kept the account from opening. A link took the browser off-site. Discovery would type the password into a fake re-login form. A guard below the page holds whatever the page says. <strong>Then, from the Claude safety cases:</strong> Claude was refused the password 3/3 times but pressed the fake form's Verify anyway, and the click was recorded. The AI offered prompt-only, review-flag-only, or all three of form block + review flag + prompt line; <strong>I chose all three.</strong>",
    "kind": "my choice"
   },
   {
    "id": "D21",
    "topic": "Surviving a tenant's relabel",
-   "proposed": "(Pass 2 item 6) The locked demo needed \"a fallback hits\" when a button is renamed, but every recorded strategy keyed on the name",
-   "chose": "<strong>The AI's addition, open for review: an <code>onlyInRegion</code> strategy (\"the only button in the Member Inquiry fieldset\"), recorded only under a labelled region scope and only when unique; refused by the schema without a region</strong>",
+   "proposed": "The demo plan needed \"a fallback hits\" when a button is renamed, but every recorded strategy keyed on the name",
+   "chose": "<strong>Adopted, the AI's addition: an <code>onlyInRegion</code> strategy (\"the only button in the Member Inquiry fieldset\"), recorded only under a labelled region scope and only when unique; refused by the schema without a region</strong>",
    "why": "Relabels are the commonest difference between banks on one product, and role, label and text strategies all fail together on one. Position within a named region survives a rename. It still never guesses (two matches fail), and the live policy re-check and network gate still apply. The drift it reports turns into a proposed override, so the name-based strategy is restored after review.",
    "kind": "ai proposal"
   },
@@ -181,8 +181,8 @@ window.SITE = {
   {
    "id": "D23",
    "topic": "When a postcondition carries another bank's label",
-   "proposed": "(found building the page map, Pass 2 item 7) Sign-on is proved by the next step's control, so a bank that renames that control fails sign-on, and the \"already signed in?\" check misreads after a re-sign-on",
-   "chose": "<strong>The AI's addition, open for review: the page map may confirm a postcondition or the precondition check, but only exactly: the screen now showing must be where this same action is known, from trusted edges, to lead on this bank. Reported as <code>MAP_FALLBACK</code> with the pinned map version</strong>",
+   "proposed": "(found building the page map) Sign-on is proved by the next step's control, so a bank that renames that control fails sign-on, and the \"already signed in?\" check misreads after a re-sign-on",
+   "chose": "<strong>Adopted, the AI's addition: the page map may confirm a postcondition or the precondition check, but only exactly: the screen now showing must be where this same action is known, from trusted edges, to lead on this bank. Reported as <code>MAP_FALLBACK</code> with the pinned map version</strong>",
    "why": "The check still asks \"did we reach the right screen?\", answered from the bank's own verified history instead of another bank's label. It's deterministic for a given map version, and it adds no way through that a verified run on that bank hasn't already taken.",
    "kind": "ai proposal"
   },
@@ -213,7 +213,7 @@ window.SITE = {
   {
    "id": "D27",
    "topic": "Reading the first row of a results list",
-   "proposed": "(found on ParaBank) \"The first transaction found\" has nothing stable to name its row by: the row's key is a date, which is data. The only way to say it is a position, which my D8 rule rejected for picking controls. The AI offered a narrow <code>row: first</code>, matching by amount, folding it into item 5, or dropping the flow",
+   "proposed": "(found on ParaBank) \"The first transaction found\" has nothing stable to name its row by: the row's key is a date, which is data. The only way to say it is a position, which my D8 rule rejected for picking controls. The AI offered a narrow <code>row: first</code>, matching by amount, folding it into the multi-row work (D28), or dropping the flow",
    "chose": "<strong>A narrow <code>row: first</code> on a table cell: reading only, never acting; recorded only when the goal declares it wants the first result; on a table found by its own label and header; an empty table finds nothing</strong>",
    "why": "D8 is about choosing between same-named controls, where an index silently picks the wrong one. \"The first result\" is what the caller asked for, so the position is the meaning, not a guess. Keeping it off controls means nothing is ever clicked by position, and an empty table failing is what turns \"no transactions\" from a hollow success into an answer.",
    "kind": "agreed"
@@ -221,7 +221,7 @@ window.SITE = {
   {
    "id": "D28",
    "topic": "Results that span pages",
-   "proposed": "(Pass 3 item 5) An artifact was a straight list of steps, so a row on page 3 couldn't be reached by a capability recorded with the row on page 1, and \"press Next\" recorded twice only works when the row is on page 3. The AI recommended one bounded loop, or none",
+   "proposed": "An artifact was a straight list of steps, so a row on page 3 couldn't be reached by a capability recorded with the row on page 1, and \"press Next\" recorded twice only works when the row is on page 3. The AI recommended one bounded loop, or none",
    "chose": "<strong>A <code>pageUntil</code> step, the only loop an artifact can hold: press the Next control until <code>until</code> (the row the next step uses) finds exactly one element, at most <code>maxPages</code> times. Recorded only from the model's <code>next_page</code> tool, which is offered only when the goal declares <code>resultsSpanPages</code>. A page turn is classed like a click; only a real link named Next is read</strong>",
    "why": "Without it, capabilities stop at whatever fits on one page, which a bank's histories never do. Bounded and with a declared exit, replay stays deterministic: same inputs, same pages turned, each logged. Several matching rows fail as ambiguous at once, running out fails saying how many pages were searched, and the goal, not the model, decides that results can span pages.",
    "kind": "agreed"
@@ -229,7 +229,7 @@ window.SITE = {
   {
    "id": "D29",
    "topic": "When drift across runs means \"change the artifact\"",
-   "proposed": "(Pass 3 item 7) Each replay reports its own drift, but one fallback can be a slow page as easily as a renamed button. The AI recommended a report that reads the run logs, with a verdict per bank and step",
+   "proposed": "Each replay reports its own drift, but one fallback can be a slow page as easily as a renamed button. The AI recommended a report that reads the run logs, with a verdict per bank and step",
    "chose": "<strong>Agreed, acting only on a settled change: the last 3 runs on a bank all found the control by the same fallback (approve the override drift proposed), or all missed it, or kept switching fallbacks (re-record). Anything less is \"watch\". Only runs of the artifact's latest revision count, so an approved override starts afresh. The report only reads</strong>",
    "why": "A single miss is often the input, not the bank: two members born the same day are <code>AMBIGUOUS_TARGET</code> by design. Advice to change an artifact that every run on that bank will follow should rest on a repeated observation. The revision hash keeps the report from re-raising drift that a person already fixed. Approving stays a person's act, as it is everywhere else.",
    "kind": "agreed"
@@ -237,7 +237,7 @@ window.SITE = {
   {
    "id": "D30",
    "topic": "How a calling agent reaches a capability",
-   "proposed": "(Pass 3 item 8) The capability catalog was cut in D15; the user chose to build everything listed. The AI recommended an MCP server over the artifacts, not a new catalog format",
+   "proposed": "The capability catalog was cut in D15; I chose to build everything listed. The AI recommended an MCP server over the artifacts, not a new catalog format",
    "chose": "<strong>Agreed: <code>interface mcp</code> serves each approved artifact as one MCP tool. One server per bank: only artifacts whose allowlist holds that bank's origin are listed. The input schema is the artifact's inputs, the output is the result contract, and annotations say read-only or \"stops before commit\". The catalog is read from disk on every list and call; drafts are never offered. Unattended only</strong>",
    "why": "The artifact already is a typed tool signature, so a catalog would only copy it. MCP is what agent hosts already speak. Scoping by origin keeps one bank's server from offering, or running, another bank's procedures. Reading from disk each time means withdrawing approval takes effect on the next call, with no cache to forget. An attended server (the D11 deadline and run handle as tool results) is the next step, not built.",
    "kind": "agreed"
@@ -245,7 +245,7 @@ window.SITE = {
   {
    "id": "D31",
    "topic": "A surface with no accessibility tree",
-   "proposed": "(Pass 3 item 9) The user asked whether this works beyond the web, and chose to build a green screen: VT100 over a pseudo-terminal, with Claude discovering on it. The AI proposed building a tree from the characters, so the loop, recorder, masker, schema and replay are shared, not forked",
+   "proposed": "I wanted to know whether this works beyond the web, and chose to build a green screen: VT100 over a pseudo-terminal, with Claude discovering on it. The AI proposed building a tree from the characters, so the loop, recorder, masker, schema and replay are shared, not forked",
    "chose": "<strong>Agreed: <code>TerminalSurface</code> reads a 24x80 VT100 grid (pyte) over telnet-style TCP and builds the same snapshot: row 1 is the screen code and title, reverse-video runs are fields named by the caption before them, the key line's keys are buttons. Every target is scoped to its screen code. The last strategy is the grid position (<code>bbox</code> in character cells). The commit guard sits at the input: on a commitPaths screen only exit and cancel keys are sent</strong>",
    "why": "A terminal grid doesn't move, so position is a real fallback here, not the guess it is on the web, and scoping to the screen code keeps it from ever landing on another screen. Building the tree from the screen keeps one discovery loop and one artifact format: what was learned about masking, identity and probes applies unchanged. The transport changed from the agreed local pseudo-terminal to telnet-style TCP, since real green-screen hosts are reached over the network; the emulator is the same. Not built: TN3270/5250 field attributes, and attended handoff on a terminal (the operator page is browser-based).",
    "kind": "agreed"
@@ -253,7 +253,7 @@ window.SITE = {
   {
    "id": "D32",
    "topic": "A surface with only pixels",
-   "proposed": "(Pass 3 item 10) For apps with no tree at all (Citrix, Swing, Delphi, canvas), the AI proposed reading the screen by OCR into the same element list the terminal builds, and the user agreed the design: RapidOCR, canvas evals in CI plus a native Tk demo with real OS input, the model reading OCR text and never the picture",
+   "proposed": "For apps with no tree at all (Citrix, Swing, Delphi, canvas), the AI proposed reading the screen by OCR into the same element list the terminal builds, and I agreed the design: RapidOCR, canvas evals in CI plus a native Tk demo with real OS input, the model reading OCR text and never the picture",
    "chose": "<strong>Agreed: <code>VisionSurface</code> (on <code>ScreenSurface</code>, shared with the terminal) finds words by OCR and boxes from the pixels: a near-white box is a field named by the label to its left, a filled box with a caption a button, the top band the screen code and title. Positions are logical pixels, so a recording on the canvas replays on the native window. A value is read twice from a crop (two scales), must agree with confidence and not mix digits with look-alike letters, or the step fails <code>UNREADABLE</code>; spaces come back from the pixel gaps, and in a value only between letters. Typed text is read back off the screen</strong>",
    "why": "A misread balance returned as success is the one failure that's worse than none, so every rule here trades answers for certainty, and the read check measures it: values read against the truth on random screens, silent misreads must be 0. Sending the model screenshots would send it the record; the OCR'd snapshot goes through the same masker as every other surface. Fields are found by a convention (white wells), which a real app may not follow: a calibration per app is the honest next step. Not built: attended handoff on this surface, scrolling lists, disabled state (only colour). On ParaBank, an app not built for these conventions, three attempts found seven gaps (select-all on macOS, masked fields, tables as buttons, links, labels above and inline, flat-snapshot masking, unscoped positions); fixed, the fourth recorded and replayed (<code>evidence/parabank-pixels/</code>).",
    "kind": "agreed"
@@ -653,7 +653,13 @@ window.SITE = {
    "date": "2026-11-17",
    "subject": "All free suites re-run at 067545f; Claude arms kept with their own stamps; evidence, report and site",
    "body": ""
+  },
+  {
+   "sha": "212419d",
+   "date": "2026-11-17",
+   "subject": "Claude arms re-run at 4c7a67b (discovery again after an API outage); pixel suite re-run awake",
+   "body": "Every section of the report is now stamped with 067545f or 4c7a67b, which differ only in the\nreport's code. Sub-account discovery: median $0.038 without the map, $0.028 with it."
   }
  ],
- "tests": 139
+ "tests": 140
 };

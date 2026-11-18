@@ -197,6 +197,26 @@ def test_unlearned_outcome_fails_where_it_stopped(replay):
     assert isinstance(invalid, Failed) and invalid.at_step == "read_member_name"
 
 
+def test_a_declared_notice_is_clicked_through_and_an_undeclared_one_is_not(base_url, discovered, audit):
+    # The committed artifact declares the product's password reminder at review; the discovered one doesn't yet
+    declared = next(o for o in load_artifact("artifacts/core_banking.lookup_member_balance.json").outcomes
+                    if o.code == "PASSWORD_REMINDER")
+    bare = discovered[2].model_copy(update={"status": "approved"})
+    reviewed = bare.model_copy(update={"outcomes": [*bare.outcomes, declared]})
+    try:
+        for artifact in (reviewed, bare):
+            httpx.post(base_url + "/__faults", params={"name": "password_reminder", "times": 1})
+            result = asyncio.run(Replayer(artifact, base_url, {"memberId": "12345"}, env=ENV, audit=audit).run())
+            if artifact is reviewed:
+                assert isinstance(result, Success), result
+                assert [e.code for e in result.recovered] == ["PASSWORD_REMINDER"]
+                assert result.recovered[0].action == "clicked through"
+            else:
+                assert isinstance(result, Failed) and result.error_class == "TARGET_UNRESOLVED", result
+    finally:
+        httpx.delete(base_url + "/__faults")
+
+
 def test_attended_replay_hands_an_unknown_screen_to_a_person(base_url, discovered, tmp_path):
     from tests.test_handoff import attended_replay, clicks
     approved = discovered[2].model_copy(update={"status": "approved"})

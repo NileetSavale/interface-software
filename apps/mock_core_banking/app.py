@@ -49,7 +49,7 @@ MEMBERS = {
     "67890": {"name": "Wei Chen", "dob": "02/14/1990", "accounts": [("Checking", "0001-67890-10", "58.25")]},
 }
 PAGE_SIZE = 10
-FAULTS = {"server_error", "session_timeout", "interstitial", "slow", "unknown_dialog", "wrong_record", "late_fill",
+FAULTS = {"server_error", "session_timeout", "interstitial", "password_reminder", "slow", "unknown_dialog", "wrong_record", "late_fill",
           "late_wrong_record"}
 # A page that arrives with its values empty and fills them in a moment later, as ParaBank's account page does from a
 # background call: every cell holding a number is emptied as the page parses and refilled 1.5 s after (ParaBank
@@ -336,6 +336,14 @@ async def member(request: Request, id: str = "", ack: str = ""):
 <TR><TD>Branch hours change on the first of next month. Please acknowledge to continue.</TD></TR>
 <TR><TD><INPUT TYPE="hidden" NAME="id" VALUE="{shown}"><INPUT TYPE="hidden" NAME="ack" VALUE="1">
 <INPUT TYPE="submit" VALUE="Acknowledge"></TD></TR></TABLE></FORM>""")
+    if fault == "password_reminder":
+        # A notice this product shows every so often, known to whoever reviews an artifact for it: unlike the
+        # interstitial above, artifacts declare it, with the button that dismisses it
+        return page(f"""<FORM METHOD="GET" ACTION="/member"><TABLE CELLPADDING=8>
+<TR><TD><B>Password reminder</B></TD></TR>
+<TR><TD>Your password expires in 5 days. You can change it now from the main menu.</TD></TR>
+<TR><TD><INPUT TYPE="hidden" NAME="id" VALUE="{shown}"><INPUT TYPE="hidden" NAME="ack" VALUE="1">
+<INPUT TYPE="submit" VALUE="Remind me later"> <A HREF="/main">Change password</A></TD></TR></TABLE></FORM>""")
     if fault == "slow":
         await asyncio.sleep(SLOW_SECONDS)
     if fault in ("wrong_record", "late_wrong_record"):

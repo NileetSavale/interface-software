@@ -28,7 +28,8 @@ def fault_matrix(d: dict) -> str:
     confusion = _table(["expected ↓ / actual →", *TYPES],
                        [[e, *(d["confusion"][e][a] or "·" for a in TYPES)] for e in TYPES if any(d["confusion"][e].values())])
     return f"""## 1. Fault matrix (no LLM)
-{_stamp(d)} {d['cases']} cases × N={d['n_per_case']} = {d['runs']} replays of the two discovered artifacts.
+{_stamp(d)} {d['runs']} replays, N={d['n_per_case']} per case: {len({r['flow'] for r in d['rows']})} artifacts \
+({', '.join(sorted({r['flow'] for r in d['rows']}))}) on banks {', '.join(sorted({r['variant'].upper() for r in d['rows']}))}.
 
 **{d['passed']}/{d['runs']} match the contract.** Sub-accounts opened across the whole suite: **{d['sub_accounts_opened']}**.
 

@@ -44,6 +44,8 @@ def cases() -> list[dict]:
                  expect="success+recovered" if flow == "lookup" else "failed/SESSION_EXPIRED"),
             dict(flow=flow, case="slow page", inputs=happy, fault="slow", expect="success*"),
             dict(flow=flow, case="unknown notice page", inputs=happy, fault="interstitial", expect="failed/TARGET_UNRESOLVED"),
+            dict(flow=flow, case="known notice page", inputs=happy, fault="password_reminder",
+                 expect="success+recovered"),
             dict(flow=flow, case="unknown dialog", inputs=happy, fault="unknown_dialog",
                  expect="failed/UNEXPECTED_DIALOG"),
             dict(flow=flow, case="app serves the wrong member", inputs=happy, fault="wrong_record",

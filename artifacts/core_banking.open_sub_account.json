@@ -12,7 +12,7 @@
     "surface": "web",
     "entryPath": "/"
   },
-  "status": "draft",
+  "status": "approved",
   "provenance": {
     "discoveryRunId": "disc_20261115T072446Z_c5d86f",
     "recordedAt": "2026-11-15T07:25:07+00:00",
@@ -105,6 +105,41 @@
         "resume": "step"
       },
       "description": "The app shows a wait message. Wait longer, then carry on."
+    },
+    {
+      "code": "PASSWORD_REMINDER",
+      "kind": "recoverable",
+      "at": "any",
+      "detect": {
+        "kind": "visible",
+        "text": {
+          "matches": "(?i)your password expires in \\d+ days?"
+        }
+      },
+      "recovery": {
+        "do": {
+          "kind": "click",
+          "target": {
+            "frame": [
+              "main"
+            ],
+            "strategies": [
+              {
+                "kind": "role",
+                "role": "button",
+                "name": "Remind me later"
+              },
+              {
+                "kind": "text",
+                "text": "Remind me later"
+              }
+            ]
+          }
+        },
+        "maxAttempts": 1,
+        "resume": "step"
+      },
+      "description": "The product's password-expiry notice, declared at review. Dismiss it with Remind me later, never Change password, and carry on."
     },
     {
       "code": "SESSION_EXPIRED",

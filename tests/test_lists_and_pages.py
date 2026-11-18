@@ -1,4 +1,4 @@
-"""Item 5: a row chosen from several by the input it shows (never by position), and a row pages away (D28)."""
+"""A row chosen from several by the input it shows (never by position), and a row pages away (D28)."""
 import asyncio
 
 import pytest

@@ -102,7 +102,7 @@ headed browser. agent-desktop is the reference for a future `DesktopSurface`.
 ### ✅ Locked: screenshot policy
 - The model gets **only the tree** by default.
 - **The first time a screen state is seen** (a new page fingerprint, see §7a), the model gets **screenshot + tree**.
-  Later visits to a known state get the tree only. *(The user's proposal; it replaced part of the AI's trigger
+  Later visits to a known state get the tree only. *(My proposal; it replaced part of the AI's trigger
   list.)*
 - A screenshot is also attached automatically when:
   - the tree is thin (few named interactive controls);
@@ -249,7 +249,7 @@ Shaping choices (each one is defensible on its own):
   outcome. Probes learn from a checkpoint failure as well, and tell the model that the screen is the app's response
   to the last step.
 
-### `open_sub_account` (Pass 2 item 4)
+### `open_sub_account`
 - **The flow:** Member detail → Open Sub-Account → a form → Continue → Review New Sub-Account, which has a
   **Confirm** button. Account type and Initial deposit have no `<label>`, so the recorder finds them by the text in
   the neighbouring cell (`anchor`).
@@ -454,7 +454,7 @@ intervention. If approval-gated irreversible actions are added later, they would
 **Evidence:** the event log (actor changes, epochs, resume checkpoint result) plus a short screen recording of a
 full handoff in `evidence/`.
 
-### As built: concurrent replays (Pass 3 item 6, suite 7)
+### As built: concurrent replays (suite 7)
 - `evals/concurrency.py`: two banks, each a mock-app **server process** of its own (A on the base artifact, B on
   its approved override and its own operator), lookup for four members, at 1, 4 and 8 replays at once in one
   process, each in its own browser. A result counts only if it carries the name of the member that run asked for,
@@ -463,7 +463,7 @@ full handoff in `evidence/`.
   no shared state between runs, and how throughput scales on one machine. At scale the same unit runs behind a
   queue per bank, with per-bank concurrency limits (the bank's app, not ours, is usually the bottleneck).
 
-### As built: several matches and pages (Pass 3 item 5, D28)
+### As built: several matches and pages (D28)
 - **A row is named by what it shows.** When no static label names a table row, the recorder looks for a cell in it
   whose text is exactly an input's value and records the row by it: "the Select link in the row where Date of
   Birth = `{{inputs.dob}}`" (`locate.js` `rowContext`, `WebSurface.describe`). Replay fills it in; two matching rows
@@ -489,7 +489,7 @@ full handoff in `evidence/`.
   crashed late run said it never existed. The crash is now a typed `failed/INTERNAL_ERROR` (message redacted) and a
   `run_crashed` event; `invoke` and `wait` return it rather than raise.
 
-### As built: a third-party app, ParaBank (Pass 3 item 4)
+### As built: a third-party app, ParaBank
 `scripts/parabank_evidence.py` registers a fictional customer on Parasoft's public demo bank, has Claude discover two
 read-only capabilities and replays them with no model; [`evidence/parabank/`](../evidence/parabank/README.md). What
 the real app found, and the changes it led to:
@@ -541,7 +541,7 @@ the real app found, and the changes it led to:
 - **Limit:** the operator's name is self-declared. The key proves the link came through the operator channel; a
   bank's SSO would supply the identity.
 
-### As built (Pass 2 item 2)
+### As built
 - **Code:**
   - `src/interface/session.py`: Session, ControlToken, Intervention.
   - `src/interface/operator.py`: OperatorHub and the page on :4200.
@@ -636,7 +636,7 @@ the real app found, and the changes it led to:
   the model if any region can't be classified. *Built instead: a fail-closed rule for names in free text (D24),
   below.*
 
-### As built (Pass 2 item 3)
+### As built
 - **Code:** `src/interface/pii.py` (Masker, PATTERNS, LABELS); `locate.js` `maskPII`; `WebSurface.screenshot`.
 - **The model's view.** Each snapshot goes through two stages before it's sent:
   1. Inputs and secrets become their `{{placeholders}}`.
@@ -683,7 +683,7 @@ the real app found, and the changes it led to:
 **Limits to state honestly in REPORT:** regex redaction misses free-text PII; screenshot masking depends on a11y
 coverage; classification of irreversibility is heuristic, which is why it's reviewable.
 
-### As built: guards below the page (Pass 2 item 5, D20)
+### As built: guards below the page (D20)
 The safety eval (§9a, suite 4) showed that guards which read the page can be fooled by the page. A tampered
 artifact pressed a commit button labelled "OK", and a link carried the browser to another site. Discovery also
 typed the password into a fake "re-enter your password" form. Three guards now sit where the page can't reach them:
@@ -699,7 +699,7 @@ typed the password into a fake "re-enter your password" form. Three guards now s
 - **Credentials go to one page.** In discovery, `{{secrets.X}}` may be typed only on the page where credentials
   were first typed: the sign-on page. Anywhere else the model gets a refusal that tells it to `give_up` if the
   session really needs signing on again.
-- **A form that asks for credentials after sign-on is hostile** (option A, chosen by the user). The Claude safety
+- **A form that asks for credentials after sign-on is hostile** (my choice of the three options, D20). The Claude safety
   cases showed the credential guard wasn't enough: Claude was refused the password every time, then pressed the
   empty form's Verify, which was recorded. Now:
   - every later action on that form is refused;
@@ -729,7 +729,7 @@ typed the password into a fake "re-enter your password" form. Three guards now s
 - **Drift detection:** every replay reports which descriptor rank hit; fallback hits per tenant are aggregated into a
   signal ("tenant X: step `submit-search` now resolves at rank 3 in 40% of runs") → re-record or add override.
 
-### As built (Pass 2 item 6)
+### As built
 **Variant B** is a second bank on the same vendor product (`interface mock-app --variant b`, or `/__variant` in
 tests). It has two template differences a real tenant would have:
 - the member search button says "Find Member" instead of "Search";
@@ -760,7 +760,7 @@ fieldset".
 - With the proposal approved, the whole contract holds on B as on A, and the happy path has no drift.
 - Bank A is unaffected by B's override.
 
-### As built: the green screen (Pass 3 item 9, D31)
+### As built: the green screen (D31)
 `src/interface/surface/terminal.py` is a second Surface, for a character terminal. The mock host is
 `apps/mock_terminal` (`interface mock-terminal`, telnet://127.0.0.1:4300): 24x80, screen codes, reverse-video fields,
 Tab between fields, Ctrl-U to erase, Enter and F1–F12, the same members and faults as the web mock, a sub-account
@@ -794,7 +794,7 @@ grid position) and with B's override approved; F10=Post on the review screen was
 A first attempt at the Claude arm crashed when a probe's API call raised. A probe the model can't answer is now
 skipped and the recording stands (tested).
 
-### As built: pixels only (Pass 3 item 10, D32)
+### As built: pixels only (D32)
 `src/interface/surface/vision.py` is a third Surface, for apps that expose only a picture: Citrix-streamed desktops,
 Swing or Delphi clients, canvas-drawn pages. What the terminal surface did over its grid moved into
 `surface/screen.py` (`ScreenSurface`: the snapshot, the recorder's strategies, resolve, conditions, the commit
@@ -915,7 +915,7 @@ rotated at 1 MB, through the same PII masker:
 A run id in `mcp.log` leads to that run's `events.jsonl`, so a caller's report can be traced end to end. Tests check
 each server log says what happened and carries no input values.
 
-### As built: the drift report (Pass 3 item 7, D29)
+### As built: the drift report (D29)
 `interface drift` (`src/interface/drift.py`) reads every replay's `events.jsonl`, which is already redacted, and
 reduces each run to how each step's control was found: by the first strategy, by a named fallback, by the page map,
 or missed (`TARGET_UNRESOLVED`, `AMBIGUOUS_TARGET`, `EXPECT_FAILED`). Then, per capability, bank and step, over the
@@ -998,7 +998,7 @@ A graph of an app's screens that grows with every verified run.
 - Fingerprint collisions between screens that mean different things (mitigated by static text in the fingerprint).
 - Map poisoning (see the write rules).
 
-### As built (Pass 2 item 7)
+### As built
 `src/interface/pagemap.py`: one JSON file per bank, no server.
 - **Screens** are a hash of the structure-only view of the snapshot (the same scrubbing as wrong-record evidence),
   with typed field values dropped. So two members' detail pages are one node, and filling a field doesn't make a new
@@ -1064,17 +1064,18 @@ A graph of an app's screens that grows with every verified run.
 **Faults.** Armed per server for the next N member pages with `POST /__faults?name=…&times=N`, or with `FAULT=` at
 start. The business outcomes need no fault; the data produces them (99999 not found, 45678 restricted, a leading 0
 invalid).
-| Fault | Expected outcome |
+| Fault | Expected outcome (measured: `evals/report.md` §1) |
 |---|---|
 | member 99999 | business `MEMBER_NOT_FOUND` (learned by a probe) |
-| member 01234 | business `INVALID_INPUT` (learned by a probe) |
+| member 01234 | business `INVALID_MEMBER_NUMBER` (learned by a probe) |
 | member 45678 | business `PERMISSION_DENIED` (library) |
-| `session_timeout` | recoverable → re-login subflow |
-| `interstitial` | recoverable → click "Acknowledge" |
+| `session_timeout` | recoverable → re-login subflow (read-only); `failed SESSION_EXPIRED` on a flow that changes data |
+| `password_reminder` | recoverable → click "Remind me later" (an outcome declared at review) |
+| `interstitial` | a notice no artifact declares: unattended `failed TARGET_UNRESOLVED`; attended, a person (the handoff demo) |
 | `slow` | auto-wait absorbs it (3 s); no recovery needed |
 | `server_error` | fatal `APP_ERROR` |
 | `wrong_record` | fatal `WRONG_RECORD` |
-| `unknown_dialog` | needs_human → the handoff demo |
+| `unknown_dialog` | escalate `UNEXPECTED_DIALOG`: unattended `failed`; attended, a person |
 
 **Variant B** (`VARIANT=b`, the second tenant)
 - Different branding.
@@ -1100,11 +1101,11 @@ invalid).
    "assisted fallback" stretch goal.
 3. ~~Capability catalog~~: **cut** from the time-box (D15). It's the stretch goal least connected to the rest. The
    artifact's contract half is already a tool signature, so it's a short next step. **Built later** as an MCP
-   server (Pass 3 item 8, D30; below).
+   server (D30; below).
 
 Already covered by core decisions: `draft → approved` gating (half of "Confidence & approval").
 
-### As built: approved artifacts as MCP tools (Pass 3 item 8, D30)
+### As built: approved artifacts as MCP tools (D30)
 `interface mcp --base-url <bank's app> [--tenant X]` (`src/interface/mcp_server.py`) is a stdio MCP server, one per
 bank. What a calling agent sees:
 
@@ -1153,7 +1154,7 @@ loop_runner's `research_log.md`: arms compared head-to-head, run counts stated, 
 **In the REPORT:** the brief fixes seven headings, so eval results go *inside* them (fault matrix → §3, map benefit
 → §4, adversarial → §6), each linking to `evals/report.md`.
 
-### As built (Pass 2 item 5)
+### As built
 `uv run python -m evals <suite>` runs one suite, and `all` runs the four that need no LLM. Each suite writes
 `evals/results/<suite>.json` (date, commit, N), and `evals/report.md` is rebuilt from those files only.
 - **Each suite gets its own copy of the mock app** on a free port, so faults and layout modes can't leak between

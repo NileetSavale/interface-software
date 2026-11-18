@@ -22,7 +22,8 @@ built this with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
   the model. Apps with no tree get a snapshot built from characters (green screen) or OCR (pixels); the model still
   reads masked text.
 - **Model choice** (D12): discovery's cost is spread over every free replay, so first-try success beats token price.
-  Over 20 real runs: median $0.017 (lookup) and $0.038 (sub-account), probes included, all replayed on another member.
+  Over 20 real runs, all replayed on another member: median $0.017 (lookup) and $0.038 (sub-account) from scratch,
+  5 runs each, probes included; less with the page map.
 - **Reused from Loop Runner**, my agent behind *When Tests Lie* (submitted to AGENT 2027 @ ICSE): the tool gate,
   stuck detection, model cascades, redaction and the eval method.
 
@@ -56,6 +57,7 @@ built this with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
 | Not found, malformed, restricted, below minimum | `business_outcome` |
 | Session expired | Re-sign-on and restart if read-only; escalate on a flow that changes data |
 | Slow page, values filled in late | Absorbed by the waits |
+| A notice the artifact declares (password reminder) | Clicked through by its declared button, then carry on |
 | Unknown dialog | A person if attached, else `failed` |
 | A different member shown | `WRONG_RECORD` before anything is read; circuit breaker after two in 24 h (D19) |
 
@@ -95,7 +97,8 @@ When no strategy survives, the bank's page map may stand in for at most two trus
   key, D25) offers Take control, Hand back, Abort; the person works in **the automation's own browser**, recorded.
   On hand-back, automation re-observes and decides: resolved, done, retry or pause again.
 - **The caller** gets `needs_human` and a run handle at its deadline; the late result is kept 15 minutes (D11).
-  [`evidence/11-handoff-unknown-notice/`](evidence/11-handoff-unknown-notice/) has the log and a masked recording.
+  [`evidence/11-handoff-unknown-notice/`](evidence/11-handoff-unknown-notice/) has the log and a masked recording;
+  its operator is scripted through the same operator API so it regenerates unattended (README step 5 does it by hand).
 
 ## Safety
 
@@ -120,4 +123,4 @@ When no strategy survives, the bank's page map may stand in for at most two trus
 - **RAG / vector database: deliberately not used.** Every lookup is an exact key or a short list.
 - **Next:** per-app calibration for the pixel surface; lone first names; racing the "already signed in?" check
   (about 2 s of each ~4 s replay).
-- **Time:** built in priority order inside a time-box (D15); commits span 14–16 Nov 2026.
+- **Time:** built in priority order inside a time-box (D15); commits span 14–18 Nov 2026.

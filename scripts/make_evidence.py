@@ -40,10 +40,18 @@ FORBIDDEN = ["Jane Doe", "Mei Chen", "Rafael Ortiz", "Staff Member", "4,210.55",
 cases: list[dict] = []
 
 
+def relink(dest: Path, run_id: str):
+    """A run's files name each other as runs/<run_id>/<file>, which is gitignored; in evidence they sit side by side."""
+    for path in dest.rglob("*"):
+        if path.suffix in (".json", ".jsonl", ".txt", ".md") and f"runs/{run_id}/" in (text := path.read_text()):
+            path.write_text(text.replace(f"runs/{run_id}/", ""))
+
+
 def keep(name: str, run_id: str, title: str, why: str, result=None, extra: dict | None = None, also: list[Path] = ()):
     """Copy a run's folder (events, result, snapshots, screenshots) into evidence/<name>/."""
     dest = OUT / name
     shutil.copytree(RUNS / run_id, dest)
+    relink(dest, run_id)
     for path in also:
         shutil.copy(path, dest / path.name)
     cases.append({"dir": name, "title": title, "why": why, "result": label(result) if result else None,
@@ -67,15 +75,17 @@ def discoveries():
         run_id = art.provenance.discovery_run_id
         dest = OUT / DISCOVERY_DIRS[flow]
         shutil.copytree(RUNS / run_id, dest)
+        relink(dest, run_id)
         for probe in sorted(RUNS.glob(f"{run_id}-probe*")):
             shutil.copytree(probe, dest / "probes" / probe.name.split("-")[-1])
+            relink(dest / "probes" / probe.name.split("-")[-1], probe.name)
         shutil.copy(path, dest / "artifact.json")
         finished = next(json.loads(l) for l in (dest / "events.jsonl").read_text().splitlines()
                         if '"discovery_finished"' in l)
         cases.append({"dir": dest.name, "title": f"Real Claude discovery: {art.capability.title}",
                       "why": f"{art.provenance.model}, {finished['steps']} steps, ${finished['cost_usd']:.3f} including "
-                             f"probes ({'; '.join(p['result'] for p in finished.get('probes', []))}). The artifact it "
-                             f"recorded is artifact.json.", "result": finished["status"], "run_id": run_id})
+                             f"probes ({'; '.join(p['result'] for p in finished.get('probes', []))}). artifact.json is "
+                             f"the artifact as committed: what it recorded, plus any outcome declared at review.", "result": finished["status"], "run_id": run_id})
         print(f"{dest.name:<36} {finished['status']}", flush=True)
 
 
@@ -128,6 +138,10 @@ def replays():
         case("06-replay-session-timeout-recovered", "Recoverable: the session expires mid-run", "Signs on again through "
              "the sign-on subflow and restarts (read-only capability). Reported as a recovery beside the success.",
              lookup, HAPPY["lookup"], fault="session_timeout")
+        case("37-replay-known-notice-clicked-through", "Recoverable: a notice the artifact knows",
+             "The app puts its password-expiry reminder in front of the member page. The artifact declares it (added at "
+             "review), so replay presses Remind me later, never Change password, and carries on. An undeclared notice "
+             "goes to a person instead (11).", lookup, HAPPY["lookup"], fault="password_reminder")
         case("07-replay-app-error", "Hard failure: the app returns a 500", "Stops at once with the step, what was "
              "expected and what was seen, plus a masked screenshot and an accessibility snapshot.", lookup,
              HAPPY["lookup"], fault="server_error")
@@ -153,7 +167,9 @@ def replays():
         keep("11-handoff-unknown-notice", result.run_id, "Escalation: a person takes the live session and hands back",
              "An unknown notice page appears. The run pauses and publishes an intervention; an operator claims "
              "control on the operator page, acknowledges the notice in the same browser, and hands back. Automation "
-             "verifies the screen and finishes. recording.webm is the run, with PII masked throughout.", result,
+             "verifies the screen and finishes. The operator here is scripted (Playwright standing in for a person, "
+             "through the same operator API and the same browser), so the case regenerates unattended. "
+             "recording.webm is the run, with PII masked throughout.", result,
              {"intervention": {"step": intervention.step_id, "reason": intervention.reason} if intervention else None})
         if recording:
             shutil.copy(recording, OUT / "11-handoff-unknown-notice" / "recording.webm")
@@ -222,7 +238,7 @@ def replays():
         print(f"{dest.name:<36} {cases[-1]['result']}", flush=True)
         app.variant("a")
 
-        # Item 5: one row out of several, and a row pages away (D28)
+        # One row out of several, and a row pages away (D28)
         find, hist = artifact("find_member", app), artifact("history", app)
         case("21-replay-one-of-three-chens", "Several matches: the one the input names", "Three Chens; the Select link "
              "is found in the row where Date of Birth = {{inputs.dob}}, never by position, and the member page's date "
@@ -236,7 +252,7 @@ def replays():
         case("24-replay-row-on-no-page", "A row on no page", "Searched all 4 pages, no next page: TARGET_UNRESOLVED, "
              "saying how many pages it searched.", hist, {**HAPPY["history"], "reference": "REF-0099"})
 
-        # Item 8: what a calling agent sees, over MCP: the approved artifacts as tools, and one call
+        # What a calling agent sees, over MCP: the approved artifacts as tools, and one call
         catalog = Path(tempfile.mkdtemp())
         for flow, path in ARTIFACTS.items():
             (catalog / path.name).write_text(dump_artifact(artifact(flow, app)))
@@ -261,7 +277,7 @@ def replays():
 
 
 def terminal_cases():
-    """Item 9: the same thread on a green screen (TerminalSurface, D31)."""
+    """The same thread on a green screen (TerminalSurface, D31)."""
     from evals import terminal
     path = terminal.ARTIFACT
     art = load_artifact(path)
@@ -316,7 +332,7 @@ def terminal_cases():
 
 
 def vision_cases():
-    """Item 10: the same thread on an app that is only pixels (VisionSurface, D32)."""
+    """The same thread on an app that is only pixels (VisionSurface, D32)."""
     from evals import vision
     path = vision.ARTIFACT
     art = load_artifact(path)

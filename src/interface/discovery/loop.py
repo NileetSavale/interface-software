@@ -567,8 +567,10 @@ class Discovery:
         path = self.out_dir / f"{artifact.capability.id}.json"
         path.write_text(dump_artifact(artifact))
         self.log.write("artifact.json", dump_artifact(artifact))
-        self.log.event("recorded", artifact=str(path), steps=len(artifact.steps), summary=args.get("summary", ""))
-        return "Recorded.", False, self._result("recorded", artifact=str(path),
+        # Logged relative to the project, so a run log copied into evidence doesn't carry the machine's home path
+        shown = str(path.relative_to(Path.cwd()) if path.is_relative_to(Path.cwd()) else path)
+        self.log.event("recorded", artifact=shown, steps=len(artifact.steps), summary=args.get("summary", ""))
+        return "Recorded.", False, self._result("recorded", artifact=shown,
                                                 summary=self.log.redact(args.get("summary", "")))
 
 

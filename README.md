@@ -60,14 +60,15 @@ uv run interface mock-app                  # http://127.0.0.1:4100
 
 Terminal 2:
 
-**1. Discover with Claude.** About 30–90 s and $0.02–0.07, including probes that teach it the business outcomes.
+**1. Discover with Claude.** About 30–90 s and $0.01–0.08, including probes that teach it the business outcomes.
 
 ```bash
 uv run interface discover goals/lookup_member_balance.json --input memberId=12345
 # → artifacts/core_banking.lookup_member_balance.json (status: draft); the log is under runs/disc_…/
 ```
 
-**2. Review and approve.** Unattended replay runs approved artifacts only.
+**2. Review and approve.** Unattended replay runs approved artifacts only. The artifacts committed in `artifacts/`
+are already reviewed and approved, so without an API key you can skip steps 1 and 2.
 
 ```bash
 uv run interface approve artifacts/core_banking.lookup_member_balance.json
@@ -87,12 +88,15 @@ A=artifacts/core_banking.lookup_member_balance.json
 uv run interface replay $A --input memberId=99999   # business_outcome MEMBER_NOT_FOUND (an answer, not a crash)
 uv run interface replay $A --input memberId=1234    # invalid_input, rejected before the browser does anything
 curl -X POST '127.0.0.1:4100/__faults?name=server_error'
-uv run interface replay $A --input memberId=34567   # failed APP_ERROR at the step, with a masked screenshot
+uv run interface replay $A --input memberId=34567   # failed: errorClass FATAL_OUTCOME, outcomeCode APP_ERROR, at the step, with a masked screenshot
 curl -X POST '127.0.0.1:4100/__faults?name=session_timeout'
 uv run interface replay $A --input memberId=34567   # success, with a SESSION_EXPIRED recovery reported
+curl -X POST '127.0.0.1:4100/__faults?name=password_reminder'
+uv run interface replay $A --input memberId=34567   # success: a notice the artifact declares, clicked through
 ```
 
-The other faults are `slow`, `unknown_dialog`, `interstitial` and `wrong_record`.
+The other faults are `slow`, `unknown_dialog`, `interstitial` (a notice no artifact declares: see step 5) and
+`wrong_record`.
 
 Every run, discovery or replay, logs to `runs/<run_id>/events.jsonl` (redacted). To read one:
 

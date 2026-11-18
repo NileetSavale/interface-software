@@ -31,7 +31,7 @@ ENV = {**OPERATOR, **{f"{k}__{bank}": v for bank in "ABC" for k, v in OPERATOR.i
 ARTIFACTS = {
     "lookup": ROOT / "artifacts" / "core_banking.lookup_member_balance.json",
     "open_sub_account": ROOT / "artifacts" / "core_banking.open_sub_account.json",
-    # Item 5: a row picked from several by the input it shows, and a row pages away (D28)
+    # A row picked from several by the input it shows, and a row pages away (D28)
     "find_member": ROOT / "artifacts" / "core_banking.find_member_by_name.json",
     "history": ROOT / "artifacts" / "core_banking.find_transaction_by_reference.json",
 }
