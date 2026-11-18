@@ -50,7 +50,7 @@ built this with, are in [`docs/DECISIONS.md`](docs/DECISIONS.md).
   handle; `failed` with the step, expected vs observed, and masked evidence. Even a crash ends typed, with its
   traceback in the run log.
 - **Measured:** 80/80 stability replays identical; across 120 shuffled layouts **no step ever found the wrong
-  control**; **fault matrix 97/97 across three banks**, 0 accounts opened.
+  control**; **fault matrix 103/103 across three banks**, 0 accounts opened.
 
 | Condition | Handling |
 |---|---|

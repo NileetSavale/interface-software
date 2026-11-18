@@ -1,14 +1,14 @@
-{"t": 0.0, "at": "2026-11-17T12:26:44+00:00", "event": "replay_started", "capability": "core_banking_gui.lookup_member_balance", "version": "1.0.0", "revision": "42fa3de175be", "inputs": ["memberId"], "tenant": null, "page_map": null}
-{"t": 1.566, "at": "2026-11-17T12:26:46+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 4.006, "at": "2026-11-17T12:26:48+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 4.961, "at": "2026-11-17T12:26:49+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 6.021, "at": "2026-11-17T12:26:50+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 7.189, "at": "2026-11-17T12:26:52+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 8.49, "at": "2026-11-17T12:26:53+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
-{"t": 9.532, "at": "2026-11-17T12:26:54+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 10.406, "at": "2026-11-17T12:26:55+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 11.533, "at": "2026-11-17T12:26:56+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 12.355, "at": "2026-11-17T12:26:57+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
-{"t": 13.026, "at": "2026-11-17T12:26:57+00:00", "event": "extracted", "step": "read_savings", "outputs": ["savingsBalance"]}
-{"t": 13.527, "at": "2026-11-17T12:26:58+00:00", "event": "checkpoint_passed"}
-{"t": 13.554, "at": "2026-11-17T12:26:58+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T122644Z_147906", "completedAt": "2026-11-17T12:26:58+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}
+{"t": 0.0, "at": "2026-11-18T06:30:32+00:00", "event": "replay_started", "capability": "core_banking_gui.lookup_member_balance", "version": "1.0.0", "revision": "42fa3de175be", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 1.579, "at": "2026-11-18T06:30:33+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 3.849, "at": "2026-11-18T06:30:35+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 4.752, "at": "2026-11-18T06:30:36+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 5.783, "at": "2026-11-18T06:30:37+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 6.842, "at": "2026-11-18T06:30:38+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 8.02, "at": "2026-11-18T06:30:40+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
+{"t": 9.009, "at": "2026-11-18T06:30:41+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 9.791, "at": "2026-11-18T06:30:41+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 10.796, "at": "2026-11-18T06:30:42+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 11.522, "at": "2026-11-18T06:30:43+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 12.197, "at": "2026-11-18T06:30:44+00:00", "event": "extracted", "step": "read_savings", "outputs": ["savingsBalance"]}
+{"t": 12.683, "at": "2026-11-18T06:30:44+00:00", "event": "checkpoint_passed"}
+{"t": 12.708, "at": "2026-11-18T06:30:44+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261118T063032Z_08afea", "completedAt": "2026-11-18T06:30:44+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

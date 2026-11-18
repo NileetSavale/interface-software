@@ -1,13 +1,13 @@
-{"t": 0.0, "at": "2026-11-17T12:24:09+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b72ba70cfad0", "inputs": ["memberId"], "tenant": "b", "page_map": null}
-{"t": 0.244, "at": "2026-11-17T12:24:09+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.328, "at": "2026-11-17T12:24:11+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.393, "at": "2026-11-17T12:24:11+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.445, "at": "2026-11-17T12:24:11+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.856, "at": "2026-11-17T12:24:11+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.296, "at": "2026-11-17T12:24:12+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.348, "at": "2026-11-17T12:24:12+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "anchor"}
-{"t": 3.727, "at": "2026-11-17T12:24:12+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.785, "at": "2026-11-17T12:24:12+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
-{"t": 3.808, "at": "2026-11-17T12:24:12+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
-{"t": 3.817, "at": "2026-11-17T12:24:12+00:00", "event": "checkpoint_passed"}
-{"t": 3.834, "at": "2026-11-17T12:24:12+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T122409Z_480893", "completedAt": "2026-11-17T12:24:12+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}
+{"t": 0.0, "at": "2026-11-18T06:27:55+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "f49134f064b2", "inputs": ["memberId"], "tenant": "b", "page_map": null}
+{"t": 0.234, "at": "2026-11-18T06:27:55+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.322, "at": "2026-11-18T06:27:58+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.39, "at": "2026-11-18T06:27:58+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.448, "at": "2026-11-18T06:27:58+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.851, "at": "2026-11-18T06:27:58+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.291, "at": "2026-11-18T06:27:58+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.357, "at": "2026-11-18T06:27:59+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "anchor"}
+{"t": 3.733, "at": "2026-11-18T06:27:59+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.794, "at": "2026-11-18T06:27:59+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 3.819, "at": "2026-11-18T06:27:59+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
+{"t": 3.829, "at": "2026-11-18T06:27:59+00:00", "event": "checkpoint_passed"}
+{"t": 3.847, "at": "2026-11-18T06:27:59+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261118T062755Z_d0a2e3", "completedAt": "2026-11-18T06:27:59+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

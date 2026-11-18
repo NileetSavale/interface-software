@@ -63,7 +63,7 @@
       "anchor": 3
     },
     "failures": {},
-    "since": "replay_20261117T122404Z_2815de",
+    "since": "replay_20261118T062751Z_570693",
     "action": "review it: interface override <the core_banking.lookup_member_balance artifact> --tenant b, then add --approve"
   },
   {
@@ -78,7 +78,7 @@
       "onlyInRegion": 3
     },
     "failures": {},
-    "since": "replay_20261117T122404Z_2815de",
+    "since": "replay_20261118T062751Z_570693",
     "action": "review it: interface override <the core_banking.lookup_member_balance artifact> --tenant b, then add --approve"
   },
   {
@@ -145,7 +145,7 @@
     "failures": {
       "EXPECT_FAILED": 3
     },
-    "since": "replay_20261117T122424Z_5a758f",
+    "since": "replay_20261118T062811Z_598dca",
     "action": "re-record step 'sign' (interface discover \u2026 --base-url <c's app>), review and re-approve <the core_banking.open_sub_account artifact>"
   }
 ]

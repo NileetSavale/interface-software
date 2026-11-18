@@ -261,11 +261,11 @@ window.SITE = {
  ],
  "evals": {
   "fault_matrix": {
-   "passed": 97,
-   "runs": 97,
+   "passed": 103,
+   "runs": 103,
    "opened": 0,
-   "date": "2026-11-17T07:01:32+00:00",
-   "commit": "067545f",
+   "date": "2026-11-18T06:21:33+00:00",
+   "commit": "9c75333",
    "misses": []
   },
   "stability": {
@@ -659,6 +659,12 @@ window.SITE = {
    "date": "2026-11-17",
    "subject": "Claude arms re-run at 4c7a67b (discovery again after an API outage); pixel suite re-run awake",
    "body": "Every section of the report is now stamped with 067545f or 4c7a67b, which differ only in the\nreport's code. Sub-account discovery: median $0.038 without the map, $0.028 with it."
+  },
+  {
+   "sha": "9c75333",
+   "date": "2026-11-18",
+   "subject": "Review fixes: a declared notice is clicked through; docs match the measured results",
+   "body": "- Mock app: a password-expiry reminder (fault password_reminder). Both web artifacts declare it at review as a\n  recoverable outcome that presses Remind me later; the fault matrix covers it on banks A, B and C, and a test\n  checks the declared and undeclared cases.\n- ARCHITECTURE fault table matches evals/report.md; the fault-matrix header names the artifacts and banks.\n- The handoff evidence says its operator is scripted; README step 5 does it by hand.\n- DECISIONS in the first person, without build-plan item numbers.\n- Core artifacts committed approved; README says discovery can be skipped without a key.\n- Evidence: no home paths, and a run's files point at each other, not at gitignored runs/.\n- README/REPORT details: APP_ERROR result fields, discovery cost range, medians are 5 runs each, dates."
   }
  ],
  "tests": 140

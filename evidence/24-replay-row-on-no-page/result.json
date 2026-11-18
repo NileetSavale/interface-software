@@ -1,6 +1,6 @@
 {
-  "runId": "replay_20261117T122614Z_412bf3",
-  "completedAt": "2026-11-17T12:26:27+00:00",
+  "runId": "replay_20261118T063001Z_96ed50",
+  "completedAt": "2026-11-18T06:30:15+00:00",
   "recovered": [],
   "drift": [],
   "status": "failed",
@@ -11,11 +11,11 @@
   "evidence": [
     {
       "kind": "a11y_snapshot",
-      "path": "runs/replay_20261117T122614Z_412bf3/look_for_reference_next_page.snapshot.txt"
+      "path": "look_for_reference_next_page.snapshot.txt"
     },
     {
       "kind": "screenshot",
-      "path": "runs/replay_20261117T122614Z_412bf3/look_for_reference_next_page.png"
+      "path": "look_for_reference_next_page.png"
     }
   ]
 }

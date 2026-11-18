@@ -1,16 +1,16 @@
 {
   "suite": "fault_matrix",
-  "date": "2026-11-17T07:01:32+00:00",
-  "commit": "067545f",
+  "date": "2026-11-18T06:21:33+00:00",
+  "commit": "9c75333",
   "n_per_case": 1,
-  "cases": 39,
+  "cases": 41,
   "variants": [
     "a",
     "b",
     "c"
   ],
-  "runs": 97,
-  "passed": 97,
+  "runs": 103,
+  "passed": 103,
   "proposed_overrides": {
     "lookup": {
       "appliesTo": ">=1.0.0 <2.0.0",
@@ -94,7 +94,7 @@
   "sub_accounts_opened": 0,
   "confusion": {
     "success": {
-      "success": 28,
+      "success": 34,
       "business_outcome": 0,
       "invalid_input": 0,
       "needs_human": 0,
@@ -140,8 +140,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.34,
-      "run_id": "replay_20261117T064143Z_708423"
+      "seconds": 4.4,
+      "run_id": "replay_20261118T060023Z_952d64"
     },
     {
       "variant": "a",
@@ -153,8 +153,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.77,
-      "run_id": "replay_20261117T064148Z_dff184"
+      "seconds": 3.8,
+      "run_id": "replay_20261118T060027Z_8df9ee"
     },
     {
       "variant": "a",
@@ -166,8 +166,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.77,
-      "run_id": "replay_20261117T064152Z_f7c4b4"
+      "seconds": 3.81,
+      "run_id": "replay_20261118T060031Z_c54ce0"
     },
     {
       "variant": "a",
@@ -180,7 +180,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T064155Z_b4ba4a"
+      "run_id": "replay_20261118T060035Z_558af7"
     },
     {
       "variant": "a",
@@ -192,8 +192,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.37,
-      "run_id": "replay_20261117T064155Z_8b1b18"
+      "seconds": 4.36,
+      "run_id": "replay_20261118T060035Z_7729e5"
     },
     {
       "variant": "a",
@@ -205,8 +205,8 @@
       "actual": "success+recovered",
       "pass": true,
       "at_step": null,
-      "seconds": 5.23,
-      "run_id": "replay_20261117T064200Z_8e16f5"
+      "seconds": 5.34,
+      "run_id": "replay_20261118T060039Z_b170c6"
     },
     {
       "variant": "a",
@@ -218,8 +218,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 6.53,
-      "run_id": "replay_20261117T064205Z_ac7bcb"
+      "seconds": 6.57,
+      "run_id": "replay_20261118T060044Z_48289e"
     },
     {
       "variant": "a",
@@ -231,8 +231,21 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 15.39,
-      "run_id": "replay_20261117T064212Z_4d66fd"
+      "seconds": 15.46,
+      "run_id": "replay_20261118T060051Z_e32716"
+    },
+    {
+      "variant": "a",
+      "flow": "lookup",
+      "case": "known notice page",
+      "fault": "password_reminder",
+      "expect": "success+recovered",
+      "run": 1,
+      "actual": "success+recovered",
+      "pass": true,
+      "at_step": null,
+      "seconds": 4.25,
+      "run_id": "replay_20261118T060107Z_9beeef"
     },
     {
       "variant": "a",
@@ -244,8 +257,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.33,
-      "run_id": "replay_20261117T064227Z_e95e26"
+      "seconds": 4.32,
+      "run_id": "replay_20261118T060111Z_b17f20"
     },
     {
       "variant": "a",
@@ -257,8 +270,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 4.36,
-      "run_id": "replay_20261117T064231Z_f0df5b"
+      "seconds": 4.39,
+      "run_id": "replay_20261118T060115Z_b51211"
     },
     {
       "variant": "a",
@@ -270,8 +283,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 5.13,
-      "run_id": "replay_20261117T064236Z_51930f"
+      "seconds": 5.05,
+      "run_id": "replay_20261118T060120Z_7121d3"
     },
     {
       "variant": "a",
@@ -283,8 +296,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 5.56,
-      "run_id": "replay_20261117T064241Z_e1bbf4"
+      "seconds": 5.55,
+      "run_id": "replay_20261118T060125Z_11dd7f"
     },
     {
       "variant": "a",
@@ -296,8 +309,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.69,
-      "run_id": "replay_20261117T064246Z_871fcd"
+      "seconds": 4.79,
+      "run_id": "replay_20261118T060130Z_ab0474"
     },
     {
       "variant": "a",
@@ -309,8 +322,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.8,
-      "run_id": "replay_20261117T064251Z_0ad0ed"
+      "seconds": 3.83,
+      "run_id": "replay_20261118T060135Z_5344bb"
     },
     {
       "variant": "a",
@@ -322,8 +335,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.77,
-      "run_id": "replay_20261117T064255Z_4fb252"
+      "seconds": 3.79,
+      "run_id": "replay_20261118T060139Z_9171d8"
     },
     {
       "variant": "a",
@@ -336,7 +349,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T064259Z_57ba31"
+      "run_id": "replay_20261118T060143Z_69c0c1"
     },
     {
       "variant": "a",
@@ -348,8 +361,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.32,
-      "run_id": "replay_20261117T064259Z_e38304"
+      "seconds": 4.38,
+      "run_id": "replay_20261118T060143Z_75d84b"
     },
     {
       "variant": "a",
@@ -361,8 +374,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.38,
-      "run_id": "replay_20261117T064303Z_cfa0e0"
+      "seconds": 4.44,
+      "run_id": "replay_20261118T060147Z_a70828"
     },
     {
       "variant": "a",
@@ -375,7 +388,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 7.43,
-      "run_id": "replay_20261117T064308Z_476948"
+      "run_id": "replay_20261118T060152Z_3df43f"
     },
     {
       "variant": "a",
@@ -387,8 +400,21 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 15.5,
-      "run_id": "replay_20261117T064315Z_79454b"
+      "seconds": 14.46,
+      "run_id": "replay_20261118T060159Z_74a598"
+    },
+    {
+      "variant": "a",
+      "flow": "open_sub_account",
+      "case": "known notice page",
+      "fault": "password_reminder",
+      "expect": "success+recovered",
+      "run": 1,
+      "actual": "success+recovered",
+      "pass": true,
+      "at_step": null,
+      "seconds": 5.2,
+      "run_id": "replay_20261118T060213Z_cc5c9f"
     },
     {
       "variant": "a",
@@ -400,8 +426,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.35,
-      "run_id": "replay_20261117T064330Z_cce3cf"
+      "seconds": 4.37,
+      "run_id": "replay_20261118T060219Z_668f86"
     },
     {
       "variant": "a",
@@ -413,8 +439,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 4.37,
-      "run_id": "replay_20261117T064335Z_55ff29"
+      "seconds": 4.38,
+      "run_id": "replay_20261118T060223Z_adaf6b"
     },
     {
       "variant": "a",
@@ -426,8 +452,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 5.89,
-      "run_id": "replay_20261117T064339Z_0287e2"
+      "seconds": 5.95,
+      "run_id": "replay_20261118T060227Z_d4f122"
     },
     {
       "variant": "a",
@@ -440,7 +466,7 @@
       "pass": true,
       "at_step": "open_sub_account_form",
       "seconds": 5.54,
-      "run_id": "replay_20261117T064345Z_ab8b18"
+      "run_id": "replay_20261118T060233Z_b0f9c7"
     },
     {
       "variant": "a",
@@ -452,8 +478,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.77,
-      "run_id": "replay_20261117T064351Z_752706"
+      "seconds": 3.8,
+      "run_id": "replay_20261118T060239Z_090a1f"
     },
     {
       "variant": "a",
@@ -465,8 +491,8 @@
       "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
       "pass": true,
       "at_step": "continue_review",
-      "seconds": 4.68,
-      "run_id": "replay_20261117T064355Z_aba9fb"
+      "seconds": 4.71,
+      "run_id": "replay_20261118T060243Z_07a5be"
     },
     {
       "variant": "a",
@@ -479,7 +505,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T064359Z_a171db"
+      "run_id": "replay_20261118T060248Z_5db7e4"
     },
     {
       "variant": "b",
@@ -491,8 +517,8 @@
       "actual": "success+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 4.16,
-      "run_id": "replay_20261117T064359Z_a18fd4"
+      "seconds": 4.21,
+      "run_id": "replay_20261118T060248Z_81c203"
     },
     {
       "variant": "b",
@@ -504,8 +530,8 @@
       "actual": "success+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 5.08,
-      "run_id": "replay_20261117T064403Z_8274f2"
+      "seconds": 5.06,
+      "run_id": "replay_20261118T060252Z_06abc9"
     },
     {
       "variant": "b",
@@ -517,8 +543,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 3.85,
-      "run_id": "replay_20261117T064409Z_b5d965"
+      "seconds": 3.83,
+      "run_id": "replay_20261118T060257Z_cbcb19"
     },
     {
       "variant": "b",
@@ -530,8 +556,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.76,
-      "run_id": "replay_20261117T064412Z_2d8c31"
+      "seconds": 3.8,
+      "run_id": "replay_20261118T060301Z_c5f32c"
     },
     {
       "variant": "b",
@@ -544,7 +570,7 @@
       "pass": true,
       "at_step": "search_member",
       "seconds": 3.79,
-      "run_id": "replay_20261117T064416Z_16e261"
+      "run_id": "replay_20261118T060305Z_288d68"
     },
     {
       "variant": "b",
@@ -557,7 +583,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T064420Z_e0387b"
+      "run_id": "replay_20261118T060308Z_6819ac"
     },
     {
       "variant": "b",
@@ -569,8 +595,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.32,
-      "run_id": "replay_20261117T064420Z_d57537"
+      "seconds": 4.37,
+      "run_id": "replay_20261118T060308Z_a7b2f4"
     },
     {
       "variant": "b",
@@ -582,8 +608,8 @@
       "actual": "success+recovered",
       "pass": true,
       "at_step": null,
-      "seconds": 5.28,
-      "run_id": "replay_20261117T064424Z_b463ba"
+      "seconds": 5.29,
+      "run_id": "replay_20261118T060313Z_1ee088"
     },
     {
       "variant": "b",
@@ -595,8 +621,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 6.69,
-      "run_id": "replay_20261117T064430Z_b8403c"
+      "seconds": 6.55,
+      "run_id": "replay_20261118T060318Z_5f4a2b"
     },
     {
       "variant": "b",
@@ -608,8 +634,21 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 15.38,
-      "run_id": "replay_20261117T064436Z_68d42e"
+      "seconds": 15.5,
+      "run_id": "replay_20261118T060325Z_ed18f6"
+    },
+    {
+      "variant": "b",
+      "flow": "lookup",
+      "case": "known notice page",
+      "fault": "password_reminder",
+      "expect": "success+recovered",
+      "run": 1,
+      "actual": "success+recovered",
+      "pass": true,
+      "at_step": null,
+      "seconds": 4.28,
+      "run_id": "replay_20261118T060340Z_2002c4"
     },
     {
       "variant": "b",
@@ -621,8 +660,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.35,
-      "run_id": "replay_20261117T064452Z_5f8eff"
+      "seconds": 4.42,
+      "run_id": "replay_20261118T060344Z_c4f799"
     },
     {
       "variant": "b",
@@ -634,8 +673,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 4.34,
-      "run_id": "replay_20261117T064456Z_45748a"
+      "seconds": 4.39,
+      "run_id": "replay_20261118T060349Z_039a7b"
     },
     {
       "variant": "b",
@@ -648,7 +687,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 5.04,
-      "run_id": "replay_20261117T064500Z_787eb1"
+      "run_id": "replay_20261118T060353Z_369ec8"
     },
     {
       "variant": "b",
@@ -660,8 +699,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 5.51,
-      "run_id": "replay_20261117T064506Z_8b979a"
+      "seconds": 5.57,
+      "run_id": "replay_20261118T060358Z_7fbbd8"
     },
     {
       "variant": "b",
@@ -673,8 +712,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.73,
-      "run_id": "replay_20261117T064511Z_d3411a"
+      "seconds": 4.71,
+      "run_id": "replay_20261118T060404Z_d1817d"
     },
     {
       "variant": "b",
@@ -686,8 +725,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 3.75,
-      "run_id": "replay_20261117T064516Z_33d43f"
+      "seconds": 3.85,
+      "run_id": "replay_20261118T060409Z_0e8ce7"
     },
     {
       "variant": "b",
@@ -700,7 +739,7 @@
       "pass": true,
       "at_step": "search_member",
       "seconds": 3.78,
-      "run_id": "replay_20261117T064520Z_2d0ffc"
+      "run_id": "replay_20261118T060413Z_29ede1"
     },
     {
       "variant": "b",
@@ -713,7 +752,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T064523Z_5ff4f3"
+      "run_id": "replay_20261118T060416Z_1ac581"
     },
     {
       "variant": "b",
@@ -726,7 +765,7 @@
       "pass": true,
       "at_step": "search_member",
       "seconds": 4.35,
-      "run_id": "replay_20261117T064523Z_31534e"
+      "run_id": "replay_20261118T060416Z_bf37c2"
     },
     {
       "variant": "b",
@@ -738,8 +777,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.32,
-      "run_id": "replay_20261117T064528Z_7fd863"
+      "seconds": 4.39,
+      "run_id": "replay_20261118T060421Z_8a38ec"
     },
     {
       "variant": "b",
@@ -751,8 +790,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 7.53,
-      "run_id": "replay_20261117T064532Z_b5b2c4"
+      "seconds": 7.46,
+      "run_id": "replay_20261118T060425Z_8c4a8c"
     },
     {
       "variant": "b",
@@ -764,8 +803,21 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 15.48,
-      "run_id": "replay_20261117T064540Z_0dcd00"
+      "seconds": 14.48,
+      "run_id": "replay_20261118T060433Z_13eba5"
+    },
+    {
+      "variant": "b",
+      "flow": "open_sub_account",
+      "case": "known notice page",
+      "fault": "password_reminder",
+      "expect": "success+recovered",
+      "run": 1,
+      "actual": "success+recovered",
+      "pass": true,
+      "at_step": null,
+      "seconds": 5.12,
+      "run_id": "replay_20261118T060447Z_4c030f"
     },
     {
       "variant": "b",
@@ -777,8 +829,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.35,
-      "run_id": "replay_20261117T064555Z_740835"
+      "seconds": 4.34,
+      "run_id": "replay_20261118T060452Z_641b93"
     },
     {
       "variant": "b",
@@ -790,8 +842,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 4.39,
-      "run_id": "replay_20261117T064600Z_fd3fe1"
+      "seconds": 4.44,
+      "run_id": "replay_20261118T060457Z_dc659a"
     },
     {
       "variant": "b",
@@ -803,8 +855,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 5.88,
-      "run_id": "replay_20261117T064604Z_e83141"
+      "seconds": 5.91,
+      "run_id": "replay_20261118T060501Z_6c11eb"
     },
     {
       "variant": "b",
@@ -816,8 +868,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 5.55,
-      "run_id": "replay_20261117T064610Z_94341b"
+      "seconds": 5.63,
+      "run_id": "replay_20261118T060507Z_44ebe0"
     },
     {
       "variant": "b",
@@ -829,8 +881,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 4.21,
-      "run_id": "replay_20261117T064615Z_9ee5d9"
+      "seconds": 3.85,
+      "run_id": "replay_20261118T060513Z_646695"
     },
     {
       "variant": "b",
@@ -842,8 +894,8 @@
       "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
       "pass": true,
       "at_step": "continue_review",
-      "seconds": 4.76,
-      "run_id": "replay_20261117T064620Z_34584a"
+      "seconds": 4.67,
+      "run_id": "replay_20261118T060517Z_3d2af3"
     },
     {
       "variant": "b",
@@ -856,7 +908,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T064624Z_06865f"
+      "run_id": "replay_20261118T060521Z_654e73"
     },
     {
       "variant": "c",
@@ -868,8 +920,8 @@
       "actual": "failed/EXPECT_FAILED",
       "pass": true,
       "at_step": "sign",
-      "seconds": 13.74,
-      "run_id": "replay_20261117T064631Z_47f2b6"
+      "seconds": 13.67,
+      "run_id": "replay_20261118T060527Z_88cce0"
     },
     {
       "variant": "c",
@@ -881,8 +933,8 @@
       "actual": "failed/EXPECT_FAILED",
       "pass": true,
       "at_step": "sign",
-      "seconds": 13.55,
-      "run_id": "replay_20261117T064644Z_f0943e"
+      "seconds": 13.68,
+      "run_id": "replay_20261118T060541Z_5e6a43"
     },
     {
       "variant": "c",
@@ -894,8 +946,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 29.45,
-      "run_id": "replay_20261117T064658Z_4c8880"
+      "seconds": 29.52,
+      "run_id": "replay_20261118T060555Z_132e63"
     },
     {
       "variant": "c",
@@ -907,8 +959,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.9,
-      "run_id": "replay_20261117T064727Z_1c05d9"
+      "seconds": 28.92,
+      "run_id": "replay_20261118T060624Z_6eafd9"
     },
     {
       "variant": "c",
@@ -920,8 +972,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.0,
-      "run_id": "replay_20261117T064756Z_0257b2"
+      "seconds": 28.88,
+      "run_id": "replay_20261118T060653Z_94b3dc"
     },
     {
       "variant": "c",
@@ -934,7 +986,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T064825Z_989007"
+      "run_id": "replay_20261118T060722Z_ef6977"
     },
     {
       "variant": "c",
@@ -946,8 +998,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.45,
-      "run_id": "replay_20261117T064825Z_a3fafb"
+      "seconds": 29.47,
+      "run_id": "replay_20261118T060722Z_1fe1f2"
     },
     {
       "variant": "c",
@@ -959,8 +1011,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 57.92,
-      "run_id": "replay_20261117T064855Z_5ed8a4"
+      "seconds": 58.05,
+      "run_id": "replay_20261118T060752Z_86ff99"
     },
     {
       "variant": "c",
@@ -972,8 +1024,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 32.16,
-      "run_id": "replay_20261117T064953Z_f5d33d"
+      "seconds": 32.25,
+      "run_id": "replay_20261118T060850Z_eb7952"
     },
     {
       "variant": "c",
@@ -985,8 +1037,21 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 40.47,
-      "run_id": "replay_20261117T065025Z_c30e1f"
+      "seconds": 39.5,
+      "run_id": "replay_20261118T060922Z_3c8c00"
+    },
+    {
+      "variant": "c",
+      "flow": "lookup",
+      "case": "known notice page",
+      "fault": "password_reminder",
+      "expect": "success*",
+      "run": 1,
+      "actual": "success+recovered+drift",
+      "pass": true,
+      "at_step": null,
+      "seconds": 30.56,
+      "run_id": "replay_20261118T061001Z_0ecf3c"
     },
     {
       "variant": "c",
@@ -998,8 +1063,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.52,
-      "run_id": "replay_20261117T065105Z_0a0368"
+      "seconds": 29.5,
+      "run_id": "replay_20261118T061032Z_5eeb31"
     },
     {
       "variant": "c",
@@ -1011,8 +1076,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 29.44,
-      "run_id": "replay_20261117T065135Z_ab3b1a"
+      "seconds": 29.54,
+      "run_id": "replay_20261118T061102Z_6fee41"
     },
     {
       "variant": "c",
@@ -1024,8 +1089,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 30.61,
-      "run_id": "replay_20261117T065204Z_8f726c"
+      "seconds": 30.77,
+      "run_id": "replay_20261118T061131Z_5c2550"
     },
     {
       "variant": "c",
@@ -1037,8 +1102,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_name",
-      "seconds": 30.61,
-      "run_id": "replay_20261117T065235Z_a50938"
+      "seconds": 30.7,
+      "run_id": "replay_20261118T061202Z_bbd61c"
     },
     {
       "variant": "c",
@@ -1050,8 +1115,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 33.07,
-      "run_id": "replay_20261117T065306Z_d4ca14"
+      "seconds": 33.25,
+      "run_id": "replay_20261118T061233Z_757666"
     },
     {
       "variant": "c",
@@ -1063,8 +1128,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.84,
-      "run_id": "replay_20261117T065339Z_09febb"
+      "seconds": 28.82,
+      "run_id": "replay_20261118T061306Z_2a5b38"
     },
     {
       "variant": "c",
@@ -1076,8 +1141,8 @@
       "actual": "business_outcome/PERMISSION_DENIED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.94,
-      "run_id": "replay_20261117T065408Z_23aba6"
+      "seconds": 28.81,
+      "run_id": "replay_20261118T061335Z_462681"
     },
     {
       "variant": "c",
@@ -1090,7 +1155,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T065437Z_7b25c4"
+      "run_id": "replay_20261118T061404Z_daaf43"
     },
     {
       "variant": "c",
@@ -1102,8 +1167,8 @@
       "actual": "failed/APP_ERROR",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.46,
-      "run_id": "replay_20261117T065437Z_7a7470"
+      "seconds": 29.47,
+      "run_id": "replay_20261118T061404Z_1d9185"
     },
     {
       "variant": "c",
@@ -1115,8 +1180,8 @@
       "actual": "failed/SESSION_EXPIRED",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.46,
-      "run_id": "replay_20261117T065506Z_676e3d"
+      "seconds": 29.38,
+      "run_id": "replay_20261118T061433Z_e2c48d"
     },
     {
       "variant": "c",
@@ -1128,8 +1193,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 35.93,
-      "run_id": "replay_20261117T065535Z_f7d394"
+      "seconds": 35.86,
+      "run_id": "replay_20261118T061502Z_a706d6"
     },
     {
       "variant": "c",
@@ -1142,7 +1207,20 @@
       "pass": true,
       "at_step": "open_sub_account_form",
       "seconds": 40.15,
-      "run_id": "replay_20261117T065611Z_99ee47"
+      "run_id": "replay_20261118T061538Z_320bea"
+    },
+    {
+      "variant": "c",
+      "flow": "open_sub_account",
+      "case": "known notice page",
+      "fault": "password_reminder",
+      "expect": "success*",
+      "run": 1,
+      "actual": "success+recovered+drift",
+      "pass": true,
+      "at_step": null,
+      "seconds": 34.15,
+      "run_id": "replay_20261118T061619Z_0c0b99"
     },
     {
       "variant": "c",
@@ -1154,8 +1232,8 @@
       "actual": "failed/UNEXPECTED_DIALOG",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 29.56,
-      "run_id": "replay_20261117T065652Z_e54d61"
+      "seconds": 29.53,
+      "run_id": "replay_20261118T061653Z_6b5360"
     },
     {
       "variant": "c",
@@ -1167,8 +1245,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 29.52,
-      "run_id": "replay_20261117T065721Z_41bb1a"
+      "seconds": 29.4,
+      "run_id": "replay_20261118T061722Z_b5d4c5"
     },
     {
       "variant": "c",
@@ -1180,8 +1258,8 @@
       "actual": "success+recovered+drift",
       "pass": true,
       "at_step": null,
-      "seconds": 34.29,
-      "run_id": "replay_20261117T065751Z_f6b7d3"
+      "seconds": 34.3,
+      "run_id": "replay_20261118T061752Z_df601a"
     },
     {
       "variant": "c",
@@ -1193,8 +1271,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "open_sub_account_form",
-      "seconds": 30.75,
-      "run_id": "replay_20261117T065825Z_d008bc"
+      "seconds": 30.68,
+      "run_id": "replay_20261118T061826Z_ff3e79"
     },
     {
       "variant": "c",
@@ -1206,8 +1284,8 @@
       "actual": "business_outcome/INVALID_MEMBER_NUMBER",
       "pass": true,
       "at_step": "search_member",
-      "seconds": 28.99,
-      "run_id": "replay_20261117T065856Z_28b859"
+      "seconds": 28.91,
+      "run_id": "replay_20261118T061857Z_e39d53"
     },
     {
       "variant": "c",
@@ -1219,8 +1297,8 @@
       "actual": "business_outcome/DEPOSIT_BELOW_MINIMUM",
       "pass": true,
       "at_step": "continue_review",
-      "seconds": 32.61,
-      "run_id": "replay_20261117T065925Z_b3b469"
+      "seconds": 32.5,
+      "run_id": "replay_20261118T061926Z_f9db56"
     },
     {
       "variant": "c",
@@ -1233,7 +1311,7 @@
       "pass": true,
       "at_step": null,
       "seconds": 0.0,
-      "run_id": "replay_20261117T065957Z_7031e5"
+      "run_id": "replay_20261118T061958Z_882f4e"
     },
     {
       "variant": "a",
@@ -1245,8 +1323,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.27,
-      "run_id": "replay_20261117T065957Z_3452f1"
+      "seconds": 4.23,
+      "run_id": "replay_20261118T061958Z_36f807"
     },
     {
       "variant": "a",
@@ -1258,8 +1336,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.22,
-      "run_id": "replay_20261117T070002Z_1d37a4"
+      "seconds": 4.21,
+      "run_id": "replay_20261118T062002Z_08fb87"
     },
     {
       "variant": "a",
@@ -1271,8 +1349,8 @@
       "actual": "failed/AMBIGUOUS_TARGET",
       "pass": true,
       "at_step": "open_matching_member",
-      "seconds": 14.48,
-      "run_id": "replay_20261117T070006Z_d2db6f"
+      "seconds": 14.54,
+      "run_id": "replay_20261118T062007Z_8613fd"
     },
     {
       "variant": "a",
@@ -1284,8 +1362,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "open_matching_member",
-      "seconds": 14.46,
-      "run_id": "replay_20261117T070020Z_108c8d"
+      "seconds": 14.42,
+      "run_id": "replay_20261118T062021Z_7f673d"
     },
     {
       "variant": "a",
@@ -1298,7 +1376,7 @@
       "pass": true,
       "at_step": "search",
       "seconds": 3.8,
-      "run_id": "replay_20261117T070035Z_7c57f6"
+      "run_id": "replay_20261118T062036Z_9e5982"
     },
     {
       "variant": "a",
@@ -1310,8 +1388,8 @@
       "actual": "failed/WRONG_RECORD",
       "pass": true,
       "at_step": "read_member_number",
-      "seconds": 4.76,
-      "run_id": "replay_20261117T070039Z_2aa35c"
+      "seconds": 4.74,
+      "run_id": "replay_20261118T062039Z_fd9015"
     },
     {
       "variant": "a",
@@ -1323,8 +1401,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 4.2,
-      "run_id": "replay_20261117T070044Z_695e5f"
+      "seconds": 4.26,
+      "run_id": "replay_20261118T062044Z_473777"
     },
     {
       "variant": "a",
@@ -1336,8 +1414,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 8.16,
-      "run_id": "replay_20261117T070048Z_8bbf5e"
+      "seconds": 8.19,
+      "run_id": "replay_20261118T062048Z_8c555e"
     },
     {
       "variant": "a",
@@ -1349,8 +1427,8 @@
       "actual": "success",
       "pass": true,
       "at_step": null,
-      "seconds": 10.2,
-      "run_id": "replay_20261117T070056Z_36ad52"
+      "seconds": 10.15,
+      "run_id": "replay_20261118T062057Z_ed6557"
     },
     {
       "variant": "a",
@@ -1362,8 +1440,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "look_for_reference_next_page",
-      "seconds": 13.86,
-      "run_id": "replay_20261117T070106Z_f297c8"
+      "seconds": 13.84,
+      "run_id": "replay_20261118T062107Z_4b3221"
     },
     {
       "variant": "a",
@@ -1375,8 +1453,8 @@
       "actual": "failed/TARGET_UNRESOLVED",
       "pass": true,
       "at_step": "look_for_reference_next_page",
-      "seconds": 8.36,
-      "run_id": "replay_20261117T070120Z_0a9f55"
+      "seconds": 8.3,
+      "run_id": "replay_20261118T062121Z_72aaea"
     },
     {
       "variant": "a",
@@ -1388,8 +1466,8 @@
       "actual": "business_outcome/MEMBER_NOT_FOUND",
       "pass": true,
       "at_step": "search",
-      "seconds": 3.82,
-      "run_id": "replay_20261117T070128Z_da329f"
+      "seconds": 3.79,
+      "run_id": "replay_20261118T062129Z_534354"
     }
   ]
 }

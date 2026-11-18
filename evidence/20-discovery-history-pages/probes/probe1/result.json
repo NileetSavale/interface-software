@@ -11,11 +11,11 @@
   "evidence": [
     {
       "kind": "a11y_snapshot",
-      "path": "runs/disc_20261116T091435Z_3dd6a1-probe1/open_history.snapshot.txt"
+      "path": "open_history.snapshot.txt"
     },
     {
       "kind": "screenshot",
-      "path": "runs/disc_20261116T091435Z_3dd6a1-probe1/open_history.png"
+      "path": "open_history.png"
     }
   ]
 }

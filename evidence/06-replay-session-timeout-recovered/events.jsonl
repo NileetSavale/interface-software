@@ -1,24 +1,24 @@
-{"t": 0.0, "at": "2026-11-17T12:23:20+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "b0ed439db19c", "inputs": ["memberId"], "tenant": null, "page_map": null}
-{"t": 0.292, "at": "2026-11-17T12:23:21+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.381, "at": "2026-11-17T12:23:23+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.448, "at": "2026-11-17T12:23:23+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.5, "at": "2026-11-17T12:23:23+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.909, "at": "2026-11-17T12:23:23+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.345, "at": "2026-11-17T12:23:24+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.41, "at": "2026-11-17T12:23:24+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.796, "at": "2026-11-17T12:23:24+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.815, "at": "2026-11-17T12:23:24+00:00", "event": "outcome", "code": "SESSION_EXPIRED", "kind": "recoverable", "step": "search_member"}
-{"t": 3.822, "at": "2026-11-17T12:23:24+00:00", "event": "outcome", "code": "SESSION_EXPIRED", "kind": "recoverable", "step": "open_sign_on_page"}
-{"t": 3.838, "at": "2026-11-17T12:23:24+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 3.891, "at": "2026-11-17T12:23:24+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 3.917, "at": "2026-11-17T12:23:24+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 4.329, "at": "2026-11-17T12:23:25+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 4.382, "at": "2026-11-17T12:23:25+00:00", "event": "recovered", "code": "SESSION_EXPIRED", "step": "search_member", "attempt": 1, "action": "ran subflow sign_on", "resume": "start"}
-{"t": 4.383, "at": "2026-11-17T12:23:25+00:00", "event": "precondition_skipped", "subflow": "sign_on"}
-{"t": 4.751, "at": "2026-11-17T12:23:25+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 4.812, "at": "2026-11-17T12:23:25+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 5.201, "at": "2026-11-17T12:23:26+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 5.247, "at": "2026-11-17T12:23:26+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
-{"t": 5.269, "at": "2026-11-17T12:23:26+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
-{"t": 5.277, "at": "2026-11-17T12:23:26+00:00", "event": "checkpoint_passed"}
-{"t": 5.297, "at": "2026-11-17T12:23:26+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T122320Z_c8069f", "completedAt": "2026-11-17T12:23:26+00:00", "recovered": [{"code": "SESSION_EXPIRED", "stepId": "search_member", "attempt": 1, "action": "ran subflow sign_on"}], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}
+{"t": 0.0, "at": "2026-11-18T06:27:03+00:00", "event": "replay_started", "capability": "core_banking.lookup_member_balance", "version": "1.0.0", "revision": "7c287eb19d36", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.277, "at": "2026-11-18T06:27:03+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.401, "at": "2026-11-18T06:27:05+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.478, "at": "2026-11-18T06:27:05+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.528, "at": "2026-11-18T06:27:06+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.926, "at": "2026-11-18T06:27:06+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.379, "at": "2026-11-18T06:27:06+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.447, "at": "2026-11-18T06:27:06+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.828, "at": "2026-11-18T06:27:07+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.86, "at": "2026-11-18T06:27:07+00:00", "event": "outcome", "code": "SESSION_EXPIRED", "kind": "recoverable", "step": "search_member"}
+{"t": 3.869, "at": "2026-11-18T06:27:07+00:00", "event": "outcome", "code": "SESSION_EXPIRED", "kind": "recoverable", "step": "open_sign_on_page"}
+{"t": 3.886, "at": "2026-11-18T06:27:07+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 3.941, "at": "2026-11-18T06:27:07+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 3.969, "at": "2026-11-18T06:27:07+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 4.38, "at": "2026-11-18T06:27:07+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.436, "at": "2026-11-18T06:27:07+00:00", "event": "recovered", "code": "SESSION_EXPIRED", "step": "search_member", "attempt": 1, "action": "ran subflow sign_on", "resume": "start"}
+{"t": 4.437, "at": "2026-11-18T06:27:07+00:00", "event": "precondition_skipped", "subflow": "sign_on"}
+{"t": 4.82, "at": "2026-11-18T06:27:08+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.88, "at": "2026-11-18T06:27:08+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 5.26, "at": "2026-11-18T06:27:08+00:00", "event": "acted", "step": "search_member", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 5.317, "at": "2026-11-18T06:27:08+00:00", "event": "extracted", "step": "read_name", "outputs": ["memberName"]}
+{"t": 5.342, "at": "2026-11-18T06:27:08+00:00", "event": "extracted", "step": "read_savings_balance", "outputs": ["savingsBalance"]}
+{"t": 5.351, "at": "2026-11-18T06:27:08+00:00", "event": "checkpoint_passed"}
+{"t": 5.369, "at": "2026-11-18T06:27:08+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261118T062703Z_276847", "completedAt": "2026-11-18T06:27:08+00:00", "recovered": [{"code": "SESSION_EXPIRED", "stepId": "search_member", "attempt": 1, "action": "ran subflow sign_on"}], "drift": [], "status": "success", "outputs": {"memberName": "{{outputs.memberName}}", "savingsBalance": "{{outputs.savingsBalance}}"}}}

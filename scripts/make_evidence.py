@@ -10,6 +10,7 @@ fails if it finds any.
 """
 import asyncio
 import json
+import re
 import shutil
 import sys
 import tempfile
@@ -40,18 +41,19 @@ FORBIDDEN = ["Jane Doe", "Mei Chen", "Rafael Ortiz", "Staff Member", "4,210.55",
 cases: list[dict] = []
 
 
-def relink(dest: Path, run_id: str):
-    """A run's files name each other as runs/<run_id>/<file>, which is gitignored; in evidence they sit side by side."""
+def relink(dest: Path):
+    """A run's files name each other as runs/<run_id>/<file>, which is gitignored; in evidence they sit side by side,
+    so the path is cut back to the file name. Only where that file is really there."""
     for path in dest.rglob("*"):
-        if path.suffix in (".json", ".jsonl", ".txt", ".md") and f"runs/{run_id}/" in (text := path.read_text()):
-            path.write_text(text.replace(f"runs/{run_id}/", ""))
+        if path.suffix in (".json", ".jsonl", ".txt", ".md") and "runs/" in (text := path.read_text()):
+            path.write_text(re.sub(r"runs/[\w-]+/([\w.-]+)",
+                                   lambda m: m.group(1) if (path.parent / m.group(1)).exists() else m.group(0), text))
 
 
 def keep(name: str, run_id: str, title: str, why: str, result=None, extra: dict | None = None, also: list[Path] = ()):
     """Copy a run's folder (events, result, snapshots, screenshots) into evidence/<name>/."""
     dest = OUT / name
     shutil.copytree(RUNS / run_id, dest)
-    relink(dest, run_id)
     for path in also:
         shutil.copy(path, dest / path.name)
     cases.append({"dir": name, "title": title, "why": why, "result": label(result) if result else None,
@@ -75,10 +77,8 @@ def discoveries():
         run_id = art.provenance.discovery_run_id
         dest = OUT / DISCOVERY_DIRS[flow]
         shutil.copytree(RUNS / run_id, dest)
-        relink(dest, run_id)
         for probe in sorted(RUNS.glob(f"{run_id}-probe*")):
             shutil.copytree(probe, dest / "probes" / probe.name.split("-")[-1])
-            relink(dest / "probes" / probe.name.split("-")[-1], probe.name)
         shutil.copy(path, dest / "artifact.json")
         finished = next(json.loads(l) for l in (dest / "events.jsonl").read_text().splitlines()
                         if '"discovery_finished"' in l)
@@ -467,6 +467,7 @@ def main():
     map_discovery()
     terminal_cases()
     vision_cases()
+    relink(OUT)
     index()
     (OUT / "cases.json").write_text(json.dumps(cases, indent=2) + "\n")
     if leaks := scan():

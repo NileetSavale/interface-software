@@ -1,17 +1,17 @@
-{"t": 0.0, "at": "2026-11-17T12:26:05+00:00", "event": "replay_started", "capability": "core_banking.find_transaction_by_reference", "version": "1.0.0", "revision": "8f2c8458650c", "inputs": ["memberId", "reference"], "tenant": null, "page_map": null}
-{"t": 0.287, "at": "2026-11-17T12:26:06+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.37, "at": "2026-11-17T12:26:08+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.448, "at": "2026-11-17T12:26:08+00:00", "event": "acted", "step": "enter_user", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.502, "at": "2026-11-17T12:26:08+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.911, "at": "2026-11-17T12:26:08+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.339, "at": "2026-11-17T12:26:09+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.386, "at": "2026-11-17T12:26:09+00:00", "event": "acted", "step": "member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.771, "at": "2026-11-17T12:26:09+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 4.188, "at": "2026-11-17T12:26:10+00:00", "event": "acted", "step": "open_history", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 6.172, "at": "2026-11-17T12:26:11+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 2}
-{"t": 8.124, "at": "2026-11-17T12:26:13+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 3}
-{"t": 8.131, "at": "2026-11-17T12:26:13+00:00", "event": "page_found", "step": "look_for_reference_next_page", "page": 3, "pages_turned": 2}
-{"t": 8.172, "at": "2026-11-17T12:26:13+00:00", "event": "extracted", "step": "date", "outputs": ["transactionDate"]}
-{"t": 8.192, "at": "2026-11-17T12:26:14+00:00", "event": "extracted", "step": "amount", "outputs": ["amount"]}
-{"t": 8.2, "at": "2026-11-17T12:26:14+00:00", "event": "checkpoint_passed"}
-{"t": 8.218, "at": "2026-11-17T12:26:14+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261117T122605Z_659fc6", "completedAt": "2026-11-17T12:26:14+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"transactionDate": "{{outputs.transactionDate}}", "amount": "{{outputs.amount}}"}}}
+{"t": 0.0, "at": "2026-11-18T06:29:53+00:00", "event": "replay_started", "capability": "core_banking.find_transaction_by_reference", "version": "1.0.0", "revision": "8f2c8458650c", "inputs": ["memberId", "reference"], "tenant": null, "page_map": null}
+{"t": 0.271, "at": "2026-11-18T06:29:53+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.349, "at": "2026-11-18T06:29:55+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.416, "at": "2026-11-18T06:29:55+00:00", "event": "acted", "step": "enter_user", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.462, "at": "2026-11-18T06:29:56+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.868, "at": "2026-11-18T06:29:56+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.307, "at": "2026-11-18T06:29:56+00:00", "event": "acted", "step": "open_member_inquiry", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.369, "at": "2026-11-18T06:29:56+00:00", "event": "acted", "step": "member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.755, "at": "2026-11-18T06:29:57+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 4.139, "at": "2026-11-18T06:29:57+00:00", "event": "acted", "step": "open_history", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 6.111, "at": "2026-11-18T06:29:59+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 2}
+{"t": 8.078, "at": "2026-11-18T06:30:01+00:00", "event": "paged", "step": "look_for_reference_next_page", "page": 3}
+{"t": 8.086, "at": "2026-11-18T06:30:01+00:00", "event": "page_found", "step": "look_for_reference_next_page", "page": 3, "pages_turned": 2}
+{"t": 8.131, "at": "2026-11-18T06:30:01+00:00", "event": "extracted", "step": "date", "outputs": ["transactionDate"]}
+{"t": 8.152, "at": "2026-11-18T06:30:01+00:00", "event": "extracted", "step": "amount", "outputs": ["amount"]}
+{"t": 8.16, "at": "2026-11-18T06:30:01+00:00", "event": "checkpoint_passed"}
+{"t": 8.178, "at": "2026-11-18T06:30:01+00:00", "event": "replay_finished", "status": "success", "result": {"runId": "replay_20261118T062953Z_a8feb5", "completedAt": "2026-11-18T06:30:01+00:00", "recovered": [], "drift": [], "status": "success", "outputs": {"transactionDate": "{{outputs.transactionDate}}", "amount": "{{outputs.amount}}"}}}

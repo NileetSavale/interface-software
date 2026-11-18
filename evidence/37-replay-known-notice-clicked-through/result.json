@@ -1,0 +1,18 @@
+{
+  "runId": "replay_20261118T062708Z_521273",
+  "completedAt": "2026-11-18T06:27:13+00:00",
+  "recovered": [
+    {
+      "code": "PASSWORD_REMINDER",
+      "stepId": "search_member",
+      "attempt": 1,
+      "action": "clicked through"
+    }
+  ],
+  "drift": [],
+  "status": "success",
+  "outputs": {
+    "memberName": "{{outputs.memberName}}",
+    "savingsBalance": "{{outputs.savingsBalance}}"
+  }
+}

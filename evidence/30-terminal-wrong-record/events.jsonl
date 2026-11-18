@@ -1,12 +1,12 @@
-{"t": 0.0, "at": "2026-11-17T12:26:39+00:00", "event": "replay_started", "capability": "core_banking_terminal.lookup_member_balance", "version": "1.0.0", "revision": "556c518031d3", "inputs": ["memberId"], "tenant": null, "page_map": null}
-{"t": 0.133, "at": "2026-11-17T12:26:39+00:00", "event": "navigated", "step": "preflight", "path": "/"}
-{"t": 2.346, "at": "2026-11-17T12:26:41+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
-{"t": 2.5, "at": "2026-11-17T12:26:41+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
-{"t": 2.79, "at": "2026-11-17T12:26:41+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
-{"t": 2.945, "at": "2026-11-17T12:26:42+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.087, "at": "2026-11-17T12:26:42+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
-{"t": 3.234, "at": "2026-11-17T12:26:42+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.391, "at": "2026-11-17T12:26:42+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
-{"t": 3.542, "at": "2026-11-17T12:26:42+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
-{"t": 3.565, "at": "2026-11-17T12:26:42+00:00", "event": "identity_mismatch", "step": "read_name", "input": "memberId", "observed_last4": "****2345"}
-{"t": 3.567, "at": "2026-11-17T12:26:42+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261117T122639Z_d69e10", "completedAt": "2026-11-17T12:26:42+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "read_name", "errorClass": "WRONG_RECORD", "expected": "memberId = {{inputs.memberId}}", "observed": "a different member", "evidence": [{"kind": "a11y_snapshot", "path": "runs/replay_20261117T122639Z_d69e10/read_name.snapshot.txt"}]}}
+{"t": 0.0, "at": "2026-11-18T06:30:26+00:00", "event": "replay_started", "capability": "core_banking_terminal.lookup_member_balance", "version": "1.0.0", "revision": "556c518031d3", "inputs": ["memberId"], "tenant": null, "page_map": null}
+{"t": 0.127, "at": "2026-11-18T06:30:26+00:00", "event": "navigated", "step": "preflight", "path": "/"}
+{"t": 2.321, "at": "2026-11-18T06:30:28+00:00", "event": "navigated", "step": "open_sign_on_page", "path": "/"}
+{"t": 2.468, "at": "2026-11-18T06:30:29+00:00", "event": "acted", "step": "enter_user_id", "action": "type", "value": "{{secrets.APP_USER}}", "rank": 0, "strategy": "role"}
+{"t": 2.746, "at": "2026-11-18T06:30:29+00:00", "event": "acted", "step": "enter_password", "action": "type", "value": "{{secrets.APP_PASSWORD}}", "rank": 0, "strategy": "role"}
+{"t": 2.89, "at": "2026-11-18T06:30:29+00:00", "event": "acted", "step": "sign", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.039, "at": "2026-11-18T06:30:29+00:00", "event": "acted", "step": "choose_member_inquiry", "action": "type", "value": "1", "rank": 0, "strategy": "role"}
+{"t": 3.181, "at": "2026-11-18T06:30:29+00:00", "event": "acted", "step": "select", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.332, "at": "2026-11-18T06:30:29+00:00", "event": "acted", "step": "enter_member_number", "action": "type", "value": "{{inputs.memberId}}", "rank": 0, "strategy": "role"}
+{"t": 3.481, "at": "2026-11-18T06:30:30+00:00", "event": "acted", "step": "search", "action": "click", "value": null, "rank": 0, "strategy": "role"}
+{"t": 3.508, "at": "2026-11-18T06:30:30+00:00", "event": "identity_mismatch", "step": "read_name", "input": "memberId", "observed_last4": "****2345"}
+{"t": 3.51, "at": "2026-11-18T06:30:30+00:00", "event": "replay_finished", "status": "failed", "result": {"runId": "replay_20261118T063026Z_de47f3", "completedAt": "2026-11-18T06:30:30+00:00", "recovered": [], "drift": [], "status": "failed", "atStep": "read_name", "errorClass": "WRONG_RECORD", "expected": "memberId = {{inputs.memberId}}", "observed": "a different member", "evidence": [{"kind": "a11y_snapshot", "path": "read_name.snapshot.txt"}]}}
